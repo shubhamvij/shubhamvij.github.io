@@ -4,7 +4,8 @@
 }
 
 .right-float {
-    float: right;
+    
+    right: right;
 }
 
 .sidebar {
@@ -33,6 +34,7 @@ body {
 }
 
 .logoText {
+    text-align: right;
     margin-top:10vh;
     font-size: 35;
 }
@@ -142,3 +144,5 @@ a:hover {
     color: gray;
     text-align: center;
 }
+
+
