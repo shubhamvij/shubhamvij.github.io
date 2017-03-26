@@ -1,0 +1,144 @@
+
+.left-float {
+    float: left;
+}
+
+.right-float {
+    float: right;
+}
+
+.sidebar {
+    height: 100vh;
+    width: 20vw;
+    min-width: 195px;
+/*    background-color: red;*/
+    display: inline-block;
+}
+
+.content {
+    height: 100vh;
+    display: inline-block;
+    flex-grow: 1;
+}
+
+.mainPageContainer {
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+body {
+    margin: 0;
+    font-family: "Questrial";
+}
+
+.logoText {
+    margin-top:10vh;
+    font-size: 35;
+}
+
+.sidebarContent {
+    margin-left: 20px;
+    margin-right: 15px;
+}
+
+.green {
+    color: green
+}
+
+.menu {
+    margin-top: 30vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.menu-item {
+    margin-top: 10px;
+    color: gray;
+}
+
+.socialMediaLinks {
+    width: inherit;
+    min-width: 195px;
+    height: 50px;
+    position: absolute;
+    bottom: 0px;
+    flex: 1;
+    flex-direction: row;
+    display: flex;
+    justify-content: space-around;
+}
+
+.socialIcon {
+    display: flex;
+}
+
+.socialIcon:hover {
+      color: green;
+}
+
+.blue {
+}
+
+.menu-item-select {
+    color: green; !important;
+}
+
+
+/*
+.menu-item {
+	display: inline-block;
+	position: relative;
+	padding-bottom: 3px;
+}
+*/
+.menu-item:after {
+	content: '';
+	display: block;
+	margin: auto;
+	height: 2px;
+	width: 0px;
+	background: transparent;
+	transition: width .5s ease, background-color .5s ease;
+}
+.menu-item:hover:after {
+	width: 100%;
+	background: green;
+}
+
+/*
+.sliding-middle-out {
+	display: inline-block;
+	position: relative;
+	padding-bottom: 3px;
+}
+*/
+.menu-item:after {
+	content: '';
+	display: block;
+	margin: auto;
+	height: 2px;
+	width: 0px;
+	background: transparent;
+	transition: width .5s ease, background-color .5s ease;
+}
+.menu-item:hover:after {
+	width: 100%;
+	background: green;
+}
+a:link, a:visited, a:active {
+  text-decoration: none; color: gray;
+}
+
+a:hover {
+    color: green;
+}
+
+.placeholder_content_text {
+    margin-top: 46vh;
+    font-size: 16px;
+    line-height: 1.25;
+    color: gray;
+    text-align: center;
+}
