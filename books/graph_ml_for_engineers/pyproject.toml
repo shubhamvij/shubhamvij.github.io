@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "graph-ml-for-engineers"
+version = "0.1.0"
+description = "Learning Graph Machine Learning made easy for Seasoned Engineers"
+authors = ["shubhamvij <reachme@shubhamvij.com>"]
+readme = "README.md"
+packages = [{include = "graph_ml_for_engineers"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+matplotlib = "networkx"
+
+[tool.poetry.group.dev.dependencies]
+networkx = "^2.8.6"
+matplotlib = "^3.5.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
