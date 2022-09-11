@@ -1,0 +1,256 @@
+%------------------------
+% Resume Template
+% Author : Anubhav Singh
+% Github : https://github.com/xprilion
+% License : MIT
+%------------------------
+
+\documentclass[a4paper,20pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[pdftex]{hyperref}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.530in}
+\addtolength{\evensidemargin}{-0.375in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.45in}
+\addtolength{\textheight}{1in}
+
+\urlstyle{rm}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-10pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-6pt}]
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item\small{
+    \textbf{#1}{: #2 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeItemWithoutTitle}[1]{
+  \item\small{
+    {\vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{#3} & \textit{#4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+
+\newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\vspace{-3pt}}
+
+\renewcommand{\labelitemi}{}
+
+\renewcommand{\labelitemii}{$\circ$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-----------------------------
+%%%%%%  CV STARTS HERE  %%%%%%
+
+\begin{document}
+
+%----------HEADING-----------------
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+  \textbf{{\LARGE Shubham Vij}} & Email: \href{mailto:}{reachme@shubhamvij.com}\\
+  \textbf{{\large Senior Research Engineer at Snap Inc.}} & \href{https://www.linkedin.com/in/shubhamvij/}{LinkedIn} \\
+  % \href{https://github.com/xprilion}{Github: ~~github.com/xprilion} \\
+\end{tabular*}
+
+\vspace{5pt}
+\section{Experience}
+  \resumeSubHeadingListStart
+    \resumeSubheading{Snap Inc}{}
+    {Senior Research Engineer}{August 2021 - Present}
+
+    \vspace{-15pt}
+    \resumeSubheading{}{}
+    {Research Engineer}{September 2019 - August 2021}
+    \vspace{5pt}
+
+    Focus around engineering Artificial Intelligence / Machine Learning systems
+to realize products out of Snap’s research. Through contributions at the lab,
+have helped build solutions to train large scale graph neural networks and deduplicate news.
+
+  \vspace{-10pt}
+  \resumeSubheading{}{}
+  {Software Engineer}{December 2018 - September 2019}
+  \vspace{5pt}
+
+  Engineered various key features for vertical video creation for Snap Publisher;
+  some highlights include: optimizing video playback and html canvas
+  performance, handling data management intricacies of distributed multi-tiered
+  architecture, and introducing various new frameworks to ease development
+  such as one for Generalized Message Passing for compute intensive webapps.
+
+  \vspace{-10pt}
+  \resumeSubheading{}{}
+  {Research Engineer}{February 2018 - December 2018}
+  \vspace{5pt}
+
+  Maintained Research team's cloud compute tooling, used by 100s of ML
+projects to scale up experiments; tangentially engineering tooling to improve
+cost efficiency and cost reporting for the system.
+Helped engineer foundations of multi-year research projects, including
+Snapchat Trends - a subset of which, eventually became an external facing
+product 3 years later.
+
+\vspace{-10pt}
+\resumeSubheading{}{}
+{Software Engineer Intern}{Jan 2017 - April. 2017}
+\vspace{5pt}
+
+Designed a library for on-device offline keyword detection, which was later 
+used as technology backing various speech recognition lenses.
+
+\resumeSubheading{Amazon Inc}{}
+{Software Development Engineer Intern}{May 2016 - August 2016}
+\vspace{5pt}
+
+Developed software to automate localization for the Amazon Silk browser,
+saving roughly 1+ hour/week of manual engineering effort.
+
+\resumeSubheading{IBM}{}
+{Mobile Solutions Developer}{September 2015 - December 2015}
+\vspace{5pt}
+
+Consulted for one of the top 5 financial institutions in Canada, engineering
+and presenting business and technical solutions centred around client
+authentication to C-level executives. Worked with cross-company and crossorganizational teams to design and engineer POC for new authentication
+architecture.
+
+\resumeSubheading{Microsoft}{}
+{Xbox Marketing Assistant}{January 2014 - April 2014}
+\vspace{5pt}
+
+Constructed analytical reports for games portfolio; automating parts of
+the process by creating tools in VBA (Excel) to compute viability of rebate
+programs by leveraging plethora of available signals (both internally and
+externally) - derived insights were used for sales and inventory forecasting.
+Designed and led a successful contextual digital marketing campaign for the
+Canadian market, leveraging popular video game influencers, to drive demand
+generation for launch of a new AAA game.
+
+
+
+% \vspace{-5pt}
+%     \resumeSubheading
+% 		{DataCamp Inc.}{Remote}
+% 		{Instructor (Part-time, Contractual)}{Dec 2018 -  Present}
+% 		\resumeItemListStart
+%         \resumeItem{Project Course - Find Movie Similarity from Plot Summaries}
+%           {Created project based course using Unsupervised learning and natural language processing.}
+%         \resumeItem{Tutorial - Introduction to Reinforcement Learning}
+%           {Created tutorial for Q-learning RL algorithm and  concepts.}
+%         \resumeItem{Impact}{Course has been taken by 250+ students so far with 4.65 average rating.}
+% 		\resumeItemListEnd
+\resumeSubHeadingListEnd
+
+
+%-----------EDUCATION-----------------
+\vspace{-5pt}
+\section{~~Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {University of Waterloo}{Waterloo, ON}
+      {Bachelors in Computer Science}{December. 2019}
+    \resumeSubheading
+      {Wilfrid Laurier University}{Waterloo, ON}
+      {Bachelors in Business Administration}{December. 2019}
+    %   \newline
+    %   {\scriptsize \textit{ \footnotesize{\newline{}\textbf{Courses:} Operating Systems, Data Structures, Analysis Of Algorithms, Artificial Intelligence, Machine Learning, Networking, Databases}}}
+    \resumeSubHeadingListEnd
+	    
+\vspace{-5pt}
+\section{Skills Summary}
+	\resumeSubHeadingListStart
+	\resumeSubItem{Languages}{~~~Python, Java, Javascript, Objective-C, HTML, CSS}
+	\resumeSubItem{We/Mobile}{~~React, Redux, Node, Express, iOS}
+	\resumeSubItem{Tools}{~~~~~~~~~~~Bazel, Pytorch, Kubeflow, Monorepositories, Big Data, SQL, Machine Learning}
+	\resumeSubItem{Platforms}{~~~~GCP, AWS}
+\resumeSubHeadingListEnd
+
+%-----------PROJECTS-----------------
+\vspace{-5pt}
+\section{Other Experience}
+\resumeSubHeadingListStart
+
+\resumeSubheading{Restuaraunt Inventory Management Software}{Self Employed}
+{Owner}{September 2016 - August 2017}
+\vspace{5pt}
+
+Led a group of two other developers in engineering an inventory management software solution for 
+small to medium sized restuaraunts.
+
+
+\resumeSubheading{South African Embrace Foundation}{}
+{Web Content Developer}{December 2015 - December 2016}
+\vspace{5pt}
+
+\resumeSubHeadingListEnd
+
+
+% \vspace{-5pt}
+% \section{Publications}
+% \resumeSubHeadingListStart
+% \resumeSubItem{Book: Deep Learning on Web (Web Development, Deep Learning)}{Work in Progress book to be published by Packt Publishing in late 2019. Tech: Django, Python, AWS, GCP, Azure (November '18)}
+% \vspace{2pt}
+% \resumeSubItem{Book: Deep Learning on Mobile Devices (Flutter App Development, Deep Learning)}{Work in Progress book to be published by Packt Publishing in late 2019. Tech: Flutter, Android, Firebase, TensorFlow, Python, Dart (December '18)}
+% \resumeSubHeadingListEnd
+% \vspace{-5pt}
+% %-----------Awards-----------------
+% \section{Honors and Awards}
+% \begin{description}[font=$\bullet$]
+% \item {Awarded title of Intel Software Innovator - May, 2019}
+% \vspace{-5pt}
+% \item {Second Runner's Up at TCS EngiNx Engineering Project Innovation Content - September, 2018 }
+% \vspace{-5pt}
+% \item {Runner's Up at Facebook Developers Circle Hackathon - August, 2017}
+
+% \end{description}
+
+% \vspace{-5pt}
+% \section{Volunteer Experience}
+%   \resumeSubHeadingListStart
+% 	\resumeSubheading
+%     {Community Lead at Developer Student Clubs NSEC}{Kolkata, India}
+%     {Conducted online and offline technical \& soft-skills training impacting over 3000 students.}{Jan 2019 - Present}
+% \vspace{5pt}
+%     % \vspace{10pt}\textbf{\large{Community Experience}}
+%     \resumeSubheading
+%     {Event Organizer at Google Developers Group Kolkata}{Kolkata, India}
+%     {Organized events, conducted workshops and delivered workshops reaching over 7000 developers.}{Jan 2018 - Present}
+
+% \resumeSubHeadingListEnd
+
+\end{document}
