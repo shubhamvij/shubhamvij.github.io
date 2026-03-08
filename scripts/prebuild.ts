@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { getAllPosts, getPostBySlug } from '../src/lib/blog'
-import { fetchScholarData } from '../src/lib/scholar'
+import { getScholarPublications } from '../src/lib/scholar'
 
 const PUBLIC_DATA = path.join(process.cwd(), 'public', 'data')
 const BLOG_DATA = path.join(PUBLIC_DATA, 'blog')
@@ -10,7 +10,7 @@ function ensureDir(dir: string) {
   fs.mkdirSync(dir, { recursive: true })
 }
 
-async function main() {
+function main() {
   ensureDir(BLOG_DATA)
 
   // Blog posts
@@ -29,14 +29,9 @@ async function main() {
   console.log('[prebuild] Generated about.json')
 
   // Scholar
-  try {
-    const publications = await fetchScholarData()
-    fs.writeFileSync(path.join(PUBLIC_DATA, 'scholar.json'), JSON.stringify(publications, null, 2))
-    console.log(`[prebuild] Generated ${publications.length} scholar publications`)
-  } catch (err) {
-    console.warn('[prebuild] Warning: Scholar scraping failed, writing empty array:', (err as Error).message)
-    fs.writeFileSync(path.join(PUBLIC_DATA, 'scholar.json'), '[]')
-  }
+  const publications = getScholarPublications()
+  fs.writeFileSync(path.join(PUBLIC_DATA, 'scholar.json'), JSON.stringify(publications, null, 2))
+  console.log(`[prebuild] Generated ${publications.length} scholar publications`)
 
   // Resume PDF
   const resumeSrc = path.join(process.cwd(), 'content', 'resume', 'resume.pdf')
@@ -45,7 +40,4 @@ async function main() {
   console.log('[prebuild] Copied resume.pdf')
 }
 
-main().catch(err => {
-  console.error('[prebuild] Fatal error:', err)
-  process.exit(1)
-})
+main()

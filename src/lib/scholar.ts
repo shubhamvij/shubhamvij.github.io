@@ -1,3 +1,6 @@
+import fs from 'fs'
+import path from 'path'
+import { parse } from 'yaml'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 
@@ -10,6 +13,12 @@ export interface ScholarPublication {
   year: string
   citations: string
   link: string
+}
+
+export function getScholarPublications(): ScholarPublication[] {
+  const filePath = path.join(process.cwd(), 'content', 'scholar.yaml')
+  const fileContents = fs.readFileSync(filePath, 'utf8')
+  return parse(fileContents) as ScholarPublication[]
 }
 
 export async function fetchScholarData(): Promise<ScholarPublication[]> {
