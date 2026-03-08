@@ -1,3 +1,3 @@
 screenSaver:
-  default: time
+  default: pipes
   idleTimeout: 30  # seconds of inactivity before sleep
