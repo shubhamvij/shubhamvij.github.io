@@ -1,0 +1,14 @@
+- id: github
+  label: GitHub
+  icon: /images/icons/github.svg
+  href: https://github.com/shubhamvij
+
+- id: linkedin
+  label: LinkedIn
+  icon: /images/icons/linkedin.svg
+  href: https://linkedin.com/in/shubhamvij
+
+- id: email
+  label: Email
+  icon: /images/icons/email.svg
+  href: mailto:reachme@shubhamvij.com
