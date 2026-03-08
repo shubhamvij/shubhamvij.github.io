@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Shubham Vij - Blog</title>
+    <link>https://shubhamvij.com/blog/</link>
+    <description>Articles on software engineering, AI, machine learning, and research.</description>
+    <language>en-us</language>
+    <atom:link href="https://shubhamvij.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title><![CDATA[Why Production GNN Recommenders Skip GNN Inference]]></title>
+      <link>https://shubhamvij.com/blog/real-time-inference-possible/</link>
+      <guid>https://shubhamvij.com/blog/real-time-inference-possible/</guid>
+      <pubDate>Sun, 08 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The biggest open secret in graph-based recommendation systems: virtually every production GNN serves pre-computed embeddings, not live graph neural network inference.]]></description>
+    </item>
+    <item>
+      <title><![CDATA[Hello World]]></title>
+      <link>https://shubhamvij.com/blog/hello-world/</link>
+      <guid>https://shubhamvij.com/blog/hello-world/</guid>
+      <pubDate>Fri, 06 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Welcome to my retro blog.]]></description>
+    </item>
+  </channel>
+</rss>

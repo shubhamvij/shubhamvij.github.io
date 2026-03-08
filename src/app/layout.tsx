@@ -13,9 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Shubham Vij',
-  description: 'Always building something new - probably vibing rn.',
-  keywords: ['Shubham Vij', 'software engineer', 'research', 'portfolio', 'research engineer', 'developer', 'personal website', "ai", "machine learning", "deep learning", "natural language processing", "computer vision", "reinforcement learning", "ml", "ml engineer", "data scientist", "open source", "projects", "blog", "about me"],
+  metadataBase: new URL('https://shubhamvij.com'),
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -25,6 +34,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="alternate" type="application/rss+xml" title="Shubham Vij - Blog" href="/feed.xml" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

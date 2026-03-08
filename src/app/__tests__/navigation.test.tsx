@@ -89,7 +89,7 @@ vi.mock('@/components/AboutContent', () => ({
 let pushStateSpy: ReturnType<typeof vi.fn>
 let replaceStateSpy: ReturnType<typeof vi.fn>
 
-import Home from '../[[...path]]/page'
+import HomeClient from '../[[...path]]/HomeClient'
 
 describe('Navigation', () => {
   beforeEach(() => {
@@ -103,14 +103,14 @@ describe('Navigation', () => {
   describe('path parsing', () => {
     it('shows boot sequence when no path is provided', () => {
       mockPath = undefined
-      const { getByTestId, queryByTestId } = render(<Home />)
+      const { getByTestId, queryByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       expect(getByTestId('boot-sequence')).toBeInTheDocument()
       expect(queryByTestId('desktop')).not.toBeInTheDocument()
     })
 
     it('skips boot and opens blog window for /blog', () => {
       mockPath = ['blog']
-      const { queryByTestId, getByTestId } = render(<Home />)
+      const { queryByTestId, getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       expect(queryByTestId('boot-sequence')).not.toBeInTheDocument()
       expect(getByTestId('desktop')).toBeInTheDocument()
       expect(getByTestId('window-blog')).toBeInTheDocument()
@@ -118,21 +118,21 @@ describe('Navigation', () => {
 
     it('skips boot and opens resume window for /resume', () => {
       mockPath = ['resume']
-      const { queryByTestId, getByTestId } = render(<Home />)
+      const { queryByTestId, getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       expect(queryByTestId('boot-sequence')).not.toBeInTheDocument()
       expect(getByTestId('window-resume')).toBeInTheDocument()
     })
 
     it('skips boot and opens research window for /research', () => {
       mockPath = ['research']
-      const { queryByTestId, getByTestId } = render(<Home />)
+      const { queryByTestId, getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       expect(queryByTestId('boot-sequence')).not.toBeInTheDocument()
       expect(getByTestId('window-research')).toBeInTheDocument()
     })
 
     it('passes slug to blog window for /blog/hello-world', () => {
       mockPath = ['blog', 'hello-world']
-      const { getByTestId } = render(<Home />)
+      const { getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       expect(getByTestId('window-blog')).toBeInTheDocument()
       const blogList = getByTestId('blog-list')
       expect(blogList.getAttribute('data-slug')).toBe('hello-world')
@@ -142,7 +142,7 @@ describe('Navigation', () => {
   describe('URL sync on window open', () => {
     it('calls pushState with /blog when blog is opened via Desktop', async () => {
       mockPath = undefined
-      const { getByTestId } = render(<Home />)
+      const { getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       // Complete boot first
       await act(async () => {
         fireEvent.click(getByTestId('boot-complete'))
@@ -155,7 +155,7 @@ describe('Navigation', () => {
 
     it('calls pushState with /resume when resume is opened', async () => {
       mockPath = undefined
-      const { getByTestId } = render(<Home />)
+      const { getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       await act(async () => {
         fireEvent.click(getByTestId('boot-complete'))
       })
@@ -167,7 +167,7 @@ describe('Navigation', () => {
 
     it('calls pushState with /research when research is opened', async () => {
       mockPath = undefined
-      const { getByTestId } = render(<Home />)
+      const { getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       await act(async () => {
         fireEvent.click(getByTestId('boot-complete'))
       })
@@ -181,7 +181,7 @@ describe('Navigation', () => {
   describe('URL sync on window close', () => {
     it('calls pushState with / when the only routable window is closed', async () => {
       mockPath = ['blog']
-      const { getByTestId } = render(<Home />)
+      const { getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       await act(async () => {
         fireEvent.click(getByTestId('close-blog'))
       })
@@ -192,7 +192,7 @@ describe('Navigation', () => {
   describe('multi-window support', () => {
     it('keeps first window open when a second window is opened', async () => {
       mockPath = undefined
-      const { getByTestId } = render(<Home />)
+      const { getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       await act(async () => {
         fireEvent.click(getByTestId('boot-complete'))
       })
@@ -211,7 +211,7 @@ describe('Navigation', () => {
   describe('non-routable windows', () => {
     it('does not call pushState when about window is opened', async () => {
       mockPath = undefined
-      const { getByTestId } = render(<Home />)
+      const { getByTestId } = render(<HomeClient socialLinks={[]} defaultScreenSaver="pipes" defaultIdleTimeout={30} />)
       await act(async () => {
         fireEvent.click(getByTestId('boot-complete'))
       })
