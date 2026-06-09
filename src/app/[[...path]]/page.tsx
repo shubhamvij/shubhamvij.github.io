@@ -30,6 +30,11 @@ const PAGE_META: Record<string, { title: string; description: string; keywords: 
     description: 'About Shubham Vij — software engineer, researcher, and builder working on AI and machine learning.',
     keywords: ['about', 'Shubham Vij', 'software engineer', 'researcher'],
   },
+  finance: {
+    title: `Finance Planner | ${SITE_NAME}`,
+    description: 'A retro Windows XP-themed retirement & paycheck planner — estimate take-home pay (federal, FICA, and state tax) and see how long until you hit your retirement target.',
+    keywords: ['retirement calculator', 'paycheck calculator', 'finance planner', 'FIRE calculator', 'take-home pay', 'tax calculator'],
+  },
 }
 
 export function generateStaticParams() {
@@ -40,6 +45,7 @@ export function generateStaticParams() {
     { path: ['resume'] },
     { path: ['research'] },
     { path: ['about'] },
+    { path: ['finance'] },
     ...posts.map(p => ({ path: ['blog', p.slug] })),
   ]
 }

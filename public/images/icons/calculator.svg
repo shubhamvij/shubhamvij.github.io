@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" shape-rendering="crispEdges">
+  <!-- calculator body -->
+  <rect x="8" y="3" width="32" height="42" rx="2" fill="#d8d4c0"/>
+  <rect x="8" y="3" width="32" height="42" rx="2" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  <rect x="9" y="4" width="30" height="40" rx="1.5" fill="#ece9d8" stroke="#9a968a" stroke-width="1"/>
+  <!-- LCD screen -->
+  <rect x="12" y="7" width="24" height="10" fill="#0c2a1a" stroke="#5a5a4a" stroke-width="1"/>
+  <rect x="14" y="9.5" width="16" height="2.5" fill="#7cfc9a"/>
+  <rect x="14" y="13" width="9" height="2" fill="#3e8a55"/>
+  <!-- buttons row 1 -->
+  <rect x="12" y="21" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="18.5" y="21" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="25" y="21" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="31" y="21" width="5" height="4" fill="#ffd700" stroke="#b8860b" stroke-width="0.7"/>
+  <!-- buttons row 2 -->
+  <rect x="12" y="26.5" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="18.5" y="26.5" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="25" y="26.5" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="31" y="26.5" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <!-- buttons row 3 -->
+  <rect x="12" y="32" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="18.5" y="32" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="25" y="32" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="31" y="32" width="5" height="9.5" fill="#e0703f" stroke="#9a2a10" stroke-width="0.7"/>
+  <!-- buttons row 4 -->
+  <rect x="12" y="37.5" width="5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+  <rect x="18.5" y="37.5" width="11.5" height="4" fill="#cfcabb" stroke="#8a867a" stroke-width="0.7"/>
+</svg>

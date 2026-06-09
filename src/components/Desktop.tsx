@@ -15,6 +15,7 @@ const APP_ICONS = [
   { id: 'blog', label: 'Blog', icon: '/images/icons/notepad.svg' },
   { id: 'resume', label: 'Resume', icon: '/images/icons/resume.svg' },
   { id: 'research', label: 'Research', icon: '/images/icons/research.svg' },
+  { id: 'finance', label: 'Finance', icon: '/images/icons/calculator.svg' },
 ]
 
 export default function Desktop({ onOpenWindow, onOpenDisplayProperties, socialLinks }: DesktopProps) {

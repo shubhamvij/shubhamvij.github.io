@@ -1,0 +1,554 @@
+/* Windows XP "Luna" calculator theme for the Finance Planner. Beveled beige chrome + dark LCD. */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: Tahoma, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #000;
+  background: #ece9d8;
+}
+
+/* ---------- Toolbar ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 6px;
+  border-bottom: 1px solid #aca899;
+  background: linear-gradient(180deg, #faf9f4 0%, #ece9d8 100%);
+  flex-shrink: 0;
+}
+.menu {
+  display: flex;
+  gap: 2px;
+}
+.menuItem {
+  padding: 2px 8px;
+  color: #555;
+}
+
+/* ---------- Menu bar (File / Edit / Help) ---------- */
+.menuBar {
+  display: flex;
+  gap: 1px;
+  position: relative;
+}
+.menuBtn {
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  padding: 2px 9px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #000;
+}
+.menuBtn:hover:not(:disabled) {
+  background: #d8e3f5;
+  border-color: #7a96c8;
+}
+.menuBtnOpen {
+  background: #cfe0f5;
+  border-color: #3a6ea5;
+}
+.menuBtn:disabled {
+  color: #a0a0a0;
+}
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 168px;
+  background: #f6f5ef;
+  border: 1px solid #808080;
+  box-shadow: 2px 3px 7px rgba(0, 0, 0, 0.35);
+  padding: 2px;
+  z-index: 60;
+}
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  padding: 4px 18px 4px 22px;
+  background: transparent;
+  border: none;
+  color: #000;
+}
+.dropdownItem:hover {
+  background: linear-gradient(180deg, #3a80e0 0%, #2b6fd0 100%);
+  color: #fff;
+}
+.dropdownItem kbd {
+  font-family: Tahoma, sans-serif;
+  font-size: 10px;
+  color: #777;
+}
+.dropdownItem:hover kbd {
+  color: #dce8ff;
+}
+.dropdownSep {
+  height: 1px;
+  background: #aca899;
+  box-shadow: 0 1px 0 #fff;
+  margin: 3px 2px;
+}
+.menuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+}
+.unsavedTag {
+  font-weight: normal;
+  color: #9a3a1a;
+}
+
+/* ---------- Info tooltip badge ---------- */
+.infoTip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: #3a6ea5;
+  color: #fff;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: help;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.infoTip:hover {
+  background: #2b5a92;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+  color: #0a246a;
+  padding-left: 4px;
+}
+.brand img {
+  width: 18px;
+  height: 18px;
+  image-rendering: pixelated;
+}
+.actions {
+  display: flex;
+  gap: 5px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: Tahoma, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #000;
+  background: #ece9d8;
+  border: 1px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow: inset 1px 1px 0 #f6f4ec, inset -1px -1px 0 #aca899;
+  padding: 3px 12px;
+  border-radius: 2px;
+}
+.btn:hover {
+  background: #f4f2e8;
+}
+.btn:active {
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 #aca899, inset -1px -1px 0 #f6f4ec;
+  padding: 4px 11px 2px 13px;
+}
+.btn:disabled {
+  color: #909090;
+  text-shadow: 1px 1px 0 #fff;
+}
+.btnPrimary {
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(180deg, #4aa54a 0%, #2f8e2f 50%, #237223 100%);
+  border-color: #6fd06f #1a5e1a #1a5e1a #6fd06f;
+  font-weight: bold;
+}
+.btnPrimary:hover {
+  background: linear-gradient(180deg, #57b857 0%, #349534 50%, #2a7e2a 100%);
+}
+.btnDanger {
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(180deg, #e0703f 0%, #c8401f 100%);
+  border-color: #f0a07a #9a2a10 #9a2a10 #f0a07a;
+}
+
+/* ---------- Body / columns ---------- */
+.body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  overflow: auto;
+  flex: 1;
+  align-content: flex-start;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 330px;
+  min-width: 290px;
+}
+
+/* ---------- Group boxes (fieldsets) ---------- */
+.groupBox {
+  border: 1px solid #aca899;
+  box-shadow: inset 1px 1px 0 #fff;
+  padding: 6px 10px 10px;
+  background: #ece9d8;
+}
+.legend {
+  font-weight: bold;
+  color: #0a246a;
+  padding: 0 4px;
+  margin-left: -2px;
+}
+
+/* ---------- Field rows ---------- */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+.row:first-of-type {
+  margin-top: 4px;
+}
+.label {
+  color: #1a1a1a;
+  flex-shrink: 0;
+}
+.hint {
+  color: #6a6a5a;
+  font-size: 10px;
+}
+.field {
+  font-family: Tahoma, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  background: #fff;
+  border: 1px solid;
+  border-color: #808080 #d8d4c0 #d8d4c0 #808080;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.18);
+  padding: 2px 4px;
+  color: #000;
+}
+.field:focus {
+  outline: 1px dotted #0a246a;
+  outline-offset: -2px;
+}
+.fieldRight {
+  text-align: right;
+}
+.money {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.moneySign {
+  position: absolute;
+  left: 5px;
+  color: #6a6a5a;
+  pointer-events: none;
+}
+.moneyInput {
+  padding-left: 14px;
+  text-align: right;
+}
+.w90 { width: 96px; }
+.w70 { width: 74px; }
+.w120 { width: 130px; }
+.grow { flex: 1; min-width: 0; }
+
+/* ---------- Savings-mode toggle ---------- */
+.toggle {
+  display: flex;
+  gap: 0;
+  margin-top: 4px;
+}
+.toggleBtn {
+  flex: 1;
+  font-family: Tahoma, sans-serif;
+  font-size: 10px;
+  padding: 4px 2px;
+  background: #ece9d8;
+  border: 1px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  color: #333;
+}
+.toggleBtnActive {
+  background: linear-gradient(180deg, #cfe0f5 0%, #aecbe8 100%);
+  border-color: #808080 #ffffff #ffffff #808080;
+  color: #0a246a;
+  font-weight: bold;
+}
+
+/* ---------- LCD hero display ---------- */
+.lcd {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0c2a1a 0%, #061410 100%);
+  border: 2px solid;
+  border-color: #585848 #d8d4c0 #d8d4c0 #585848;
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.75);
+  padding: 14px 16px 16px;
+  color: #86f0a8;
+  font-family: var(--font-geist-mono), 'Courier New', monospace;
+  text-shadow: 0 0 7px rgba(124, 252, 154, 0.5);
+}
+.lcd::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.13) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+.lcdLabel {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #58c47e;
+  opacity: 0.85;
+}
+.lcdBig {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin: 3px 0;
+}
+.lcdSub {
+  font-size: 11px;
+  color: #6fdc92;
+  opacity: 0.92;
+}
+.lcdWarn {
+  color: #ffb35c;
+  text-shadow: 0 0 7px rgba(255, 179, 92, 0.5);
+}
+.lcdGold {
+  color: #ffe14d;
+  text-shadow: 0 0 9px rgba(255, 215, 0, 0.6);
+}
+
+/* ---------- Stat rows / breakdowns ---------- */
+.stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+}
+.statLabel {
+  color: #1a1a1a;
+}
+.statSub {
+  color: #6a6a5a;
+  font-size: 10px;
+}
+.statValue {
+  font-family: var(--font-geist-mono), 'Courier New', monospace;
+  font-weight: 600;
+  color: #14401f;
+}
+.statNeg {
+  color: #b3331a;
+}
+.divider {
+  height: 1px;
+  background: #aca899;
+  box-shadow: 0 1px 0 #fff;
+  margin: 5px 0;
+}
+.total {
+  font-weight: bold;
+}
+.gold {
+  color: #b8860b;
+  font-weight: bold;
+}
+
+/* waterfall bar */
+.barTrack {
+  height: 7px;
+  background: #fff;
+  border: 1px solid #808080;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.2);
+  margin-top: 1px;
+}
+.barFill {
+  height: 100%;
+}
+
+/* ---------- Expenses table ---------- */
+.expHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+.link {
+  color: #0a3fa8;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  font-size: 10px;
+  font-family: Tahoma, sans-serif;
+  padding: 0;
+}
+.expRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 1px 0;
+}
+
+/* ---------- Chart ---------- */
+.chart {
+  background: #f7f6ef;
+  border: 1px solid;
+  border-color: #808080 #d8d4c0 #d8d4c0 #808080;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+}
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.chartSvg {
+  cursor: crosshair;
+}
+.crosshair {
+  transition: opacity 130ms ease;
+  pointer-events: none;
+}
+.crosshairDot {
+  filter: drop-shadow(0 0 2px rgba(28, 58, 94, 0.6));
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-top: 1px solid #aca899;
+  box-shadow: 0 -1px 0 #fff;
+  color: #6a6a5a;
+  font-size: 10px;
+  background: #e4e1d2;
+}
+
+/* ---------- Share dialog ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.dialog {
+  width: min(440px, 92%);
+  background: #ece9d8;
+  border: 1px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.45);
+}
+.dialogTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 4px 3px 8px;
+  color: #fff;
+  font-weight: bold;
+  background: linear-gradient(180deg, #0a246a 0%, #3a6ea5 45%, #2b5a92 100%);
+}
+.dialogClose {
+  width: 18px;
+  height: 18px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(180deg, #e0703f 0%, #c03020 100%);
+  border: 1px solid #fff6;
+  border-radius: 2px;
+}
+.dialogBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.codeBox {
+  display: flex;
+  gap: 6px;
+}
+.codeField {
+  flex: 1;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  background: #fff;
+  border: 1px solid #808080;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.18);
+  padding: 4px 6px;
+  color: #14401f;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.copied {
+  color: #2f8e2f;
+  font-weight: bold;
+}
+
+/* ---------- Unsaved-changes dialog ---------- */
+.dialogSmall {
+  width: min(360px, 92%);
+}
+.dialogMessage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 2px 6px;
+  font-size: 11px;
+}
+.warnIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #ffe680 0%, #f5b400 70%, #d89000 100%);
+  border: 1px solid #9a7000;
+  color: #4a3000;
+  font-weight: bold;
+  font-size: 17px;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+.dialogButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 2px;
+}
+.dialogButtons .btn {
+  min-width: 76px;
+}

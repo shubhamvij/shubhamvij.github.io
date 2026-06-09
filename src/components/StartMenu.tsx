@@ -15,6 +15,7 @@ const MENU_ITEMS = [
   { id: 'blog', label: 'Blog', icon: '/images/icons/notepad.svg' },
   { id: 'resume', label: 'Resume', icon: '/images/icons/resume.svg' },
   { id: 'research', label: 'Research', icon: '/images/icons/research.svg' },
+  { id: 'finance', label: 'Finance Planner', icon: '/images/icons/calculator.svg' },
 ]
 
 export default function StartMenu({ isOpen, onClose, onNavigate, onSleep, socialLinks }: StartMenuProps) {

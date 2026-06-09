@@ -23,6 +23,7 @@ function generateSitemap() {
     { url: '/resume/', priority: '0.6', changefreq: 'monthly' },
     { url: '/research/', priority: '0.7', changefreq: 'monthly' },
     { url: '/about/', priority: '0.6', changefreq: 'monthly' },
+    { url: '/finance/', priority: '0.7', changefreq: 'monthly' },
   ]
 
   const blogPages = posts.map(p => ({

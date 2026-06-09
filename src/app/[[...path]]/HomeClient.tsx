@@ -16,6 +16,7 @@ import BlogList from '@/components/BlogList'
 import ResumeViewer from '@/components/ResumeViewer'
 import ScholarFeed from '@/components/ScholarFeed'
 import AboutContent from '@/components/AboutContent'
+import FinancePlanner from '@/components/finance/FinancePlanner'
 import type { SocialLink } from '@/lib/social'
 
 const WINDOW_TITLES: Record<string, string> = {
@@ -23,10 +24,11 @@ const WINDOW_TITLES: Record<string, string> = {
   resume: 'Resume',
   research: 'Research - Papers & Patents',
   about: 'About - Shubham Vij',
+  finance: 'Finance Planner - Calculator',
   'display-properties': 'Display Properties',
 }
 
-const ROUTABLE_SECTIONS = ['blog', 'resume', 'research'] as const
+const ROUTABLE_SECTIONS = ['blog', 'resume', 'research', 'finance'] as const
 
 function parsePathSegments(path?: string[]): { section: string | null; slug: string | null } {
   if (!path || path.length === 0) return { section: null, slug: null }
@@ -50,7 +52,9 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
   const [startMenuOpen, setStartMenuOpen] = useState(false)
   const [sleeping, setSleeping] = useState(false)
   const [blogSlug, setBlogSlug] = useState<string | null>(initialSlug)
+  const [financeShareCode, setFinanceShareCode] = useState<string | null>(null)
   const suppressUrlSync = useRef(false)
+  const closeGuardsRef = useRef<Record<string, (() => boolean) | null>>({})
 
   // Screen saver settings (localStorage-backed with server defaults)
   const [screenSaverId, setScreenSaverId] = useState(defaultScreenSaver)
@@ -102,9 +106,18 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
       }
     }
 
+    // Capture a finance share code (?s=...) before opening windows
+    const shareCode = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('s')
+      : null
+    if (shareCode) setFinanceShareCode(shareCode)
+
     // Open URL-specified window last so it gets highest z-index
     if (initialSection && WINDOW_TITLES[initialSection]) {
-      openWindow(initialSection, WINDOW_TITLES[initialSection])
+      const geometry = initialSection === 'finance' ? { size: { width: 800, height: 640 } } : undefined
+      openWindow(initialSection, WINDOW_TITLES[initialSection], geometry)
+    } else if (shareCode) {
+      openWindow('finance', WINDOW_TITLES['finance'], { size: { width: 800, height: 640 } })
     }
 
     requestAnimationFrame(() => { suppressUrlSync.current = false })
@@ -133,12 +146,12 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
 
   const handleOpenWindow = useCallback((id: string) => {
     const title = WINDOW_TITLES[id] || id
-    openWindow(id, title)
+    openWindow(id, title, id === 'finance' ? { size: { width: 800, height: 640 } } : undefined)
     if (id !== 'blog') setBlogSlug(null)
     syncUrl(id)
   }, [openWindow, syncUrl])
 
-  const handleCloseWindow = useCallback((id: string) => {
+  const doCloseWindow = useCallback((id: string) => {
     closeWindow(id)
     if ((ROUTABLE_SECTIONS as readonly string[]).includes(id)) {
       const remaining = windows.filter(w => w.id !== id && (ROUTABLE_SECTIONS as readonly string[]).includes(w.id))
@@ -151,6 +164,19 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
     }
     if (id === 'blog') setBlogSlug(null)
   }, [closeWindow, windows])
+
+  // A window's content can register a guard (e.g. unsaved changes) that intercepts the close.
+  const handleCloseWindow = useCallback((id: string) => {
+    const guard = closeGuardsRef.current[id]
+    if (guard && guard()) return
+    doCloseWindow(id)
+  }, [doCloseWindow])
+
+  const registerFinanceCloseGuard = useCallback((guard: (() => boolean) | null) => {
+    closeGuardsRef.current['finance'] = guard
+  }, [])
+
+  const closeFinance = useCallback(() => doCloseWindow('finance'), [doCloseWindow])
 
   const handleFocusWindow = useCallback((id: string) => {
     focusWindow(id)
@@ -214,6 +240,13 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
       case 'resume': return <ResumeViewer />
       case 'research': return <ScholarFeed />
       case 'about': return <AboutContent />
+      case 'finance': return (
+        <FinancePlanner
+          initialCode={financeShareCode}
+          onClose={closeFinance}
+          registerCloseGuard={registerFinanceCloseGuard}
+        />
+      )
       case 'display-properties': return (
         <DisplayProperties
           currentScreenSaver={screenSaverId}

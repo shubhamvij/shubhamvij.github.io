@@ -17,7 +17,7 @@ export function useWindowManager() {
   const [windows, setWindows] = useState<WindowState[]>([])
   const [topZ, setTopZ] = useState(10)
 
-  const openWindow = useCallback((id: string, title: string, geometry?: { position: { x: number; y: number }; size: { width: number; height: number }; isMaximized?: boolean }) => {
+  const openWindow = useCallback((id: string, title: string, geometry?: { position?: { x: number; y: number }; size?: { width: number; height: number }; isMaximized?: boolean }) => {
     setWindows(prev => {
       const existing = prev.find(w => w.id === id)
       if (existing) {
