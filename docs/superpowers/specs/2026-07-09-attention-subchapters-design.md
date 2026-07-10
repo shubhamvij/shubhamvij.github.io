@@ -159,6 +159,28 @@ Refs: Shazeer (GLU variants), Geva et al. (key-value memories), Mixtral.
   widget ("each component gets its own deep dive — 2.1 through 2.4");
   `TransformerBlockDiagram.tsx` part blurbs gain a short "deep dive: 2.x"
   suffix (embed→2.1, mha→2.2, ln1/add1/ln2/add2→2.3, ffn→2.4).
+
+## Data-flow panel in the block diagram (user addition, 2026-07-09)
+
+`TransformerBlockDiagram.tsx` additionally gains a **live data-flow panel**:
+a real forward pass through one pre-norm block is computed in-component over
+a fixed toy input (4 tokens, d=4, single attention head, d_ff=8, fixed
+weights, no biases, γ=1/β=0 norms). Selecting a component shows the actual
+numbers **before → after** that component as two color-coded 4×4 vector
+grids (token-labelled rows), with shape captions:
+
+- `embed`: tokens [4] → vectors [4×4] (symbols become vectors; the one
+  shape-changing step).
+- `ln1`/`ln2`: [4×4] → [4×4], rows visibly re-standardized.
+- `mha`: [4×4] → [4×4], plus the real 4×4 attention-weight heatmap ("who
+  looks at whom").
+- `add1`/`add2`: shows the sublayer's edit being added to the untouched
+  residual copy.
+- `ffn`: shape line "4×4 → 4×8 → 4×4" (expand → nonlinearity → project).
+
+Every stage's output shape equals its input shape — the panel makes the
+"blocks stack like LEGO" claim visible in numbers. Small CSS additions to
+`course.module.css` for the vector grids.
 - `attention/index.tsx` registers the five new widgets:
   `order-blind`, `position-lab`, `head-matrix`, `residual-stream`,
   `param-budget` — one component file each (2.1 uses two of them).
@@ -188,6 +210,7 @@ Refs: Shazeer (GLU variants), Geva et al. (key-value memories), Mixtral.
   through — the flattening must leave a subchapter-free course (GFM)
   pixel-identical. Guard: run both courses' existing tests unmodified except
   where flattening is explicit.
-- Widget honesty: the Order-Blindness and RoPE labs compute real attention /
-  real rotations (no faked numbers), so the demos stay truthful under any
+- Widget honesty: the Order-Blindness and RoPE labs and the block diagram's
+  data-flow panel compute real attention / real rotations / a real block
+  forward pass (no faked numbers), so the demos stay truthful under any
   slider setting.
