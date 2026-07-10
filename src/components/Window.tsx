@@ -110,7 +110,9 @@ export default function Window({
   }
 
   return (
-    <div style={{ position: 'absolute', inset: 0, ...minimizeStyle }}>
+    // zIndex must live on this wrapper: its transform creates a stacking context,
+    // so a z-index further down (on the Rnd) can never re-order windows.
+    <div style={{ position: 'absolute', inset: 0, zIndex: state.zIndex, ...minimizeStyle }}>
       <Rnd
         position={state.isMaximized ? { x: 0, y: 0 } : state.position}
         size={state.isMaximized

@@ -51,4 +51,20 @@ describe('BlogList', () => {
     expect(external.getAttribute('target')).toBe('_blank')
     expect(external.getAttribute('rel')).toBe('noopener noreferrer')
   })
+
+  it('routes internal link clicks through onInternalNavigate without a page load', async () => {
+    const onInternalNavigate = vi.fn()
+    render(<BlogList onInternalNavigate={onInternalNavigate} />)
+    fireEvent.click(await screen.findByText(/Graph Foundation Models, in Seven Ideas/))
+
+    const internal = await screen.findByRole('link', { name: 'the course' })
+    const clicked = fireEvent.click(internal)
+    expect(onInternalNavigate).toHaveBeenCalledWith('/learn/graph-foundation-models')
+    expect(clicked).toBe(false) // default prevented — no browser navigation
+
+    // External links keep their default behavior.
+    const external = screen.getByRole('link', { name: 'the paper' })
+    fireEvent.click(external)
+    expect(onInternalNavigate).toHaveBeenCalledTimes(1)
+  })
 })

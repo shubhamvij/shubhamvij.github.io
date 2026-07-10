@@ -68,6 +68,29 @@ describe('CoursewareShell', () => {
     expect(screen.getByText('Contents')).toBeDefined()
   })
 
+  it('swaps courses in place once booted — no second boot sequence', () => {
+    const { rerender } = render(<CoursewareShell slug={null} onNavigate={vi.fn()} />)
+    skipBoot()
+    expect(screen.getByText('Contents')).toBeDefined()
+
+    // A launch link elsewhere on the desktop updates the slug prop; the course
+    // must appear immediately, without replaying the CD-ROM intro.
+    rerender(<CoursewareShell slug="attention-mechanisms" onNavigate={vi.fn()} />)
+    expect(screen.getByRole('heading', { name: 'Attention, from scratch' })).toBeDefined()
+    expect(screen.queryByText(/autorun\.exe/)).toBeNull()
+  })
+
+  it('cross-course links inside lessons swap the course through onNavigate', () => {
+    const onNavigate = vi.fn()
+    render(<CoursewareShell slug="attention-mechanisms" onNavigate={onNavigate} />)
+    skipBoot()
+    // Module 7 prose links the GFM course.
+    fireEvent.click(screen.getByRole('button', { name: /7\. One mental model/ }))
+    const link = screen.getByRole('link', { name: 'Graph Foundation Models course' })
+    fireEvent.click(link)
+    expect(onNavigate).toHaveBeenCalledWith('graph-foundation-models')
+  })
+
   it('shows continue state once a course has progress', () => {
     render(<Harness />)
     skipBoot()

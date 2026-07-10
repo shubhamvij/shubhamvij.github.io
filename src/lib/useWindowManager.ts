@@ -13,17 +13,25 @@ export interface WindowState {
   size: { width: number; height: number }
 }
 
+// Windows stack above the desktop (z 10) — each open/focus goes one above the current top.
+function nextZ(windows: WindowState[]): number {
+  return windows.reduce((max, w) => Math.max(max, w.zIndex), 10) + 1
+}
+
 export function useWindowManager() {
   const [windows, setWindows] = useState<WindowState[]>([])
-  const [topZ, setTopZ] = useState(10)
 
+  // z-index is derived inside the functional update so several synchronous calls
+  // (e.g. restoring cookie windows plus the URL window on mount) stack distinctly
+  // instead of sharing one stale "top" value.
   const openWindow = useCallback((id: string, title: string, geometry?: { position?: { x: number; y: number }; size?: { width: number; height: number }; isMaximized?: boolean }) => {
     setWindows(prev => {
+      const zIndex = nextZ(prev)
       const existing = prev.find(w => w.id === id)
       if (existing) {
         return prev.map(w =>
           w.id === id
-            ? { ...w, isMinimized: false, zIndex: topZ + 1 }
+            ? { ...w, isMinimized: false, zIndex }
             : w
         )
       }
@@ -34,26 +42,25 @@ export function useWindowManager() {
         title,
         isMinimized: false,
         isMaximized: geometry?.isMaximized ?? false,
-        zIndex: topZ + 1,
+        zIndex,
         defaultPosition: pos,
         defaultSize: size,
         position: pos,
         size,
       }]
     })
-    setTopZ(z => z + 1)
-  }, [topZ])
+  }, [])
 
   const closeWindow = useCallback((id: string) => {
     setWindows(prev => prev.filter(w => w.id !== id))
   }, [])
 
   const focusWindow = useCallback((id: string) => {
-    setTopZ(z => {
-      setWindows(prev =>
-        prev.map(w => w.id === id ? { ...w, zIndex: z + 1 } : w)
-      )
-      return z + 1
+    setWindows(prev => {
+      const target = prev.find(w => w.id === id)
+      if (!target) return prev
+      const zIndex = nextZ(prev)
+      return prev.map(w => w.id === id ? { ...w, zIndex } : w)
     })
   }, [])
 

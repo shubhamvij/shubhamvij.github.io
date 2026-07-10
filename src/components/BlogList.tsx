@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 
 interface PostMeta {
   slug: string
@@ -13,9 +13,11 @@ interface BlogListProps {
   initialSlug?: string | null
   onNavigate?: (slug: string | null) => void
   onOpenPost?: (slug: string) => void
+  /** Handles clicks on site-internal links (e.g. /learn/...) through the window manager instead of a page load. */
+  onInternalNavigate?: (path: string) => void
 }
 
-export default function BlogList({ initialSlug, onNavigate, onOpenPost }: BlogListProps) {
+export default function BlogList({ initialSlug, onNavigate, onOpenPost, onInternalNavigate }: BlogListProps) {
   const [posts, setPosts] = useState<PostMeta[]>([])
   const [selectedPost, setSelectedPost] = useState<{ content: string; meta: PostMeta } | null>(null)
   const [loading, setLoading] = useState(true)
@@ -59,6 +61,27 @@ export default function BlogList({ initialSlug, onNavigate, onOpenPost }: BlogLi
     onNavigate?.(null)
   }
 
+  // The innerHTML object must keep a stable identity: React 19 re-sets innerHTML
+  // whenever the dangerouslySetInnerHTML prop object changes, which would rebuild
+  // the article DOM on every re-render — destroying link nodes mid-click (the
+  // browser then suppresses the click entirely).
+  const articleHtml = useMemo(
+    () => (selectedPost ? { __html: renderMarkdown(selectedPost.content) } : undefined),
+    [selectedPost]
+  )
+
+  // Route site-internal article links through the window manager (no page reload);
+  // external links keep their native behavior (new tab via target="_blank").
+  const handleArticleClick = (e: React.MouseEvent) => {
+    if (!onInternalNavigate) return
+    const anchor = (e.target as HTMLElement).closest('a')
+    const href = anchor?.getAttribute('href')
+    if (href?.startsWith('/')) {
+      e.preventDefault()
+      onInternalNavigate(href)
+    }
+  }
+
   if (loading) return <div className="p-4 text-gray-500" style={{ fontFamily: 'Tahoma, sans-serif' }}>Loading...</div>
 
   if (selectedPost) {
@@ -74,7 +97,8 @@ export default function BlogList({ initialSlug, onNavigate, onOpenPost }: BlogLi
         <p className="text-xs text-gray-500 mb-4">{selectedPost.meta.date}</p>
         <div
           className="prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(selectedPost.content) }}
+          onClick={handleArticleClick}
+          dangerouslySetInnerHTML={articleHtml}
         />
       </div>
     )

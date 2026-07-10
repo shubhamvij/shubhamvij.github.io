@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 function renderMarkdown(md: string): string {
   let html = md
@@ -27,6 +27,13 @@ export default function AboutContent() {
       .catch(() => setContent(null))
   }, [])
 
+  // Stable object identity: React 19 re-sets innerHTML when this prop object is
+  // recreated, rebuilding the DOM mid-click and swallowing link clicks.
+  const aboutHtml = useMemo(
+    () => (content ? { __html: renderMarkdown(content) } : undefined),
+    [content]
+  )
+
   return (
     <div className="p-4" style={{ fontFamily: 'Tahoma, sans-serif' }}>
       <div className="flex items-start gap-4 mb-4">
@@ -43,8 +50,8 @@ export default function AboutContent() {
         </div>
       </div>
       <div className="border-t pt-4 text-sm text-gray-700 space-y-3">
-        {content ? (
-          <div dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />
+        {aboutHtml ? (
+          <div dangerouslySetInnerHTML={aboutHtml} />
         ) : (
           <p>Loading...</p>
         )}
