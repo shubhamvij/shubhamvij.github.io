@@ -257,30 +257,12 @@ export const MODULES: CourseModule[] = [
           </>
         ),
       },
-      { kind: 'widget', widget: 'mask-lab-efficiency' },
-      {
-        kind: 'quiz',
-        questions: [
-          {
-            id: 'am3-q3',
-            prompt: 'With sliding-window attention (window w), a token can\'t directly see tokens beyond w positions back. How do such models still use long context?',
-            options: [
-              { text: 'They can\'t — information outside the window is lost', explain: 'Direct attention is lost per layer, but the network is deep…' },
-              { text: 'Stacked layers relay information: each layer extends effective reach by w, like a receptive field growing with depth', correct: true, explain: 'Layer 1 sees w back; layer 2 sees information that already traveled w, reaching 2w; and so on. If that sounds exactly like message passing hops in a GNN — module 5 is waiting.' },
-              { text: 'They secretly fall back to full attention on long inputs', explain: 'The whole point is *not* paying O(n²); the window stays fixed, depth does the relaying.' },
-            ],
-          },
-        ],
-      },
       {
         kind: 'refs',
         items: [
           { label: 'GQA: Grouped-Query Attention — Ainslie et al. (EMNLP 2023)', href: 'https://arxiv.org/abs/2305.13245' },
           { label: 'Fast Transformer Decoding (Multi-Query Attention) — Shazeer (2019)', href: 'https://arxiv.org/abs/1911.02150' },
           { label: 'DeepSeek-V2 (Multi-head Latent Attention) — DeepSeek-AI (2024)', href: 'https://arxiv.org/abs/2405.04434', note: 'KV cache compressed into a latent vector' },
-          { label: 'Longformer — Beltagy et al. (2020)', href: 'https://arxiv.org/abs/2004.05150' },
-          { label: 'Big Bird — Zaheer et al. (NeurIPS 2020)', href: 'https://arxiv.org/abs/2007.14062', note: 'window + global + random; provably universal' },
-          { label: 'Transformers are RNNs (linear attention) — Katharopoulos et al. (ICML 2020)', href: 'https://arxiv.org/abs/2006.16236' },
         ],
       },
     ],

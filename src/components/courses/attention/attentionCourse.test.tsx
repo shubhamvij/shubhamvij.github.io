@@ -56,7 +56,7 @@ describe('Attention course through CourseShell', () => {
 
   it('mask lab switches modes and reports pair counts', () => {
     render(<CourseShell course={attentionCourse} />)
-    fireEvent.click(screen.getByRole('button', { name: /3\. Taming the n²/ }))
+    fireEvent.click(screen.getByRole('button', { name: /3\.3 Score fewer pairs/ }))
     expect(screen.getByText('Attention Mask Lab')).toBeDefined()
     // full mode: 100/100 pairs
     expect(screen.getByText('100 / 100')).toBeDefined()

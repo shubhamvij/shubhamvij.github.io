@@ -174,4 +174,95 @@ export const EFFICIENCY_SUBCHAPTERS: CourseModule[] = [
       },
     ],
   },
+  // ------------------------------------------------------------------
+  {
+    id: 'efficiency-sparse',
+    navLabel: '3.3 Score fewer pairs',
+    title: 'Score fewer pairs: sparse and linear attention',
+    subtitle: 'If n² pairs is the problem, stop scoring all of them',
+    minutes: 6,
+    blocks: [
+      {
+        kind: 'prose',
+        body: (
+          <>
+            <p>
+              3.1 shrank the cache and 3.2 moved fewer bytes — but both still <em>score every pair</em>. The last
+              family attacks n² itself by declaring most pairs not worth scoring. <strong>Longformer</strong> and{' '}
+              <strong>BigBird</strong> keep a sliding window around each token plus a handful of{' '}
+              <strong>global tokens</strong> that everyone may attend to — hubs that keep any two tokens within
+              two hops even though almost no pairs are scored directly (BigBird adds random links and proves the
+              construction loses no expressive power in the limit). <strong>Mistral-7B</strong> shipped the
+              production version: a plain 4096-token sliding window, relying on depth to relay longer-range
+              information (module 3&apos;s quiz taught the receptive-field arithmetic), with a rolling KV cache
+              buffer as the memory bonus — evict everything outside the window.
+            </p>
+            <p>
+              <strong>Linear attention</strong> is the radical cousin: replace softmax with a kernel feature map
+              φ so the computation reorders from (QKᵀ)V — the n×n matrix — to Q(KᵀV), a d×d summary computed
+              once. O(n) exactly, and the recurrent form even turns a transformer into an RNN at decode time. The
+              price is fidelity: that d×d summary is a lossy bottleneck compared to exact pairwise softmax, and
+              quality gaps show up on recall-heavy tasks — the reason the 2024-25 wave (Mamba, RWKV, hybrid
+              layers) mixes linear-time layers <em>with</em> a few full-attention ones rather than replacing them.
+            </p>
+            <p>Play with what &quot;fewer pairs&quot; looks like — the counter is the whole argument:</p>
+          </>
+        ),
+      },
+      { kind: 'widget', widget: 'mask-lab-efficiency' },
+      {
+        kind: 'callout',
+        icon: '🕸️',
+        title: 'Remember this shape',
+        body: (
+          <>
+            Window + a few hub nodes + a sprinkle of random links — that&apos;s a <em>graph</em> design, chosen for
+            short path lengths at low edge count. Module 5 makes the connection explicit: every one of these
+            &quot;efficient attention patterns&quot; is an adjacency structure, and choosing one is graph construction.
+          </>
+        ),
+      },
+      {
+        kind: 'quiz',
+        questions: [
+          {
+            id: 'am3-q3',
+            prompt: 'With sliding-window attention (window w), a token can\'t directly see tokens beyond w positions back. How do such models still use long context?',
+            options: [
+              { text: 'They can\'t — information outside the window is lost', explain: 'Direct attention is lost per layer, but the network is deep…' },
+              { text: 'Stacked layers relay information: each layer extends effective reach by w, like a receptive field growing with depth', correct: true, explain: 'Layer 1 sees w back; layer 2 sees information that already traveled w, reaching 2w; and so on. If that sounds exactly like message passing hops in a GNN — module 5 is waiting.' },
+              { text: 'They secretly fall back to full attention on long inputs', explain: 'The whole point is *not* paying O(n²); the window stays fixed, depth does the relaying.' },
+            ],
+          },
+          {
+            id: 'am3-3-q1',
+            prompt: 'Longformer/BigBird add a few GLOBAL tokens to the sliding window. What do they buy?',
+            options: [
+              { text: 'Hub connectivity: any token reaches any other in ≤2 hops through a global token, so long-range dependencies survive even though almost no pairs are directly scored', correct: true, explain: 'A star topology stapled onto a path: linear edge count, short path lengths. (BigBird\'s random extra links serve the same small-world purpose.)' },
+              { text: 'Extra positional precision', explain: 'Global tokens carry no special positional role — they\'re about connectivity.' },
+              { text: 'A bigger vocabulary', explain: 'Global tokens are ordinary tokens (often [CLS] or task tokens) given wider wiring, not new vocabulary.' },
+            ],
+          },
+          {
+            id: 'am3-3-q2',
+            prompt: 'Linear attention computes Q(KᵀV) instead of (QKᵀ)V. What does the reordering buy, and what does it cost?',
+            options: [
+              { text: 'Buys O(n): KᵀV is a fixed d×d summary so no n×n matrix ever forms. Costs fidelity: softmax\'s exact pairwise weighting is replaced by a lossy kernel approximation', correct: true, explain: 'Associativity does the work — and the d×d bottleneck is why quality gaps appear on recall-heavy tasks, pushing modern designs toward hybrids (a few exact-attention layers among linear ones).' },
+              { text: 'Buys exactness, costs memory', explain: 'Backwards: it\'s the approximate one; memory is what it saves.' },
+              { text: 'It\'s pure notation — the same computation either way', explain: 'With softmax in between, the two orderings aren\'t even equal; removing/replacing softmax is precisely the (consequential) trick.' },
+            ],
+          },
+        ],
+      },
+      {
+        kind: 'refs',
+        items: [
+          { label: 'Longformer — Beltagy et al. (2020)', href: 'https://arxiv.org/abs/2004.05150' },
+          { label: 'Big Bird — Zaheer et al. (NeurIPS 2020)', href: 'https://arxiv.org/abs/2007.14062', note: 'window + global + random; provably universal' },
+          { label: 'Mistral 7B — Jiang et al. (2023)', href: 'https://arxiv.org/abs/2310.06825', note: 'sliding window + rolling KV buffer in production' },
+          { label: 'Transformers are RNNs (linear attention) — Katharopoulos et al. (ICML 2020)', href: 'https://arxiv.org/abs/2006.16236' },
+        ],
+      },
+    ],
+  },
 ]
