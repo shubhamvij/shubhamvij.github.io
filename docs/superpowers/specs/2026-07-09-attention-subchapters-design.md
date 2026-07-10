@@ -15,8 +15,9 @@ course engine gains one level of module nesting to host them.
 
 ## Non-goals
 
-- No deep-dive subchapters for modules 1 or 3–7 (future work; the engine
-  support built here enables them).
+- No deep-dive subchapters for modules 1, 4, 5, 6, 7 (future work; the
+  engine support built here enables them). Module 3 IS in scope — see the
+  "Module 3" section added 2026-07-09.
 - No click-through from block-diagram parts to subchapters (would couple a
   widget to shell navigation); the diagram blurbs get a plain-text
   "deep dive: 2.x" pointer instead.
@@ -159,6 +160,57 @@ Refs: Shazeer (GLU variants), Geva et al. (key-value memories), Mixtral.
   widget ("each component gets its own deep dive — 2.1 through 2.4");
   `TransformerBlockDiagram.tsx` part blurbs gain a short "deep dive: 2.x"
   suffix (embed→2.1, mha→2.2, ln1/add1/ln2/add2→2.3, ffn→2.4).
+
+## Module 3 rework: prelim context + technique subchapters (user addition, 2026-07-09)
+
+Module 3 currently assumes the reader already knows what a KV cache is and
+why memory movement matters. Fix in two parts:
+
+**Main module 3 (rewritten, ~8 min).** Teach the prerequisites in order:
+(a) prefill pays n² compute; (b) the decoding loop generates one token at a
+time, and each new token's query must score against every past token's K/V —
+recomputing those every step is O(t²) wasted work, so decoders cache them:
+that is the **KV cache**; (c) the cache's size formula
+(2 × layers × K/V heads × d_head × context × bytes) and why long-context
+decoding becomes memory-bound, not compute-bound. New widget `kv-cache` —
+**KV Cache Lab**: a decoding stepper (generate token by token) with a
+cache ON/off toggle showing K/V projections computed so far (t cached vs
+t(t+1)/2 recomputed), plus a real-config sizer (model preset chips + context
+slider → cache GB vs an 80 GB HBM bar). Main module ends with a map of the
+three attack directions pointing at 3.1/3.2/3.3. New quiz ids am3-q4..q6
+(why cache K/V but not Q; what the cache scales with; recompute counts).
+
+**3.1 Shrink the cache (`efficiency-kv-sharing`, ~6 min).** MQA / GQA / MLA.
+Widget `head-sharing` — **Head Sharing Lab**: 8 query heads wired to
+8/4/2/1 K/V heads (MHA/GQA-4/GQA-2/MQA mode chips) with arrow diagram,
+cache-per-token readout, and a qualitative quality indicator per mode; MLA
+mode replaces K/V heads with one low-rank latent vector (plus the decoupled
+RoPE key), cache between MQA and GQA sizes at ~MHA quality. Moved quiz
+am3-q2 (GQA) + new am3-1-q1 (MLA latent), am3-1-q2 (quality/cache
+interpolation). Refs: MQA (Shazeer), GQA, DeepSeek-V2.
+
+**3.2 Compute smarter: FlashAttention (`efficiency-flash`, ~6 min).**
+Prelim: GPU memory hierarchy (HBM big-but-slow, on-chip SRAM tiny-but-fast);
+attention was bottlenecked on HBM traffic, not FLOPs. Widget `flash-tiling`
+— **Flash Tiling Lab**: a 16×16 score matrix; naive mode shows the full
+matrix materialized in HBM (counters: n² scores written + read back); tiled
+mode steps tile-by-tile (load Q/K tiles to SRAM, online-softmax running
+max/denominator, accumulate output, discard tile) with counter "scores
+materialized in HBM: 0" and an exactness note. Moved quiz am3-q1 + new
+am3-2-q1 (why online softmax makes tiling exact), am3-2-q2 (FLOPs unchanged,
+traffic reduced). Refs: FlashAttention, FlashAttention-2, online softmax.
+
+**3.3 Score fewer pairs (`efficiency-sparse`, ~6 min).** The existing
+`mask-lab-efficiency` widget moves here from main module 3, with expanded
+prose: windows + global tokens (Longformer/BigBird), production sliding
+window (Mistral), linear attention's reordering trick and its trade-offs.
+Moved quiz am3-q3 + new am3-3-q1 (global tokens as hubs), am3-3-q2 (linear
+attention: Q(KᵀV) associativity, O(n), quality cost). Refs: Longformer,
+BigBird, Mistral-7B, linear attention.
+
+Catalog effects: minutes 89 → 106 (module 3: 9→8, +18 subchapters);
+highlights → "13 interactive labs · 7 deep dives". Moved quiz ids keep
+their original strings so existing readers' saved answers stay valid.
 
 ## Data-flow panel in the block diagram (user addition, 2026-07-09)
 
