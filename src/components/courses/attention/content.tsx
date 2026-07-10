@@ -217,7 +217,7 @@ export const MODULES: CourseModule[] = [
     navLabel: '3. Taming the n²',
     title: 'The quadratic problem and its fixes',
     subtitle: 'KV caches, fewer heads, smarter kernels, sparser masks',
-    minutes: 9,
+    minutes: 8,
     subchapters: EFFICIENCY_SUBCHAPTERS,
     blocks: [
       {
@@ -225,44 +225,86 @@ export const MODULES: CourseModule[] = [
         body: (
           <>
             <p>
-              Full attention scores every pair: n tokens → n² work. Double your context, quadruple the compute —
-              and at generation time there&apos;s a second tax: to avoid recomputing keys and values for the whole
-              history at every step, decoders cache them (the <strong>KV cache</strong>), which for long contexts
-              becomes gigabytes of memory traffic per token. The modern fixes attack from three directions:
+              Full attention scores every pair: n tokens → n² work. Double your context, quadruple the compute.
+              That&apos;s the tax at <strong>prefill</strong>, when the prompt is processed in one parallel pass. But
+              generation is different, and this is the piece most explanations skip: a decoder produces{' '}
+              <strong>one token at a time</strong>, and each new token&apos;s query must score against the key of{' '}
+              <em>every token so far</em>, then blend their values. Recompute those K/V projections from scratch
+              each step and you&apos;re doing t(t+1)/2 projections for t tokens — almost all of it repeated work,
+              since past tokens&apos; K and V never change (with a causal mask, tokens can&apos;t see the future, so new
+              tokens never alter old projections).
             </p>
+            <p>
+              So decoders store them. That store is the <strong>KV cache</strong> — the second character in every
+              efficiency story of the LLM era. Watch it earn its existence, then check its price:
+            </p>
+          </>
+        ),
+      },
+      { kind: 'widget', widget: 'kv-cache' },
+      {
+        kind: 'callout',
+        icon: '🧾',
+        title: 'The n² tax is really two different bills',
+        body: (
+          <>
+            <strong>Prefill is compute-bound</strong> (n² scores, but massively parallel);{' '}
+            <strong>decoding is memory-bound</strong> (one token&apos;s worth of compute per step, but the whole KV
+            cache re-read from memory every single token). Optimizations target one bill or the other — misread
+            which one and none of this module makes sense.
+          </>
+        ),
+      },
+      {
+        kind: 'prose',
+        body: (
+          <>
+            <p>With the vocabulary in place, the modern fixes sort into three attack directions — each with its own deep dive below this module in the sidebar:</p>
             <ul>
-              <li>
-                <strong>Shrink the KV cache.</strong> <A href="https://arxiv.org/abs/1911.02150">Multi-Query
-                Attention</A> shares one K/V head across all query heads;{' '}
-                <A href="https://arxiv.org/abs/2305.13245">GQA</A> interpolates — a few K/V heads shared by
-                groups of query heads (Llama-style);{' '}
-                <A href="https://arxiv.org/abs/2405.04434">Multi-head Latent Attention</A> (DeepSeek-V2) goes
-                further and compresses the whole cache into a low-rank latent vector.
-              </li>
-              <li>
-                <strong>Compute the same thing, smarter.</strong>{' '}
-                <A href="https://arxiv.org/abs/2205.14135">FlashAttention</A> changes no math at all: it&apos;s an
-                IO-aware kernel that tiles the computation so the n×n matrix never materializes in GPU main
-                memory (HBM) — exact attention, several times faster. The lesson: the bottleneck was memory
-                movement, not FLOPs.
-              </li>
-              <li>
-                <strong>Score fewer pairs.</strong> <A href="https://arxiv.org/abs/2004.05150">Longformer</A> and{' '}
-                <A href="https://arxiv.org/abs/2007.14062">BigBird</A> use windows + a few global tokens;{' '}
-                <A href="https://arxiv.org/abs/2310.06825">Mistral</A> ships sliding-window attention in
-                production; <A href="https://arxiv.org/abs/2006.16236">linear attention</A> reorders the math to
-                dodge n² entirely (with quality trade-offs). Play with what &quot;fewer pairs&quot; looks like in deep dive 3.3 below.
-              </li>
+              <li><strong>3.1 — Shrink the cache.</strong> Queries are used once, but K/V are re-read forever: share K/V heads across query heads (MQA, GQA) or cache a compressed latent instead (DeepSeek&apos;s MLA).</li>
+              <li><strong>3.2 — Compute the same thing, smarter.</strong> FlashAttention changes zero math: it reorganizes the computation so the n×n matrix never touches GPU main memory. The bottleneck was memory movement, not FLOPs.</li>
+              <li><strong>3.3 — Score fewer pairs.</strong> Windows + global tokens (Longformer, BigBird), production sliding windows (Mistral), or linear attention&apos;s reordering that dodges n² entirely — with trade-offs.</li>
             </ul>
           </>
         ),
       },
       {
+        kind: 'quiz',
+        questions: [
+          {
+            id: 'am3-q4',
+            prompt: 'Decoders cache K and V — but never Q. Why the asymmetry?',
+            options: [
+              { text: 'Each query is used once, at the step that computes it; every past K and V must be re-read at every future step', correct: true, explain: 'Cache what gets re-read, recompute what doesn\'t. This lifetime asymmetry is also why the K/V side is where all of 3.1\'s surgery happens.' },
+              { text: 'Queries are too large to store', explain: 'Q, K, V are the same size per head — the difference is how long each is needed, not how big it is.' },
+              { text: 'The causal mask deletes queries', explain: 'The mask hides future keys from queries; it doesn\'t delete anything.' },
+            ],
+          },
+          {
+            id: 'am3-q5',
+            prompt: 'Which of these does the KV cache\'s size NOT scale with?',
+            options: [
+              { text: 'The number of QUERY heads', correct: true, explain: 'Cache = 2 × layers × K/V heads × d_head × context × bytes. Query heads never enter the formula — which is exactly the loophole GQA exploits (subchapter 3.1).' },
+              { text: 'Context length', explain: 'Linearly — it\'s the slider in the lab, and the reason 128k contexts hurt.' },
+              { text: 'The number of layers', explain: 'Every layer keeps its own K/V for every past token.' },
+            ],
+          },
+          {
+            id: 'am3-q6',
+            prompt: 'After generating t tokens, how many K/V projections has the model computed with vs without a cache?',
+            options: [
+              { text: 't with the cache; t(t+1)/2 without — the cache turns quadratic recomputation into linear work, paid for in memory', correct: true, explain: 'Each token projected once vs the whole history reprojected each step (1+2+…+t). The lab\'s counter is this formula running live.' },
+              { text: 'The same either way — the cache only helps latency jitter', explain: 'The counts differ asymptotically: t vs t(t+1)/2 is the entire reason the cache exists.' },
+              { text: 't² with the cache, t without', explain: 'Backwards — the cache is the linear one.' },
+            ],
+          },
+        ],
+      },
+      {
         kind: 'refs',
         items: [
-          { label: 'GQA: Grouped-Query Attention — Ainslie et al. (EMNLP 2023)', href: 'https://arxiv.org/abs/2305.13245' },
-          { label: 'Fast Transformer Decoding (Multi-Query Attention) — Shazeer (2019)', href: 'https://arxiv.org/abs/1911.02150' },
-          { label: 'DeepSeek-V2 (Multi-head Latent Attention) — DeepSeek-AI (2024)', href: 'https://arxiv.org/abs/2405.04434', note: 'KV cache compressed into a latent vector' },
+          { label: 'Transformer Inference Arithmetic — kipply (2022)', href: 'https://kipp.ly/transformer-inference-arithmetic/', note: 'the classic back-of-envelope treatment of KV cache & memory-bound decoding' },
+          { label: 'Efficient Memory Management for LLM Serving (PagedAttention/vLLM) — Kwon et al. (SOSP 2023)', href: 'https://arxiv.org/abs/2309.06180', note: 'what serving systems do about the cache' },
         ],
       },
     ],

@@ -13,6 +13,7 @@ import ResidualStreamLab from './ResidualStreamLab'
 import ParamBudgetLab from './ParamBudgetLab'
 import HeadShareLab from './HeadShareLab'
 import FlashTilingLab from './FlashTilingLab'
+import KvCacheLab from './KvCacheLab'
 
 const MaskEfficiency = () => <AttentionMaskLab emphasis="efficiency" />
 const MaskGraphs = () => <AttentionMaskLab emphasis="graphs" />
@@ -38,5 +39,6 @@ export const attentionCourse: CourseDefinition = {
     'param-budget': ParamBudgetLab,
     'head-sharing': HeadShareLab,
     'flash-tiling': FlashTilingLab,
+    'kv-cache': KvCacheLab,
   },
 }

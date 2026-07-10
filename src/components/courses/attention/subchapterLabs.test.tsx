@@ -7,6 +7,7 @@ import ResidualStreamLab from './ResidualStreamLab'
 import ParamBudgetLab from './ParamBudgetLab'
 import HeadShareLab from './HeadShareLab'
 import FlashTilingLab from './FlashTilingLab'
+import KvCacheLab from './KvCacheLab'
 
 describe('OrderBlindLab', () => {
   it('shows permutation equivariance without positions, broken symmetry with', () => {
@@ -134,5 +135,24 @@ describe('FlashTilingLab', () => {
     // and feedback narration / the always-on labNote's <strong>) — assert presence, not uniqueness
     expect(screen.getAllByText(/tile 1\/16/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/running max/i).length).toBeGreaterThan(0)
+  })
+})
+
+describe('KvCacheLab', () => {
+  it('counts cached vs recomputed K/V projections while decoding', () => {
+    render(<KvCacheLab />)
+    // 3 tokens generated, cache ON: each token's K/V computed exactly once
+    expect(screen.getByText(/3 — once per token, then reused/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /KV cache ON/i }))
+    expect(screen.getByText(/6 — every past token reprojected/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /generate next token/i }))
+    expect(screen.getByText(/10 — every past token reprojected/)).toBeDefined()
+  })
+  it('sizes the cache for real configs', () => {
+    render(<KvCacheLab />)
+    // default Llama-3-8B at 8k ctx: 2·32·8·128·2B·8192 = 1.07 GB
+    expect(screen.getByText(/1\.07 GB/)).toBeDefined()
+    fireEvent.change(screen.getByLabelText(/context length/i), { target: { value: '4' } }) // 131072
+    expect(screen.getByText(/17\.18 GB/)).toBeDefined()
   })
 })

@@ -194,7 +194,7 @@ export const EFFICIENCY_SUBCHAPTERS: CourseModule[] = [
               two hops even though almost no pairs are scored directly (BigBird adds random links and proves the
               construction loses no expressive power in the limit). <strong>Mistral-7B</strong> shipped the
               production version: a plain 4096-token sliding window, relying on depth to relay longer-range
-              information (module 3&apos;s quiz taught the receptive-field arithmetic), with a rolling KV cache
+              information (the quiz below walks the receptive-field arithmetic), with a rolling KV cache
               buffer as the memory bonus — evict everything outside the window.
             </p>
             <p>
