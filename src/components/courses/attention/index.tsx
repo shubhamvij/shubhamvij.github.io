@@ -6,6 +6,11 @@ import TransformerBlockDiagram from './TransformerBlockDiagram'
 import AttentionMaskLab from './AttentionMaskLab'
 import PatchifyLab from './PatchifyLab'
 import TypedAttentionLab from './TypedAttentionLab'
+import OrderBlindLab from './OrderBlindLab'
+import PositionLab from './PositionLab'
+import HeadMatrixLab from './HeadMatrixLab'
+import ResidualStreamLab from './ResidualStreamLab'
+import ParamBudgetLab from './ParamBudgetLab'
 
 const MaskEfficiency = () => <AttentionMaskLab emphasis="efficiency" />
 const MaskGraphs = () => <AttentionMaskLab emphasis="graphs" />
@@ -24,5 +29,10 @@ export const attentionCourse: CourseDefinition = {
     'mask-lab-graphs': MaskGraphs,
     'patchify': PatchifyLab,
     'typed-attention': TypedAttentionLab,
+    'order-blind': OrderBlindLab,
+    'position-lab': PositionLab,
+    'head-matrix': HeadMatrixLab,
+    'residual-stream': ResidualStreamLab,
+    'param-budget': ParamBudgetLab,
   },
 }

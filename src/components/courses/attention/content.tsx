@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import type { CourseModule } from '../engine/types'
+import { BLOCK_SUBCHAPTERS } from './subchapters'
 
 function A({ href, children }: { href: string; children: ReactNode }) {
   return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
@@ -107,6 +108,7 @@ export const MODULES: CourseModule[] = [
     title: 'Multi-head attention & the block',
     subtitle: 'Heads specialize; residuals make it stackable',
     minutes: 10,
+    subchapters: BLOCK_SUBCHAPTERS,
     blocks: [
       {
         kind: 'prose',
@@ -134,7 +136,10 @@ export const MODULES: CourseModule[] = [
             </p>
             <p>
               Attention alone isn&apos;t a model, though. The full <strong>transformer block</strong> wraps it with
-              three pieces of glue that make 100-layer stacks trainable. Click around:
+              three pieces of glue that make 100-layer stacks trainable. Click around — and when a component
+              hooks you, it has its own deep dive: <strong>2.1</strong> embeddings &amp; positions,{' '}
+              <strong>2.2</strong> inside multi-head, <strong>2.3</strong> residuals &amp; norms,{' '}
+              <strong>2.4</strong> the FFN (in the sidebar, right under this module):
             </p>
           </>
         ),

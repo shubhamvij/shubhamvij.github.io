@@ -34,10 +34,24 @@ describe('Attention course through CourseShell', () => {
       for (const b of m.blocks) {
         if (b.kind === 'widget') used.add(b.widget)
       }
+      for (const sub of m.subchapters ?? []) {
+        for (const b of sub.blocks) {
+          if (b.kind === 'widget') used.add(b.widget)
+        }
+      }
     }
     for (const key of used) {
       expect(attentionCourse.widgets[key], `widget "${key}" missing from registry`).toBeDefined()
     }
+  })
+
+  it('module 2 exposes the four deep-dive subchapters', () => {
+    render(<CourseShell course={attentionCourse} />)
+    fireEvent.click(screen.getByRole('button', { name: /2\.1 Embeddings & positions/ }))
+    expect(screen.getByText('Position Lab')).toBeDefined()
+    expect(screen.getByText(/Module 2 · Deep dive 1 of 4/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /2\.4 The FFN/ }))
+    expect(screen.getByText('Parameter Budget Lab')).toBeDefined()
   })
 
   it('mask lab switches modes and reports pair counts', () => {
