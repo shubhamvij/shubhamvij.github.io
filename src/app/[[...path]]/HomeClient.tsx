@@ -114,7 +114,18 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
 
     // Open URL-specified window last so it gets highest z-index
     if (initialSection && WINDOW_TITLES[initialSection]) {
-      const geometry = initialSection === 'finance' ? { size: { width: 800, height: 640 } } : undefined
+      let geometry: { size: { width: number; height: number } } | undefined
+      if (initialSection === 'finance') {
+        geometry = { size: { width: 800, height: 640 } }
+      } else if (initialSection === 'blog' && initialSlug) {
+        // Deep links straight to a post get a reading-sized window (clamped to the viewport)
+        geometry = {
+          size: {
+            width: Math.max(500, Math.min(920, window.innerWidth - 120)),
+            height: Math.max(350, Math.min(680, window.innerHeight - 150)),
+          },
+        }
+      }
       openWindow(initialSection, WINDOW_TITLES[initialSection], geometry)
     } else if (shareCode) {
       openWindow('finance', WINDOW_TITLES['finance'], { size: { width: 800, height: 640 } })

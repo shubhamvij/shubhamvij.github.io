@@ -1,0 +1,688 @@
+/* Windows XP "Luna" study-guide theme. Beige chrome + white lesson paper, matching finance.module.css conventions. */
+
+.guide {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: Tahoma, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #000;
+  background: #ece9d8;
+  container-type: inline-size;
+}
+
+/* ---------- Top toolbar ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #aca899;
+  background: linear-gradient(180deg, #faf9f4 0%, #ece9d8 100%);
+  flex-shrink: 0;
+}
+.backLink {
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  color: #0b5fcc;
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.backLink:hover {
+  text-decoration: underline;
+}
+.toolbarTitle {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toolbarSpacer {
+  flex: 1;
+}
+.toolbarPct {
+  color: #444;
+  white-space: nowrap;
+}
+
+/* XP-style progress bar: sunken track, green blocks */
+.progressTrack {
+  width: 120px;
+  height: 13px;
+  border: 1px solid #686868;
+  border-color: #686868 #d4d0c8 #d4d0c8 #686868;
+  background: #fff;
+  padding: 1px;
+  flex-shrink: 0;
+}
+.progressFill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    #3be13b 0px,
+    #2fc42f 6px,
+    #2fc42f 8px,
+    transparent 8px,
+    transparent 10px
+  );
+  transition: width 300ms ease;
+}
+
+/* ---------- Body layout ---------- */
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.sidebar {
+  width: 198px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid #aca899;
+  background: #ece9d8;
+  padding: 6px 4px;
+}
+.sidebarHeading {
+  font-size: 10px;
+  font-weight: bold;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 6px 4px;
+}
+.moduleItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  padding: 5px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #000;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.moduleItem:hover {
+  background: #d8e3f5;
+  border-color: #7a96c8;
+}
+.moduleItemActive {
+  background: linear-gradient(180deg, #3a80e0 0%, #2b6fd0 100%);
+  border-color: #2b5fb0;
+  color: #fff;
+}
+.moduleItemActive .moduleMinutes {
+  color: #cfe0f8;
+}
+.moduleTick {
+  width: 14px;
+  flex-shrink: 0;
+  text-align: center;
+  color: #2f8e2f;
+  font-weight: bold;
+}
+.moduleItemActive .moduleTick {
+  color: #b7f0b7;
+}
+.moduleLabel {
+  flex: 1;
+  line-height: 1.25;
+}
+.moduleMinutes {
+  font-size: 9px;
+  color: #777;
+  white-space: nowrap;
+}
+
+/* Narrow-width module picker (shown via container query) */
+.narrowNav {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #aca899;
+  background: #ece9d8;
+}
+.narrowSelect {
+  flex: 1;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  padding: 3px 4px;
+  min-width: 0;
+}
+
+@container (max-width: 649px) {
+  .sidebar {
+    display: none;
+  }
+  .narrowNav {
+    display: flex;
+  }
+}
+
+/* ---------- Lesson pane ---------- */
+.lessonPane {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  background: #fff;
+}
+.lessonInner {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 18px 22px 40px;
+}
+@container (max-width: 649px) {
+  .lessonInner {
+    padding: 12px 12px 32px;
+  }
+}
+.lessonKicker {
+  font-size: 10px;
+  font-weight: bold;
+  color: #2b6fd0;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 2px;
+}
+.lessonTitle {
+  font-size: 21px;
+  font-weight: bold;
+  line-height: 1.2;
+  margin: 0 0 2px;
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+}
+.lessonSubtitle {
+  font-size: 12px;
+  color: #555;
+  margin: 0 0 14px;
+}
+
+/* ---------- Prose ---------- */
+.prose {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.prose p {
+  margin: 0 0 11px;
+}
+.prose a {
+  color: #0b5fcc;
+  text-decoration: underline;
+}
+.prose a:hover {
+  color: #063b85;
+}
+.prose strong {
+  font-weight: bold;
+}
+.prose code {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  background: #f4f2ea;
+  border: 1px solid #e0dcc8;
+  padding: 0 3px;
+}
+.prose ul,
+.prose ol {
+  margin: 0 0 11px;
+  padding-left: 22px;
+}
+.prose li {
+  margin-bottom: 4px;
+}
+.sectionHeading {
+  font-size: 15px;
+  font-weight: bold;
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+  margin: 20px 0 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #e4e0d0;
+}
+
+/* ---------- Callout (XP balloon) ---------- */
+.callout {
+  display: flex;
+  gap: 8px;
+  background: #ffffe1;
+  border: 1px solid #aca070;
+  border-radius: 3px;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.12);
+  padding: 8px 10px;
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.calloutIcon {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.calloutBody strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* ---------- Widget box (sunken well) ---------- */
+.widgetBox {
+  border: 1px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #f8f7f2;
+  margin: 4px 0 14px;
+}
+.widgetTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(180deg, #7ba2e0 0%, #5580c8 100%);
+  padding: 3px 8px;
+}
+.widgetHint {
+  font-weight: normal;
+  color: #e6eeff;
+  margin-left: auto;
+  font-size: 10px;
+  text-align: right;
+}
+.widgetBody {
+  padding: 10px;
+}
+
+/* ---------- Buttons (XP bevel) ---------- */
+.btn {
+  font-family: Tahoma, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #000;
+  background: #ece9d8;
+  border: 1px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  padding: 3px 12px;
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) {
+  background: #f4f2e8;
+}
+.btn:active:not(:disabled) {
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 #aca899, inset -1px -1px 0 #f6f4ec;
+}
+.btn:disabled {
+  color: #909090;
+  text-shadow: 1px 1px 0 #fff;
+  cursor: default;
+}
+.btnPrimary {
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(180deg, #4aa54a 0%, #2f8e2f 50%, #237223 100%);
+  border-color: #6fd06f #1a5e1a #1a5e1a #6fd06f;
+  font-weight: bold;
+}
+.btnPrimary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #57b857 0%, #349534 50%, #2a7e2a 100%);
+}
+.btnToggle {
+  composes: btn;
+}
+.btnToggleOn {
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 #aca899;
+  background: #f9f8f3;
+  font-weight: bold;
+}
+
+/* ---------- Quiz ---------- */
+.quiz {
+  margin: 4px 0 14px;
+}
+.quizQ {
+  border: 1px solid #aca899;
+  background: #ece9d8;
+  box-shadow: inset 1px 1px 0 #fff;
+  padding: 10px 12px 12px;
+  margin-bottom: 10px;
+}
+.quizPrompt {
+  font-size: 12.5px;
+  font-weight: bold;
+  line-height: 1.45;
+  margin: 0 0 8px;
+}
+.quizNum {
+  color: #2b6fd0;
+  margin-right: 4px;
+}
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  width: 100%;
+  text-align: left;
+  font-family: Tahoma, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  padding: 6px 9px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+.option:hover:not(:disabled) {
+  background: #e8f0fb;
+}
+.option:disabled {
+  cursor: default;
+}
+.optionKey {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #7f9db9;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  margin-top: 1px;
+}
+.optionCorrect {
+  background: #e3f6e3 !important;
+  border-color: #3d9a3d;
+}
+.optionCorrect .optionKey {
+  background: #3d9a3d;
+  border-color: #2a7e2a;
+  color: #fff;
+}
+.optionWrong {
+  background: #fbe7e4 !important;
+  border-color: #c86050;
+}
+.optionWrong .optionKey {
+  background: #c86050;
+  border-color: #a84030;
+  color: #fff;
+}
+.optionDim {
+  opacity: 0.65;
+}
+.feedback {
+  display: flex;
+  gap: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid;
+  padding: 7px 9px;
+  margin-top: 6px;
+}
+.feedbackCorrect {
+  background: #e3f6e3;
+  border-color: #3d9a3d;
+}
+.feedbackWrong {
+  background: #fff4d9;
+  border-color: #c8a030;
+}
+.feedbackIcon {
+  flex-shrink: 0;
+  font-weight: bold;
+}
+.tryAgain {
+  margin-top: 6px;
+}
+
+/* ---------- Labs (shared) ---------- */
+.labCanvas {
+  background: #fff;
+  border: 1px solid #7f9db9;
+  width: 100%;
+  display: block;
+}
+.labControls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.labNote {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.45;
+  margin-top: 7px;
+}
+.labStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fff;
+  border: 1px solid #aca899;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+.labStatValue {
+  font-weight: bold;
+  color: #0a246a;
+  font-variant-numeric: tabular-nums;
+}
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  min-width: 90px;
+  height: 4px;
+  background: linear-gradient(180deg, #9a9a9a, #d8d8d8);
+  border: 1px solid #808080;
+  border-radius: 2px;
+  outline: none;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 11px;
+  height: 21px;
+  background: linear-gradient(180deg, #f6f6f0 0%, #d8d4c8 100%);
+  border: 1px solid #707070;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.slider::-moz-range-thumb {
+  width: 11px;
+  height: 21px;
+  background: linear-gradient(180deg, #f6f6f0 0%, #d8d4c8 100%);
+  border: 1px solid #707070;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.sliderLabel {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* ---------- Paper shelf ---------- */
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 9px;
+}
+.chip {
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  background: #ece9d8;
+  border: 1px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  padding: 2px 9px;
+  cursor: pointer;
+}
+.chipOn {
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 #aca899;
+  background: #dce9f8;
+  font-weight: bold;
+}
+.paperGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@container (max-width: 649px) {
+  .paperGrid {
+    grid-template-columns: 1fr;
+  }
+}
+.paperCard {
+  background: #fff;
+  border: 1px solid #aca899;
+  padding: 8px 10px;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.paperName {
+  font-weight: bold;
+  font-size: 12px;
+}
+.paperName a {
+  color: #0b5fcc;
+  text-decoration: none;
+}
+.paperName a:hover {
+  text-decoration: underline;
+}
+.paperMeta {
+  color: #777;
+  font-size: 10.5px;
+  margin: 1px 0 4px;
+}
+.paperTag {
+  display: inline-block;
+  font-size: 9.5px;
+  font-weight: bold;
+  color: #0a246a;
+  background: #dce9f8;
+  border: 1px solid #9ab4d8;
+  border-radius: 2px;
+  padding: 0 5px;
+  margin-right: 4px;
+}
+
+/* ---------- Task matcher ---------- */
+.matchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid #aca899;
+  padding: 7px 9px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.matchPrompt {
+  flex: 1;
+  min-width: 180px;
+  line-height: 1.4;
+}
+.matchBtns {
+  display: flex;
+  gap: 4px;
+}
+.matchState {
+  width: 18px;
+  text-align: center;
+  font-weight: bold;
+}
+.matchStateOk {
+  color: #2f8e2f;
+}
+.matchStateNo {
+  color: #c8401f;
+}
+
+/* ---------- References ---------- */
+.refsBox {
+  border: 1px solid #aca899;
+  background: #f6f5ee;
+  box-shadow: inset 1px 1px 0 #fff;
+  padding: 9px 12px;
+  margin: 16px 0 4px;
+}
+.refsHeading {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #666;
+  margin: 0 0 6px;
+}
+.refItem {
+  display: flex;
+  gap: 6px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  margin-bottom: 5px;
+}
+.refBullet {
+  color: #2b6fd0;
+  flex-shrink: 0;
+}
+.refItem a {
+  color: #0b5fcc;
+  text-decoration: none;
+}
+.refItem a:hover {
+  text-decoration: underline;
+}
+.refNote {
+  color: #666;
+}
+
+/* ---------- Footer nav ---------- */
+.footerNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  padding-top: 12px;
+  border-top: 1px solid #e4e0d0;
+}
+.footerSpacer {
+  flex: 1;
+}
+.completeBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e3f6e3;
+  border: 1px solid #3d9a3d;
+  padding: 8px 10px;
+  font-size: 12px;
+  margin-top: 14px;
+}
+
+/* ---------- Message passing lab node/edge styling ---------- */
+.nodeCircle {
+  cursor: pointer;
+  transition: r 150ms ease;
+}
+.nodeCircle:hover {
+  stroke-width: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressFill,
+  .nodeCircle {
+    transition: none;
+  }
+}

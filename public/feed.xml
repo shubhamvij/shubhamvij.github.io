@@ -7,11 +7,11 @@
     <language>en-us</language>
     <atom:link href="https://shubhamvij.com/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
-      <title><![CDATA[Why Production GNN Recommenders Skip GNN Inference]]></title>
-      <link>https://shubhamvij.com/blog/real-time-inference-possible/</link>
-      <guid>https://shubhamvij.com/blog/real-time-inference-possible/</guid>
-      <pubDate>Sun, 08 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[The biggest open secret in graph-based recommendation systems: virtually every production GNN serves pre-computed embeddings, not live graph neural network inference.]]></description>
+      <title><![CDATA[Graph Foundation Models: An Interactive Study Guide]]></title>
+      <link>https://shubhamvij.com/blog/graph-foundation-models/</link>
+      <guid>https://shubhamvij.com/blog/graph-foundation-models/</guid>
+      <pubDate>Thu, 09 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A brilliant.org-style interactive course on Graph Foundation Models — message passing, the heterogeneity trilemma, the GFM zoo, and the billion-scale frontier. Seven modules with hands-on labs, quizzes, and 40+ referenced papers.]]></description>
     </item>
     <item>
       <title><![CDATA[Hello World]]></title>

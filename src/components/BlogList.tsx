@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, ComponentType } from 'react'
+import GfmStudyGuide from '@/components/gfm/GfmStudyGuide'
 
 interface PostMeta {
   slug: string
@@ -7,6 +8,13 @@ interface PostMeta {
   date: string
   description: string
   tags?: string[]
+  interactive?: string
+}
+
+// Posts flagged with `interactive: <key>` in their frontmatter render one of these
+// components instead of their markdown body (the markdown remains as a fallback).
+const INTERACTIVE_POSTS: Record<string, ComponentType<{ onBack?: () => void }>> = {
+  'gfm-study-guide': GfmStudyGuide,
 }
 
 interface BlogListProps {
@@ -62,6 +70,16 @@ export default function BlogList({ initialSlug, onNavigate, onOpenPost }: BlogLi
   if (loading) return <div className="p-4 text-gray-500" style={{ fontFamily: 'Tahoma, sans-serif' }}>Loading...</div>
 
   if (selectedPost) {
+    const Interactive = selectedPost.meta.interactive
+      ? INTERACTIVE_POSTS[selectedPost.meta.interactive]
+      : undefined
+    if (Interactive) {
+      return (
+        <div style={{ height: '100%' }}>
+          <Interactive onBack={goBackToList} />
+        </div>
+      )
+    }
     return (
       <div className="p-4" style={{ fontFamily: 'Tahoma, sans-serif' }}>
         <button

@@ -13,6 +13,8 @@ export interface BlogPostMeta {
   image?: string
   lastModified?: string
   readingTime?: number
+  /** Slug of a registered interactive component that renders in place of the markdown body. */
+  interactive?: string
 }
 
 function calculateReadingTime(content: string): number {
