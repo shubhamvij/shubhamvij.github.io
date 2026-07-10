@@ -763,3 +763,57 @@
   bottom: -2px;
   border-left: 1px dotted #8a98ab;
 }
+
+/* ---------- Block-diagram data-flow panel ---------- */
+.flowPanel {
+  margin-top: 8px;
+  border: 1px solid #aca899;
+  background: #fff;
+  padding: 8px 10px;
+}
+.flowTitle {
+  font-size: 10.5px;
+  font-weight: bold;
+  color: #0a246a;
+  margin: 0 0 6px;
+}
+.flowGrids {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.flowArrow {
+  font-size: 16px;
+  color: #555;
+}
+.vecGrid {
+  display: grid;
+  gap: 1px;
+  font-size: 8.5px;
+  font-family: Tahoma, sans-serif;
+}
+.vecCell {
+  min-width: 34px;
+  padding: 2px 3px;
+  text-align: right;
+  border: 1px solid #e2ddcc;
+}
+.vecTok {
+  min-width: 30px;
+  padding: 2px 4px;
+  color: #555;
+  text-align: right;
+  border: 1px solid transparent;
+}
+.flowShape {
+  font-size: 9.5px;
+  color: #666;
+  margin: 2px 0 0;
+}
+.flowNote {
+  font-size: 10.5px;
+  color: #333;
+  margin: 6px 0 0;
+  line-height: 1.4;
+}

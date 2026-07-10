@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import s from '../engine/course.module.css'
 
 interface Part {
@@ -23,6 +23,138 @@ const PARTS: Part[] = [
   { id: 'ffn', label: 'feed-forward network', x: 145, y: 52, w: 170, h: 30, color: '#fbe7d4', blurb: 'The computation step: a two-layer MLP (usually 4× wider than the model dimension) applied to each token independently — no token-to-token communication here. Roughly 2/3 of a transformer\'s parameters live in these layers; much of its stored "knowledge" does too. Deep dive: 2.4.' },
   { id: 'add2', label: '⊕ add (residual)', x: 155, y: 14, w: 130, h: 22, color: '#e3f6e3', blurb: 'Second residual add. Output shape = input shape, so blocks stack like LEGO: GPT-3 is 96 of these; a ViT is the same block over image patches; a graph transformer is the same block with attention restricted by a graph. Deep dive: 2.3.' },
 ]
+
+// ---------- A real forward pass through one pre-norm block ----------
+// 4 tokens, d=4, one attention head, d_ff=8, fixed weights, no biases, γ=1/β=0.
+// Computed once at module load; the panel below the diagram shows the numbers.
+const FLOW_TOKENS = ['The', 'cat', 'sat', 'here']
+const F_EMB = [
+  [0.2, -0.6, 0.4, 0.1],
+  [0.9, 0.3, -0.5, 0.7],
+  [-0.4, 0.8, 0.6, -0.2],
+  [0.5, -0.3, -0.7, -0.8],
+]
+const F_WQ = [[0.6, -0.3, 0.2, 0.5], [0.1, 0.7, -0.4, 0.2], [-0.5, 0.2, 0.6, -0.1], [0.3, 0.4, 0.1, -0.6]]
+const F_WK = [[0.5, 0.2, -0.6, 0.1], [-0.2, 0.6, 0.3, -0.4], [0.4, -0.1, 0.5, 0.3], [0.2, 0.5, -0.3, 0.6]]
+const F_WV = [[0.7, -0.2, 0.1, 0.4], [0.2, 0.5, -0.3, 0.1], [-0.3, 0.4, 0.6, 0.2], [0.1, -0.5, 0.2, 0.7]]
+const F_WO = [[0.5, 0.3, -0.2, 0.1], [-0.3, 0.6, 0.2, -0.1], [0.2, -0.4, 0.7, 0.3], [0.1, 0.2, -0.3, 0.6]]
+const F_W1 = [
+  [0.4, -0.2, 0.3, 0.1], [-0.3, 0.5, 0.2, -0.4], [0.2, 0.3, -0.5, 0.6], [0.6, -0.4, 0.1, 0.2],
+  [-0.1, 0.2, 0.4, -0.3], [0.3, 0.6, -0.2, -0.5], [-0.5, 0.1, 0.3, 0.4], [0.2, -0.3, 0.6, 0.1],
+]
+const F_W2 = [
+  [0.3, -0.2, 0.4, 0.1, -0.3, 0.2, 0.5, -0.1],
+  [-0.2, 0.4, 0.1, -0.5, 0.2, 0.3, -0.4, 0.6],
+  [0.5, 0.1, -0.3, 0.2, 0.4, -0.6, 0.1, 0.3],
+  [0.1, -0.4, 0.2, 0.3, -0.1, 0.5, 0.2, -0.2],
+]
+
+const fMatVec = (W: number[][], x: number[]) => W.map(row => row.reduce((acc, w, i) => acc + w * x[i], 0))
+const fLn = (v: number[]) => {
+  const m = v.reduce((a, b) => a + b, 0) / v.length
+  const sd = Math.sqrt(v.reduce((a, b) => a + (b - m) * (b - m), 0) / v.length + 1e-5)
+  return v.map(x => (x - m) / sd)
+}
+const fPe = (p: number) => [Math.sin(0.9 * p), Math.cos(0.9 * p), Math.sin(0.35 * p), Math.cos(0.35 * p)].map(v => v * 0.5)
+
+function blockForward() {
+  const x0 = F_EMB.map((e, p) => e.map((v, d) => v + fPe(p)[d]))
+  const x1 = x0.map(fLn)
+  const q = x1.map(v => fMatVec(F_WQ, v))
+  const k = x1.map(v => fMatVec(F_WK, v))
+  const vv = x1.map(v => fMatVec(F_WV, v))
+  const attnW = q.map(qi => {
+    const scores = k.map(kj => qi.reduce((acc, x, i2) => acc + x * kj[i2], 0) / 2)
+    const mx = Math.max(...scores)
+    const exps = scores.map(sc => Math.exp(sc - mx))
+    const sum = exps.reduce((a2, b2) => a2 + b2, 0)
+    return exps.map(e2 => e2 / sum)
+  })
+  const a = attnW.map(w => fMatVec(F_WO, vv[0].map((_, d) => w.reduce((acc, wj, j) => acc + wj * vv[j][d], 0))))
+  const x2 = x0.map((v, i2) => v.map((x, d) => x + a[i2][d]))
+  const x3 = x2.map(fLn)
+  const f = x3.map(v => fMatVec(F_W2, fMatVec(F_W1, v).map(h => Math.max(0, h))))
+  const out = x2.map((v, i2) => v.map((x, d) => x + f[i2][d]))
+  return { x0, x1, a, attnW, x2, x3, f, out }
+}
+const FLOW = blockForward()
+
+interface FlowStage {
+  before: number[][] | null // null = show token symbols
+  after: number[][]
+  beforeLabel: string
+  afterLabel: string
+  shape: string
+  note: string
+  weights?: number[][]
+}
+
+const FLOW_STAGES: Record<string, FlowStage> = {
+  embed: {
+    before: null, after: FLOW.x0, beforeLabel: 'tokens', afterLabel: 'embedding + position',
+    shape: 'tokens [4] → vectors [4×4]',
+    note: 'The only shape-changing step: symbols become d-dim vectors (embedding row + position vector). Everything after is [4×4] in, [4×4] out.',
+  },
+  ln1: {
+    before: FLOW.x0, after: FLOW.x1, beforeLabel: 'from embeddings', afterLabel: 'normalized',
+    shape: '[4×4] → [4×4]',
+    note: 'Each ROW is rescaled to mean 0, variance 1 — compare a row across the two grids. Per token, never across the batch.',
+  },
+  mha: {
+    before: FLOW.x1, after: FLOW.a, beforeLabel: 'normalized input', afterLabel: 'attention output (the edit)',
+    shape: '[4×4] → [4×4]', weights: FLOW.attnW,
+    note: 'The middle grid is the real attention pattern — row = query token, column = who it attends to, rows sum to 1. The output mixes value vectors by those weights.',
+  },
+  add1: {
+    before: FLOW.a, after: FLOW.x2, beforeLabel: 'attention edit', afterLabel: 'input + edit',
+    shape: '[4×4] + [4×4] → [4×4]',
+    note: 'The edit is ADDED to the untouched pre-norm input (the residual copy) — attention adjusts each token\'s vector, it never replaces it.',
+  },
+  ln2: {
+    before: FLOW.x2, after: FLOW.x3, beforeLabel: 'residual stream', afterLabel: 'normalized',
+    shape: '[4×4] → [4×4]',
+    note: 'Same normalization again before the FFN — each row back to mean 0, variance 1.',
+  },
+  ffn: {
+    before: FLOW.x3, after: FLOW.f, beforeLabel: 'normalized input', afterLabel: 'FFN output (the edit)',
+    shape: '4×4 → 4×8 → 4×4 (expand → nonlinearity → project back)',
+    note: 'Each row goes through the SAME two matrices independently — cover the other rows and nothing changes. No token sees any other token here.',
+  },
+  add2: {
+    before: FLOW.f, after: FLOW.out, beforeLabel: 'FFN edit', afterLabel: 'block output',
+    shape: '[4×4] + [4×4] → [4×4]',
+    note: 'Output shape = input shape, so the next block consumes this directly — stack 96 of them and you have a GPT.',
+  },
+}
+
+const flowColor = (v: number) => {
+  const t = Math.max(-1.6, Math.min(1.6, v)) / 1.6
+  return t >= 0
+    ? `rgb(${Math.round(255 - 55 * t)}, ${Math.round(255 - 144 * t)}, ${Math.round(255 - 231 * t)})`
+    : `rgb(${Math.round(255 + 212 * t)}, ${Math.round(255 + 144 * t)}, ${Math.round(255 + 47 * t)})`
+}
+
+function VecGrid({ label, data, weights }: { label: string; data: number[][] | null; weights?: boolean }) {
+  return (
+    <div>
+      <div className={s.vecGrid} style={{ gridTemplateColumns: `auto repeat(${data ? data[0].length : 1}, auto)` }}>
+        {FLOW_TOKENS.map((tok, i) => (
+          <Fragment key={`row${i}`}>
+            <span key={`t${i}`} className={s.vecTok}>{tok}</span>
+            {data
+              ? data[i].map((v, d) => (
+                  <span key={`${i}-${d}`} className={s.vecCell} style={{ background: weights ? flowColor(-v * 1.6) : flowColor(v) }}>
+                    {v.toFixed(2)}
+                  </span>
+                ))
+              : <span key={`s${i}`} className={s.vecCell}>&quot;{FLOW_TOKENS[i]}&quot;</span>}
+          </Fragment>
+        ))}
+      </div>
+      <p className={s.flowShape}>{label}</p>
+    </div>
+  )
+}
 
 export default function TransformerBlockDiagram() {
   const [selected, setSelected] = useState('mha')
@@ -77,6 +209,28 @@ export default function TransformerBlockDiagram() {
           <span className={s.feedbackIcon}>▸</span>
           <span><strong>{part.label}:</strong> {part.blurb}</span>
         </div>
+        {(() => {
+          const flow = FLOW_STAGES[selected]
+          if (!flow) return null
+          return (
+            <div className={s.flowPanel}>
+              <p className={s.flowTitle}>data through &quot;{part.label}&quot; — real numbers, computed live</p>
+              <div className={s.flowGrids}>
+                <VecGrid label={flow.beforeLabel} data={flow.before} />
+                <span className={s.flowArrow}>→</span>
+                {flow.weights && (
+                  <>
+                    <VecGrid label="attention weights (rows sum to 1)" data={flow.weights} weights />
+                    <span className={s.flowArrow}>→</span>
+                  </>
+                )}
+                <VecGrid label={flow.afterLabel} data={flow.after} />
+              </div>
+              <p className={s.flowShape}>{flow.shape}</p>
+              <p className={s.flowNote}>{flow.note}</p>
+            </div>
+          )
+        })()}
         <p className={s.labNote}>
           Read bottom-up. The pattern to internalize: <strong>attention communicates, the FFN computes,
           residuals + LayerNorm keep it all trainable</strong>. Every architecture in this course is this block

@@ -93,4 +93,13 @@ describe('Attention course through CourseShell', () => {
     const raw = window.localStorage.getItem('attention-course-progress-v1')
     expect(raw).toContain('am1-q1')
   })
+
+  it('block diagram shows shapes and data flowing through the selected component', () => {
+    render(<CourseShell course={attentionCourse} />)
+    fireEvent.click(screen.getByRole('button', { name: /2\. The transformer block/ }))
+    fireEvent.click(screen.getAllByText('feed-forward network')[0])
+    expect(screen.getByText(/4×4 → 4×8 → 4×4/)).toBeDefined()
+    fireEvent.click(screen.getAllByText('token embeddings + positions')[0])
+    expect(screen.getByText(/tokens \[4\] → vectors \[4×4\]/)).toBeDefined()
+  })
 })
