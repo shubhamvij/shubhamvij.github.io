@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import CoursewareShell from './CoursewareShell'
 import { invalidateCourseProgressCaches } from '@/components/courses/engine/progress'
+import { COURSE_CATALOG } from '@/lib/courseCatalog'
 
 beforeEach(() => {
   const store = new Map<string, string>()
@@ -45,10 +46,16 @@ describe('CoursewareShell', () => {
   it('lists both courses in the library with their meta', () => {
     render(<Harness />)
     skipBoot()
-    expect(screen.getByText('Graph Foundation Models')).toBeDefined()
-    expect(screen.getByText('Attention, Everywhere')).toBeDefined()
-    expect(screen.getByText(/7 modules · ~66 min/)).toBeDefined()
-    expect(screen.getByText(/7 modules · ~64 min/)).toBeDefined()
+    // Assert against COURSE_CATALOG itself, not copied-in numbers: the
+    // attention course's minutes/highlights change repeatedly as deep-dive
+    // subchapters land, and a hardcoded string here would break every time.
+    for (const course of COURSE_CATALOG) {
+      expect(screen.getByText(course.title)).toBeDefined()
+      expect(
+        screen.getByText(`${course.modules} modules · ~${course.minutes} min`, { exact: false })
+      ).toBeDefined()
+      expect(screen.getByText(course.highlights, { exact: false })).toBeDefined()
+    }
     expect(screen.getByText(/More titles in production/)).toBeDefined()
   })
 
