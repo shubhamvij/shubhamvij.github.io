@@ -209,7 +209,7 @@ attention: Q(KᵀV) associativity, O(n), quality cost). Refs: Longformer,
 BigBird, Mistral-7B, linear attention.
 
 Catalog effects: minutes 89 → 106 (module 3: 9→8, +18 subchapters);
-highlights → "13 interactive labs · 7 deep dives". Moved quiz ids keep
+highlights → "14 interactive labs · 7 deep dives". Moved quiz ids keep
 their original strings so existing readers' saved answers stay valid.
 
 ## Data-flow panel in the block diagram (user addition, 2026-07-09)
@@ -237,8 +237,9 @@ Every stage's output shape equals its input shape — the panel makes the
   `order-blind`, `position-lab`, `head-matrix`, `residual-stream`,
   `param-budget` — one component file each (2.1 uses two of them).
 - `courseCatalog.ts`: `modules` stays 7 (top-level count); `minutes`
-  64 → 89 (+7+6+6+6); `highlights` "6 interactive labs" → "10 interactive
-  labs".
+  64 → 89 (+7+6+6+6); `highlights` "6 interactive labs" → "11 interactive
+  labs · 4 deep dives" (the module-3 rework later takes both to their final
+  values: 106 min, 14 labs · 7 deep dives).
 
 ## Testing
 
