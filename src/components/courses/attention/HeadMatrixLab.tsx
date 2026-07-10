@@ -87,7 +87,7 @@ export default function HeadMatrixLab() {
         </div>
         <p className={s.labNote}>
           Drag <strong>h</strong>: d_head shrinks but the parameter count doesn&apos;t move — heads are a{' '}
-          <strong>slicing</strong> of the same four ${'{'}d×d{'}'} matrices (W_Q, W_K, W_V, W_O), trading subspace
+          <strong>slicing</strong> of the same four d×d matrices (W_Q, W_K, W_V, W_O), trading subspace
           size for pattern count. Drag <strong>g</strong> below h and you&apos;ve invented GQA: fewer K/V heads
           shared across query heads, shrinking the KV cache that dominates decoding memory — the story module 3
           picks up.
