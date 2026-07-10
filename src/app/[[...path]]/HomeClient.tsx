@@ -11,6 +11,7 @@ import SleepOverlay from '@/components/SleepOverlay'
 import DisplayProperties from '@/components/DisplayProperties'
 import { useWindowManager } from '@/lib/useWindowManager'
 import { useIdleTimer } from '@/lib/useIdleTimer'
+import { initSounds, requestStartupChime, playSound, soundForWindowAction } from '@/lib/sounds'
 import { getOpenWindows, setOpenWindows } from '@/lib/windowCookies'
 import BlogList from '@/components/BlogList'
 import ResumeViewer from '@/components/ResumeViewer'
@@ -80,6 +81,12 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
     if (savedTimeout) setIdleTimeout(parseInt(savedTimeout, 10))
   }, [])
 
+  // Unlock audio on the first user gesture; chime when the desktop appears.
+  useEffect(() => initSounds(), [])
+  useEffect(() => {
+    if (phase === 'desktop') requestStartupChime()
+  }, [phase])
+
   const updateScreenSaverSettings = useCallback((id: string, timeout: number) => {
     setScreenSaverId(id)
     setIdleTimeout(timeout)
@@ -88,6 +95,7 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
   }, [])
 
   const handleSleep = useCallback(() => {
+    playSound('sleep')
     setStartMenuOpen(false)
     setSleeping(true)
   }, [])
@@ -168,12 +176,15 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
     const geometry = id === 'finance'
       ? { size: { width: 800, height: 640 } }
       : id === 'learn' ? readingGeometry() : undefined
+    const sound = soundForWindowAction(windows.find(w => w.id === id))
+    if (sound) playSound(sound)
     openWindow(id, title, geometry)
     if (id !== 'blog') setBlogSlug(null)
     syncUrl(id, id === 'learn' ? learnSlug : undefined)
-  }, [openWindow, syncUrl, learnSlug])
+  }, [openWindow, syncUrl, learnSlug, windows])
 
   const doCloseWindow = useCallback((id: string) => {
+    playSound('closeWindow')
     closeWindow(id)
     if ((ROUTABLE_SECTIONS as readonly string[]).includes(id)) {
       const remaining = windows.filter(w => w.id !== id && (ROUTABLE_SECTIONS as readonly string[]).includes(w.id))
@@ -224,15 +235,37 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
     window.history.replaceState(null, '', path)
   }, [])
 
+  // Site-internal links inside window content (e.g. a blog post's "Launch the course")
+  // open the target window in place instead of reloading the whole desktop.
+  const handleInternalNavigate = useCallback((path: string) => {
+    const segments = path.split('/').filter(Boolean)
+    const { section, slug } = parsePathSegments(segments.length > 0 ? segments : undefined)
+    if (!section || !WINDOW_TITLES[section]) return
+    if (section === 'learn') {
+      setLearnSlug(slug)
+    } else if (section === 'blog') {
+      setBlogSlug(slug)
+    }
+    const geometry = section === 'learn'
+      ? readingGeometry()
+      : section === 'finance' ? { size: { width: 800, height: 640 } } : undefined
+    const sound = soundForWindowAction(windows.find(w => w.id === section))
+    if (sound) playSound(sound)
+    openWindow(section, WINDOW_TITLES[section], geometry)
+    window.history.pushState(null, '', slug ? `/${section}/${slug}` : `/${section}`)
+  }, [openWindow, windows])
+
   const handleTaskbarWindowClick = useCallback((id: string) => {
     const win = windows.find(w => w.id === id)
     if (!win) return
 
     if (win.isMinimized) {
+      playSound('restore')
       openWindow(id, win.title)
     } else {
       const maxZ = Math.max(...windows.map(w => w.zIndex))
       if (win.zIndex === maxZ) {
+        playSound('minimize')
         minimizeWindow(id)
       } else {
         focusWindow(id)
@@ -269,7 +302,7 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
 
   function getWindowContent(id: string) {
     switch (id) {
-      case 'blog': return <BlogList initialSlug={blogSlug} onNavigate={handleBlogNavigate} />
+      case 'blog': return <BlogList initialSlug={blogSlug} onNavigate={handleBlogNavigate} onInternalNavigate={handleInternalNavigate} />
       case 'learn': return <CoursewareShell slug={learnSlug} onNavigate={handleLearnNavigate} />
       case 'resume': return <ResumeViewer />
       case 'research': return <ScholarFeed />
@@ -314,8 +347,8 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
                 state={w}
                 onClose={() => handleCloseWindow(w.id)}
                 onFocus={() => handleFocusWindow(w.id)}
-                onMinimize={() => minimizeWindow(w.id)}
-                onToggleMaximize={() => toggleMaximize(w.id)}
+                onMinimize={() => { playSound('minimize'); minimizeWindow(w.id) }}
+                onToggleMaximize={() => { playSound(w.isMaximized ? 'minimize' : 'restore'); toggleMaximize(w.id) }}
                 onUpdateGeometry={(pos, size) => updateWindowGeometry(w.id, pos, size)}
               >
                 {getWindowContent(w.id)}
@@ -331,7 +364,10 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
           />
           <Taskbar
             windows={windows}
-            onStartClick={() => setStartMenuOpen(prev => !prev)}
+            onStartClick={() => {
+              if (!startMenuOpen) playSound('menuPop')
+              setStartMenuOpen(!startMenuOpen)
+            }}
             onWindowClick={handleTaskbarWindowClick}
             startMenuOpen={startMenuOpen}
           />

@@ -1,6 +1,7 @@
 'use client'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { SocialLink } from '@/lib/social'
+import { playSound } from '@/lib/sounds'
 
 interface StartMenuProps {
   isOpen: boolean
@@ -60,6 +61,7 @@ export default function StartMenu({ isOpen, onClose, onNavigate, onSleep, social
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => playSound('click')}
                   className="block px-3 py-1.5 hover:bg-blue-600 hover:text-white text-xs"
                   style={{ fontFamily: 'Tahoma, sans-serif' }}
                 >

@@ -1,6 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import s from './learn.module.css'
+import { playCdInsert, playVijcartaJingle } from '@/lib/sounds'
 
 const CAPTIONS = [
   'Loading multimedia database…',
@@ -40,6 +41,7 @@ function Globe() {
 export default function BootSplash({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState<'insert' | 'splash'>('insert')
   const [caption, setCaption] = useState(0)
+  const soundStops = useRef<Array<() => void>>([])
 
   useEffect(() => {
     const timers = [
@@ -50,6 +52,18 @@ export default function BootSplash({ onDone }: { onDone: () => void }) {
     ]
     return () => timers.forEach(clearTimeout)
   }, [onDone])
+
+  // CD-ROM spin-up under the autorun screen; skipping unmounts us and cuts audio.
+  useEffect(() => {
+    soundStops.current.push(playCdInsert())
+    const stops = soundStops.current
+    return () => stops.forEach(stop => stop())
+  }, [])
+
+  // Encarta-style jingle as the splash appears (the drive tail rings under it).
+  useEffect(() => {
+    if (phase === 'splash') soundStops.current.push(playVijcartaJingle())
+  }, [phase])
 
   if (phase === 'insert') {
     return (

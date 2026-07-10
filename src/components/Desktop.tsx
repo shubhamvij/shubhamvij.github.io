@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react'
 import DesktopIcon from './DesktopIcon'
 import DesktopContextMenu from './DesktopContextMenu'
 import { useMobile } from '@/lib/useMobile'
+import { playSound } from '@/lib/sounds'
 import type { SocialLink } from '@/lib/social'
 
 interface DesktopProps {
@@ -55,7 +56,7 @@ export default function Desktop({ onOpenWindow, onOpenDisplayProperties, socialL
               icon={link.icon}
               label={link.label}
               isExternal
-              onDoubleClick={() => window.open(link.href, '_blank')}
+              onDoubleClick={() => { playSound('click'); window.open(link.href, '_blank') }}
             />
           ))}
         </div>

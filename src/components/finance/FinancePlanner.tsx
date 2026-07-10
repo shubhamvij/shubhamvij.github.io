@@ -9,6 +9,7 @@ import { getSavedPlanCode, setSavedPlanCode } from '@/lib/finance/financeCookies
 import InputsPanel from './InputsPanel'
 import ResultsPanel from './ResultsPanel'
 import ShareDialog from './ShareDialog'
+import { playSound } from '@/lib/sounds'
 
 interface Props {
   initialCode?: string | null
@@ -34,6 +35,11 @@ export default function FinancePlanner({ initialCode, onClose, registerCloseGuar
   useEffect(() => {
     dirtyRef.current = dirty
   }, [dirty])
+
+  // XP exclamation when the unsaved-changes dialog pops up.
+  useEffect(() => {
+    if (unsavedOpen) playSound('error')
+  }, [unsavedOpen])
 
   // Load from ?s= (priority) then cookie, once after mount; record that snapshot as the saved baseline.
   useEffect(() => {
