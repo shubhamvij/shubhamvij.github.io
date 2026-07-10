@@ -17,6 +17,7 @@ import ResumeViewer from '@/components/ResumeViewer'
 import ScholarFeed from '@/components/ScholarFeed'
 import AboutContent from '@/components/AboutContent'
 import FinancePlanner from '@/components/finance/FinancePlanner'
+import CoursewareShell from '@/components/learn/CoursewareShell'
 import type { SocialLink } from '@/lib/social'
 
 const WINDOW_TITLES: Record<string, string> = {
@@ -25,10 +26,21 @@ const WINDOW_TITLES: Record<string, string> = {
   research: 'Research - Papers & Patents',
   about: 'About - Shubham Vij',
   finance: 'Finance Planner - Calculator',
+  learn: "Vijcarta '26 - Interactive Courseware",
   'display-properties': 'Display Properties',
 }
 
-const ROUTABLE_SECTIONS = ['blog', 'resume', 'research', 'finance'] as const
+const ROUTABLE_SECTIONS = ['blog', 'resume', 'research', 'finance', 'learn'] as const
+
+// Courseware and blog reading both want a roomier window than the 500x350 default.
+function readingGeometry() {
+  return {
+    size: {
+      width: Math.max(500, Math.min(920, window.innerWidth - 120)),
+      height: Math.max(350, Math.min(680, window.innerHeight - 150)),
+    },
+  }
+}
 
 function parsePathSegments(path?: string[]): { section: string | null; slug: string | null } {
   if (!path || path.length === 0) return { section: null, slug: null }
@@ -51,7 +63,8 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
   const [phase, setPhase] = useState<'boot' | 'desktop'>(isDeepLink ? 'desktop' : 'boot')
   const [startMenuOpen, setStartMenuOpen] = useState(false)
   const [sleeping, setSleeping] = useState(false)
-  const [blogSlug, setBlogSlug] = useState<string | null>(initialSlug)
+  const [blogSlug, setBlogSlug] = useState<string | null>(initialSection === 'blog' ? initialSlug : null)
+  const [learnSlug, setLearnSlug] = useState<string | null>(initialSection === 'learn' ? initialSlug : null)
   const [financeShareCode, setFinanceShareCode] = useState<string | null>(null)
   const suppressUrlSync = useRef(false)
   const closeGuardsRef = useRef<Record<string, (() => boolean) | null>>({})
@@ -117,14 +130,9 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
       let geometry: { size: { width: number; height: number } } | undefined
       if (initialSection === 'finance') {
         geometry = { size: { width: 800, height: 640 } }
-      } else if (initialSection === 'blog' && initialSlug) {
-        // Deep links straight to a post get a reading-sized window (clamped to the viewport)
-        geometry = {
-          size: {
-            width: Math.max(500, Math.min(920, window.innerWidth - 120)),
-            height: Math.max(350, Math.min(680, window.innerHeight - 150)),
-          },
-        }
+      } else if (initialSection === 'learn' || (initialSection === 'blog' && initialSlug)) {
+        // Deep links to courseware or straight to a post get a reading-sized window
+        geometry = readingGeometry()
       }
       openWindow(initialSection, WINDOW_TITLES[initialSection], geometry)
     } else if (shareCode) {
@@ -157,10 +165,13 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
 
   const handleOpenWindow = useCallback((id: string) => {
     const title = WINDOW_TITLES[id] || id
-    openWindow(id, title, id === 'finance' ? { size: { width: 800, height: 640 } } : undefined)
+    const geometry = id === 'finance'
+      ? { size: { width: 800, height: 640 } }
+      : id === 'learn' ? readingGeometry() : undefined
+    openWindow(id, title, geometry)
     if (id !== 'blog') setBlogSlug(null)
-    syncUrl(id)
-  }, [openWindow, syncUrl])
+    syncUrl(id, id === 'learn' ? learnSlug : undefined)
+  }, [openWindow, syncUrl, learnSlug])
 
   const doCloseWindow = useCallback((id: string) => {
     closeWindow(id)
@@ -174,6 +185,7 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
       }
     }
     if (id === 'blog') setBlogSlug(null)
+    if (id === 'learn') setLearnSlug(null)
   }, [closeWindow, windows])
 
   // A window's content can register a guard (e.g. unsaved changes) that intercepts the close.
@@ -193,14 +205,22 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
     focusWindow(id)
     if (id === 'blog') {
       syncUrl(id, blogSlug)
+    } else if (id === 'learn') {
+      syncUrl(id, learnSlug)
     } else {
       syncUrl(id)
     }
-  }, [focusWindow, syncUrl, blogSlug])
+  }, [focusWindow, syncUrl, blogSlug, learnSlug])
 
   const handleBlogNavigate = useCallback((slug: string | null) => {
     setBlogSlug(slug)
     const path = slug ? `/blog/${slug}` : '/blog'
+    window.history.replaceState(null, '', path)
+  }, [])
+
+  const handleLearnNavigate = useCallback((slug: string | null) => {
+    setLearnSlug(slug)
+    const path = slug ? `/learn/${slug}` : '/learn'
     window.history.replaceState(null, '', path)
   }, [])
 
@@ -235,6 +255,8 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
         openWindow(section, WINDOW_TITLES[section])
         if (section === 'blog') {
           setBlogSlug(slug)
+        } else if (section === 'learn') {
+          setLearnSlug(slug)
         }
       }
 
@@ -248,6 +270,7 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
   function getWindowContent(id: string) {
     switch (id) {
       case 'blog': return <BlogList initialSlug={blogSlug} onNavigate={handleBlogNavigate} />
+      case 'learn': return <CoursewareShell slug={learnSlug} onNavigate={handleLearnNavigate} />
       case 'resume': return <ResumeViewer />
       case 'research': return <ScholarFeed />
       case 'about': return <AboutContent />

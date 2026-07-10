@@ -1,6 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, ComponentType } from 'react'
-import GfmStudyGuide from '@/components/gfm/GfmStudyGuide'
+import { useState, useEffect, useRef } from 'react'
 
 interface PostMeta {
   slug: string
@@ -8,13 +7,6 @@ interface PostMeta {
   date: string
   description: string
   tags?: string[]
-  interactive?: string
-}
-
-// Posts flagged with `interactive: <key>` in their frontmatter render one of these
-// components instead of their markdown body (the markdown remains as a fallback).
-const INTERACTIVE_POSTS: Record<string, ComponentType<{ onBack?: () => void }>> = {
-  'gfm-study-guide': GfmStudyGuide,
 }
 
 interface BlogListProps {
@@ -70,16 +62,6 @@ export default function BlogList({ initialSlug, onNavigate, onOpenPost }: BlogLi
   if (loading) return <div className="p-4 text-gray-500" style={{ fontFamily: 'Tahoma, sans-serif' }}>Loading...</div>
 
   if (selectedPost) {
-    const Interactive = selectedPost.meta.interactive
-      ? INTERACTIVE_POSTS[selectedPost.meta.interactive]
-      : undefined
-    if (Interactive) {
-      return (
-        <div style={{ height: '100%' }}>
-          <Interactive onBack={goBackToList} />
-        </div>
-      )
-    }
     return (
       <div className="p-4" style={{ fontFamily: 'Tahoma, sans-serif' }}>
         <button
@@ -123,6 +105,12 @@ function renderMarkdown(md: string): string {
     .replace(/^### (.*$)/gim, '<h3 class="text-base font-bold mt-4 mb-2">$1</h3>')
     .replace(/^## (.*$)/gim, '<h2 class="text-lg font-bold mt-4 mb-2">$1</h2>')
     .replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold mt-4 mb-2">$1</h1>')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_match, text, href) => {
+      // Internal links navigate the site in the same tab; external ones open a new tab.
+      const external = /^https?:\/\//.test(href)
+      const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : ''
+      return `<a href="${href}" class="text-blue-700 underline hover:text-blue-900"${attrs}>${text}</a>`
+    })
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-gray-900 text-green-400 p-3 rounded my-3 text-xs overflow-x-auto"><code>$2</code></pre>')

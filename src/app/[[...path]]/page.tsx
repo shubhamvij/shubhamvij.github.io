@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getSocialLinks } from '@/lib/social'
 import { getSettings } from '@/lib/settings'
 import { getAllPosts, getPostBySlug } from '@/lib/blog'
+import { COURSE_CATALOG } from '@/lib/courseCatalog'
 import { JsonLd } from '@/components/JsonLd'
 import HomeClient from './HomeClient'
 
@@ -35,6 +36,11 @@ const PAGE_META: Record<string, { title: string; description: string; keywords: 
     description: 'A retro Windows XP-themed retirement & paycheck planner — estimate take-home pay (federal, FICA, and state tax) and see how long until you hit your retirement target.',
     keywords: ['retirement calculator', 'paycheck calculator', 'finance planner', 'FIRE calculator', 'take-home pay', 'tax calculator'],
   },
+  learn: {
+    title: `Vijcarta Courseware | ${SITE_NAME}`,
+    description: "Vijcarta '26 — an Encarta-style interactive courseware library. Free, self-paced courses on machine learning topics with hands-on labs and quizzes.",
+    keywords: ['interactive courses', 'machine learning', 'courseware', 'study guide', 'Encarta', 'graph neural networks', 'transformers'],
+  },
 }
 
 export function generateStaticParams() {
@@ -46,7 +52,9 @@ export function generateStaticParams() {
     { path: ['research'] },
     { path: ['about'] },
     { path: ['finance'] },
+    { path: ['learn'] },
     ...posts.map(p => ({ path: ['blog', p.slug] })),
+    ...COURSE_CATALOG.map(c => ({ path: ['learn', c.slug] })),
   ]
 }
 
@@ -118,6 +126,36 @@ export async function generateMetadata({
     } catch {
       return { title: SITE_NAME }
     }
+  }
+
+  // Course page: /learn/{slug}
+  if (section === 'learn' && path.length > 1) {
+    const course = COURSE_CATALOG.find(c => c.slug === path[1])
+    if (course) {
+      const title = `${course.title} — Interactive Course | ${SITE_NAME}`
+      return {
+        title,
+        description: course.description,
+        keywords: ['interactive course', 'machine learning', course.title],
+        alternates: { canonical: `${BASE_URL}/learn/${course.slug}/` },
+        openGraph: {
+          title,
+          description: course.description,
+          url: `${BASE_URL}/learn/${course.slug}/`,
+          siteName: SITE_NAME,
+          locale: 'en_US',
+          type: 'website',
+          images: [{ url: DEFAULT_IMAGE, width: 800, height: 800, alt: SITE_NAME }],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title,
+          description: course.description,
+          images: [DEFAULT_IMAGE],
+        },
+      }
+    }
+    return { title: SITE_NAME }
   }
 
   // Static section pages
@@ -203,6 +241,23 @@ function buildJsonLd(pathSegments: string[] | undefined) {
     } catch {
       return []
     }
+  }
+
+  // Course page
+  if (section === 'learn' && pathSegments.length > 1) {
+    const course = COURSE_CATALOG.find(c => c.slug === pathSegments[1])
+    if (!course) return []
+    return [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Course',
+        name: course.title,
+        description: course.description,
+        url: `${BASE_URL}/learn/${course.slug}/`,
+        provider: { '@type': 'Person', name: SITE_NAME, url: BASE_URL },
+        isAccessibleForFree: true,
+      },
+    ]
   }
 
   // About page

@@ -1,6 +1,6 @@
 'use client'
 import { useMemo, useState } from 'react'
-import s from './gfm.module.css'
+import s from '../engine/course.module.css'
 
 // Joint scaling law L(N, D) = L_inf + (Nc/N)^aN + (Dc/D)^aD using the exponents
 // GraphBFF (arXiv:2602.04768) fits for heterogeneous-graph pretraining:
@@ -135,20 +135,26 @@ export default function ScalingLab({ initialView = 'laws' }: { initialView?: 'la
 
         {view === 'gap' && (
           <>
-            <svg viewBox="0 0 340 150" className={s.labCanvas} role="img" aria-label="Bar chart comparing public data across modalities">
-              {DATA_BARS.map((bar, i) => {
-                const y = 8 + i * 23
-                const width = Math.max(6, ((bar.log - 3.5) / (13.5 - 3.5)) * 205)
-                return (
-                  <g key={bar.label}>
-                    <rect x={125} y={y} width={width} height={11} fill={bar.color} opacity={0.85} />
-                    <text x={122} y={y + 9} fontSize={8.2} textAnchor="end" fill="#333">{bar.label}</text>
-                    <text x={128 + width} y={y + 9} fontSize={8} fill="#555">{bar.sub}</text>
-                  </g>
-                )
-              })}
-              <text x={125} y={147} fontSize={8} fill="#888">bar length = log scale — each step is 10×</text>
-            </svg>
+            <div className={s.gapChart} role="img" aria-label="Bar chart comparing public data across modalities">
+              {DATA_BARS.map(bar => (
+                <div key={bar.label} className={s.gapRow}>
+                  <div className={s.gapLabel}>
+                    <strong>{bar.label}</strong>
+                    <span className={s.gapSub}>{bar.sub}</span>
+                  </div>
+                  <div className={s.gapTrack}>
+                    <div
+                      className={s.gapFill}
+                      style={{
+                        width: `${Math.max(3, ((bar.log - 3.5) / (13.5 - 3.5)) * 100)}%`,
+                        background: bar.color,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+              <div className={s.gapAxis}>bar length = log scale — each step is another 10×</div>
+            </div>
             <p className={s.labNote}>
               Tokens, image-text pairs, and edges aren&apos;t directly comparable units — but the <em>orders of
               magnitude</em> are the story. Public text corpora are ~10,000× larger than the biggest public graph

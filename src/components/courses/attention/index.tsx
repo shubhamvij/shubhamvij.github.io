@@ -1,0 +1,28 @@
+import type { CourseDefinition } from '../engine/types'
+import { MODULES, COURSE_TITLE, COURSE_TAGLINE } from './content'
+import AttentionLab from './AttentionLab'
+import MultiHeadLab from './MultiHeadLab'
+import TransformerBlockDiagram from './TransformerBlockDiagram'
+import AttentionMaskLab from './AttentionMaskLab'
+import PatchifyLab from './PatchifyLab'
+import TypedAttentionLab from './TypedAttentionLab'
+
+const MaskEfficiency = () => <AttentionMaskLab emphasis="efficiency" />
+const MaskGraphs = () => <AttentionMaskLab emphasis="graphs" />
+
+export const attentionCourse: CourseDefinition = {
+  id: 'attention-mechanisms',
+  title: COURSE_TITLE,
+  tagline: COURSE_TAGLINE,
+  storageKey: 'attention-course-progress-v1',
+  modules: MODULES,
+  widgets: {
+    'attention-lab': AttentionLab,
+    'multi-head': MultiHeadLab,
+    'block-diagram': TransformerBlockDiagram,
+    'mask-lab-efficiency': MaskEfficiency,
+    'mask-lab-graphs': MaskGraphs,
+    'patchify': PatchifyLab,
+    'typed-attention': TypedAttentionLab,
+  },
+}

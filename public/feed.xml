@@ -7,11 +7,18 @@
     <language>en-us</language>
     <atom:link href="https://shubhamvij.com/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
-      <title><![CDATA[Graph Foundation Models: An Interactive Study Guide]]></title>
+      <title><![CDATA[Attention, Everywhere: One Mechanism from GPT to Graph Transformers]]></title>
+      <link>https://shubhamvij.com/blog/attention-everywhere/</link>
+      <guid>https://shubhamvij.com/blog/attention-everywhere/</guid>
+      <pubDate>Thu, 09 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Multi-head attention, vision transformers, FlashAttention/GQA/MLA, and typed graph attention (HGT, GraphBFF) are one idea in different wiring. Summary of my interactive attention course.]]></description>
+    </item>
+    <item>
+      <title><![CDATA[Graph Foundation Models, in Seven Ideas]]></title>
       <link>https://shubhamvij.com/blog/graph-foundation-models/</link>
       <guid>https://shubhamvij.com/blog/graph-foundation-models/</guid>
       <pubDate>Thu, 09 Jul 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[A brilliant.org-style interactive course on Graph Foundation Models — message passing, the heterogeneity trilemma, the GFM zoo, and the billion-scale frontier. Seven modules with hands-on labs, quizzes, and 40+ referenced papers.]]></description>
+      <description><![CDATA[Why there's no GPT for graphs yet, what the field is doing about it, and the billion-scale result that suggests the LLM playbook runs on graphs. Summary of my interactive GFM course.]]></description>
     </item>
     <item>
       <title><![CDATA[Hello World]]></title>

@@ -3,6 +3,7 @@ import path from 'path'
 import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
 import { getAllPosts, getPostBySlug } from '../src/lib/blog'
+import { COURSE_CATALOG } from '../src/lib/courseCatalog'
 import { getScholarPublications } from '../src/lib/scholar'
 
 const PUBLIC_DATA = path.join(process.cwd(), 'public', 'data')
@@ -24,6 +25,7 @@ function generateSitemap() {
     { url: '/research/', priority: '0.7', changefreq: 'monthly' },
     { url: '/about/', priority: '0.6', changefreq: 'monthly' },
     { url: '/finance/', priority: '0.7', changefreq: 'monthly' },
+    { url: '/learn/', priority: '0.8', changefreq: 'monthly' },
   ]
 
   const blogPages = posts.map(p => ({
@@ -33,7 +35,13 @@ function generateSitemap() {
     lastmod: p.lastModified || p.date,
   }))
 
-  const entries = [...staticPages, ...blogPages]
+  const coursePages = COURSE_CATALOG.map(c => ({
+    url: `/learn/${c.slug}/`,
+    priority: '0.8',
+    changefreq: 'monthly' as const,
+  }))
+
+  const entries = [...staticPages, ...blogPages, ...coursePages]
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries.map(e => `  <url>

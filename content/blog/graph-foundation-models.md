@@ -1,111 +1,42 @@
 ---
-title: "Graph Foundation Models: An Interactive Study Guide"
+title: "Graph Foundation Models, in Seven Ideas"
 date: "2026-07-09"
-description: "A brilliant.org-style interactive course on Graph Foundation Models — message passing, the heterogeneity trilemma, the GFM zoo, and the billion-scale frontier. Seven modules with hands-on labs, quizzes, and 40+ referenced papers."
-tags: ["graph neural networks", "foundation models", "GNN", "machine learning", "GFM", "interactive", "study guide"]
-interactive: "gfm-study-guide"
+description: "Why there's no GPT for graphs yet, what the field is doing about it, and the billion-scale result that suggests the LLM playbook runs on graphs. Summary of my interactive GFM course."
+tags: ["graph neural networks", "foundation models", "GNN", "machine learning", "GFM"]
 ---
 
-# Graph Foundation Models: An Interactive Study Guide
+**TL;DR:** Language and vision got foundation models; graphs mostly haven't. The blockers are a missing shared vocabulary (three kinds of heterogeneity) and a missing public data ocean. The field is running four competing bets to fix the first, and industrial relational data looks like the fix for the second — with a 2026 Meta paper showing clean LLM-style scaling laws once you have billions of edges.
 
-This post is an interactive study guide — open it on the site to get the hands-on
-labs, quizzes, and progress tracking. The outline and reading list below are the
-static version of the same material.
+**This post is the summary version.** The full interactive course — hands-on labs, quizzes, progress tracking, and 46 referenced papers — runs in the [Vijcarta '26 courseware](/learn/graph-foundation-models) on this site.
 
-## Module 1 — Graphs are everywhere
+**[▸ Launch the course](/learn/graph-foundation-models)**
 
-Nodes, edges, features, and types. Molecules, social and payment networks,
-citation graphs, knowledge graphs, road networks, computation graphs — and the
-observation that every relational database is a temporal heterogeneous graph
-(rows are nodes, foreign keys are edges). Sequences and grids are special-case
-graphs, which is why LLMs and ViTs can be seen as foundation models over trivial
-topologies.
+## 1. Half the world's data is secretly a graph
 
-- A Gentle Introduction to Graph Neural Networks (Distill, 2021): https://distill.pub/2021/gnn-intro/
-- Stanford CS224W: https://web.stanford.edu/class/cs224w/
-- Geometric Deep Learning proto-book: https://geometricdeeplearning.com
+Molecules, social and payment networks, citation graphs, knowledge graphs, road networks — and every relational database, where rows are nodes and foreign keys are edges. Even text and images are special-case graphs (a path, a grid), which is why the recipe that worked for them keeps tempting graph people.
 
-## Module 2 — How machines learn on graphs
+## 2. Machines learn on graphs by message passing
 
-Message passing in three steps (collect, aggregate, update); k layers = k-hop
-receptive field; over-smoothing; the GNN family tree: GCN, GraphSAGE (inductive),
-GAT (attention), GIN (Weisfeiler-Lehman expressiveness), graph transformers.
+Each layer, every node aggregates its neighbors' feature vectors and updates its own — so k layers = a k-hop receptive field. Stack too many and everything blurs into the same vector (over-smoothing), which is why GNNs stay shallow. GCN, GraphSAGE, GAT, and GIN are one-line variations on this loop.
 
-- GCN — Kipf & Welling: https://arxiv.org/abs/1609.02907
-- GraphSAGE — Hamilton et al.: https://arxiv.org/abs/1706.02216
-- GAT — Veličković et al.: https://arxiv.org/abs/1710.10903
-- GIN — Xu et al.: https://arxiv.org/abs/1810.00826
-- Understanding Convolutions on Graphs (Distill): https://distill.pub/2021/understanding-gnns/
+## 3. Foundation models follow a five-ingredient recipe
 
-## Module 3 — The foundation-model recipe
+A shared token vocabulary; a self-supervised objective; a scalable architecture; predictable scaling laws; oceans of public data. At scale you get in-context learning — adaptation with zero weight updates. Keep the checklist in mind, because graphs fail it in two specific places.
 
-The five ingredients that made LLMs work: a shared token vocabulary, a
-self-supervised objective, a scalable architecture, predictable scaling laws,
-and oceans of public data — plus in-context learning as the emergent payoff.
+## 4. Graphs break the vocabulary ingredient three ways
 
-- Foundation models report — Bommasani et al.: https://arxiv.org/abs/2108.07258
-- GPT-3 — Brown et al.: https://arxiv.org/abs/2005.14165
-- Scaling laws — Kaplan et al.: https://arxiv.org/abs/2001.08361
-- TabPFN — Hollmann et al.: https://arxiv.org/abs/2207.01848
+Feature heterogeneity: every dataset invents its own feature schema, so a pretrained model can't even run on the next graph — it fails at the first weight matrix. Structural heterogeneity: a model that learned "trust your neighbors" (homophily) transfers it to fraud graphs where neighbors are systematically opposite. Task heterogeneity: node-, edge-, and graph-level tasks want different inductive biases. Together: graphs have no canonical tokens — no "graph vocabulary."
 
-## Module 4 — Why graphs break the recipe
+## 5. The GFM zoo is four bets on what the vocabulary should be
 
-The heterogeneity trilemma: feature heterogeneity (every dataset invents its own
-feature schema — a pretrained model can't even run), structural heterogeneity
-(homophily vs heterophily, degree distributions, motifs), and task heterogeneity
-(node / edge / graph-level). The "graph vocabulary" problem: graphs have no
-canonical tokens.
+Stay in one domain where vocabulary exists (ULTRA's relation-interaction graphs for KGs; JMP/MACE/UMA over the periodic table). Make everything text and borrow an LLM's vocabulary (OFA, GraphGPT, LLaGA). Bet on structure plus in-context learning (GraphAny, PRODIGY, the TabPFN-lineage G2T-FM and GraphPFN). Or group features by type with shared transformations at industrial scale — the line the GraphBFF paper builds on, at the price of an open expressivity-vs-compatibility trade-off.
 
-- Position: Graph Foundation Models Are Already Here — Mao et al.: https://arxiv.org/abs/2402.02216
-- Graph Foundation Models: A Comprehensive Survey — Wang et al.: https://arxiv.org/abs/2505.15116
-- Beyond Homophily in GNNs — Zhu et al.: https://arxiv.org/abs/2006.11468
-- GFM survey (TPAMI 2025) — Liu et al.: https://arxiv.org/abs/2310.11829
+## 6. The data ingredient is being unlocked at billion scale
 
-## Module 5 — The GFM zoo: four bets on a vocabulary
+Public graph datasets top out ~10⁹–10¹⁰ edges; the truly enormous graphs are private. "Billion-Scale Graph Foundation Models" (GraphBFF, Meta 2026) pretrains a 1.4B-parameter graph transformer on a ~50B node/edge enterprise graph with nothing but masked link prediction — and reports clean power-law scaling plus a frozen model that beats task-specific GNNs on 10/10 unseen tasks (up to +31 PRAUC). Meanwhile relational databases (RelBench, KumoRFM, Relational Transformer, Google's relational GFM) look like the field's "web-scale moment": heterogeneous graphs everywhere, with labels generated for free by the database's own timeline.
 
-Bet 1: stay in one domain — ULTRA for knowledge graphs (relation-interaction
-graphs), JMP / MACE-MP-0 / UMA for atomistic systems (the periodic table as a
-shared vocabulary). Bet 2: make everything text — OFA, GraphGPT, LLaGA, UniGraph.
-Bet 3: structure + in-context learning — GraphAny, PRODIGY, G2T-FM, GraphPFN.
-Bet 4: typed feature groups at industrial scale — the TabFM lineage
-(FT-Transformer) extended to graphs, including the equivariance recipe and
-GraphBFF's type-conditioned attention; the expressivity-vs-compatibility
-trade-off is an open question.
+## 7. What's still open
 
-- ULTRA — Galkin et al.: https://arxiv.org/abs/2310.04562
-- One for All — Liu et al.: https://arxiv.org/abs/2310.00149
-- GraphAny — Zhao et al.: https://arxiv.org/abs/2405.20445
-- PRODIGY — Huang et al.: https://arxiv.org/abs/2305.12600
-- G2T-FM — Eremeev et al.: https://arxiv.org/abs/2508.20906
-- GraphPFN — Eremeev et al.: https://arxiv.org/abs/2509.21489
-- JMP — Shoghi et al.: https://arxiv.org/abs/2310.16802
-- Equivariance Everywhere All At Once — Finkelshtein et al.: https://arxiv.org/abs/2506.14291
+The universal graph vocabulary; how to choose feature groupings; what "train on the web" even means for graphs; evaluation when pretraining data is private; compute-optimal budgets when per-example cost depends on neighborhood sampling; and what emerges at the next 10× of scale.
 
-## Module 6 — The billion-scale frontier
-
-Public graph data is 3-4 orders of magnitude behind text; the biggest graphs are
-private. GraphBFF (Meta, 2026): a 1.4B-parameter graph transformer pretrained
-with masked link prediction on a ~50B node/edge enterprise graph — clean neural
-scaling laws, and a frozen model that beats task-specific GNNs on 10/10 unseen
-tasks by up to +31 PRAUC. Relational databases as the likely unlock: RelBench,
-KumoRFM and KumoRFM-2, the Relational Transformer, Griffin, and Google's GFM for
-relational data.
-
-- Billion-Scale Graph Foundation Models (GraphBFF): https://arxiv.org/abs/2602.04768
-- Benchmarks position paper — Bechler-Speicher et al.: https://arxiv.org/abs/2502.14546
-- RelBench — Robinson et al.: https://arxiv.org/abs/2407.20060
-- KumoRFM: https://kumo.ai/research/kumo_relational_foundation_model.pdf
-- Google Research on relational GFMs: https://research.google/blog/graph-foundation-models-for-relational-data/
-- Towards Neural Scaling Laws on Graphs — Liu et al.: https://arxiv.org/abs/2402.02054
-- Do Neural Scaling Laws Exist on Graph SSL? — Ma et al.: https://arxiv.org/abs/2408.11243
-
-## Module 7 — Open problems & going further
-
-The vocabulary question; feature-grouping granularity; defining the pretraining
-universe; evaluation when pretraining data is private; compute-optimal training
-when per-example cost is graph-dependent; emergence. Reading path: Distill →
-Mao et al. → Galkin & Bronstein's blog → ULTRA + GraphAny → GraphBFF → RelBench.
-
-- Foundation Models in Graph & Geometric Deep Learning — Galkin & Bronstein: https://towardsdatascience.com/foundation-models-in-graph-geometric-deep-learning-f363e2576f58/
-- Learning on Graphs conference: https://logconference.org/
-- Awesome-Foundation-Models-on-Graphs: https://github.com/Zehong-Wang/Awesome-Foundation-Models-on-Graphs
+**Go deeper:** the [interactive course](/learn/graph-foundation-models) walks each idea with a lab — run message passing yourself, feed mismatched features to a pretrained model, rewire a graph from homophilic to heterophilic, and play with GraphBFF's actual fitted scaling-law exponents. Key papers if you want to jump straight to sources: [GraphBFF](https://arxiv.org/abs/2602.04768), [the GFM position paper](https://arxiv.org/abs/2402.02216), [ULTRA](https://arxiv.org/abs/2310.04562), [GraphAny](https://arxiv.org/abs/2405.20445), [RelBench](https://arxiv.org/abs/2407.20060), and the [Galkin & Bronstein overview](https://towardsdatascience.com/foundation-models-in-graph-geometric-deep-learning-f363e2576f58/).

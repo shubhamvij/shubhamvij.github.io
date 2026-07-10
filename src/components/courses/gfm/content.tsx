@@ -1,31 +1,5 @@
 import { ReactNode } from 'react'
-import type { QuizQuestion } from './Quiz'
-
-export type WidgetKey =
-  | 'message-passing'
-  | 'feature-space'
-  | 'homophily'
-  | 'scaling-laws'
-  | 'data-gap'
-  | 'task-matcher'
-  | 'paper-shelf'
-
-export type LessonBlock =
-  | { kind: 'prose'; body: ReactNode }
-  | { kind: 'heading'; text: string }
-  | { kind: 'callout'; icon: string; title: string; body: ReactNode }
-  | { kind: 'widget'; widget: WidgetKey }
-  | { kind: 'quiz'; questions: QuizQuestion[] }
-  | { kind: 'refs'; items: { label: string; href: string; note?: string }[] }
-
-export interface GuideModule {
-  id: string
-  navLabel: string
-  title: string
-  subtitle: string
-  minutes: number
-  blocks: LessonBlock[]
-}
+import type { CourseModule } from '../engine/types'
 
 function A({ href, children }: { href: string; children: ReactNode }) {
   return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
@@ -34,7 +8,7 @@ function A({ href, children }: { href: string; children: ReactNode }) {
 export const GUIDE_TITLE = 'Graph Foundation Models'
 export const GUIDE_TAGLINE = 'An interactive study guide — from message passing to billion-parameter graph models'
 
-export const MODULES: GuideModule[] = [
+export const MODULES: CourseModule[] = [
   // ------------------------------------------------------------------
   {
     id: 'graphs',

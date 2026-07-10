@@ -1,49 +1,35 @@
 'use client'
 import { useRef, useState } from 'react'
-import s from './gfm.module.css'
-import { MODULES, GUIDE_TITLE, GUIDE_TAGLINE, LessonBlock, WidgetKey } from './content'
-import { useGuideProgress } from './progress'
+import s from './course.module.css'
+import type { CourseDefinition, LessonBlock } from './types'
+import { useCourseProgress } from './progress'
 import Quiz from './Quiz'
-import MessagePassingLab from './MessagePassingLab'
-import FeatureSpaceLab from './FeatureSpaceLab'
-import HomophilyLab from './HomophilyLab'
-import ScalingLab from './ScalingLab'
-import TaskMatcher from './TaskMatcher'
-import PaperShelf from './PaperShelf'
 
 interface Props {
+  course: CourseDefinition
   onBack?: () => void
+  backLabel?: string
 }
 
-function Widget({ widget }: { widget: WidgetKey }) {
-  switch (widget) {
-    case 'message-passing': return <MessagePassingLab />
-    case 'feature-space': return <FeatureSpaceLab />
-    case 'homophily': return <HomophilyLab />
-    case 'scaling-laws': return <ScalingLab initialView="laws" />
-    case 'data-gap': return <ScalingLab initialView="gap" />
-    case 'task-matcher': return <TaskMatcher />
-    case 'paper-shelf': return <PaperShelf />
-  }
-}
-
-export default function GfmStudyGuide({ onBack }: Props) {
-  const { progress, markModuleComplete, recordQuizAnswer, setLastModule, resetProgress } = useGuideProgress()
+export default function CourseShell({ course, onBack, backLabel = '← Back' }: Props) {
+  const { progress, markModuleComplete, recordQuizAnswer, setLastModule, resetProgress } = useCourseProgress(course.storageKey)
   const [navChoice, setNavChoice] = useState<string | null>(null)
   const [confirmingReset, setConfirmingReset] = useState(false)
   const paneRef = useRef<HTMLDivElement>(null)
 
+  const modules = course.modules
+
   // Until the reader navigates, resume wherever they left off (falling back to module 1).
-  const resumeId = progress.lastModuleId && MODULES.some(m => m.id === progress.lastModuleId)
+  const resumeId = progress.lastModuleId && modules.some(m => m.id === progress.lastModuleId)
     ? progress.lastModuleId
-    : MODULES[0].id
+    : modules[0].id
   const activeId = navChoice ?? resumeId
 
-  const activeIndex = MODULES.findIndex(m => m.id === activeId)
-  const active = MODULES[activeIndex]
-  const completedCount = MODULES.filter(m => progress.completedModules.includes(m.id)).length
-  const pct = Math.round((completedCount / MODULES.length) * 100)
-  const allDone = completedCount === MODULES.length
+  const activeIndex = modules.findIndex(m => m.id === activeId)
+  const active = modules[activeIndex]
+  const completedCount = modules.filter(m => progress.completedModules.includes(m.id)).length
+  const pct = Math.round((completedCount / modules.length) * 100)
+  const allDone = completedCount === modules.length
 
   const goTo = (id: string) => {
     setNavChoice(id)
@@ -53,8 +39,8 @@ export default function GfmStudyGuide({ onBack }: Props) {
 
   const completeAndContinue = () => {
     markModuleComplete(active.id)
-    if (activeIndex < MODULES.length - 1) {
-      goTo(MODULES[activeIndex + 1].id)
+    if (activeIndex < modules.length - 1) {
+      goTo(modules[activeIndex + 1].id)
     }
   }
 
@@ -65,7 +51,7 @@ export default function GfmStudyGuide({ onBack }: Props) {
     }
     resetProgress()
     setConfirmingReset(false)
-    goTo(MODULES[0].id)
+    goTo(modules[0].id)
   }
 
   const renderBlock = (block: LessonBlock, i: number) => {
@@ -84,8 +70,10 @@ export default function GfmStudyGuide({ onBack }: Props) {
             </span>
           </div>
         )
-      case 'widget':
-        return <Widget key={i} widget={block.widget} />
+      case 'widget': {
+        const Widget = course.widgets[block.widget]
+        return Widget ? <Widget key={i} /> : null
+      }
       case 'quiz':
         return (
           <div key={i}>
@@ -120,10 +108,10 @@ export default function GfmStudyGuide({ onBack }: Props) {
       <div className={s.toolbar}>
         {onBack && (
           <button type="button" className={s.backLink} onClick={onBack}>
-            ← All posts
+            {backLabel}
           </button>
         )}
-        <span className={s.toolbarTitle} title={GUIDE_TAGLINE}>{GUIDE_TITLE}</span>
+        <span className={s.toolbarTitle} title={course.tagline}>{course.title}</span>
         <span className={s.toolbarSpacer} />
         <span className={s.toolbarPct}>{pct}% complete</span>
         <div className={s.progressTrack} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
@@ -141,7 +129,7 @@ export default function GfmStudyGuide({ onBack }: Props) {
           onChange={e => goTo(e.target.value)}
           aria-label="Jump to module"
         >
-          {MODULES.map(m => (
+          {modules.map(m => (
             <option key={m.id} value={m.id}>
               {progress.completedModules.includes(m.id) ? '✓ ' : ''}{m.navLabel}
             </option>
@@ -152,7 +140,7 @@ export default function GfmStudyGuide({ onBack }: Props) {
       <div className={s.body}>
         <nav className={s.sidebar}>
           <p className={s.sidebarHeading}>Modules</p>
-          {MODULES.map(m => (
+          {modules.map(m => (
             <button
               key={m.id}
               type="button"
@@ -169,39 +157,39 @@ export default function GfmStudyGuide({ onBack }: Props) {
         <div className={s.lessonPane} ref={paneRef}>
           <div className={s.lessonInner}>
             <p className={s.lessonKicker}>
-              Module {activeIndex + 1} of {MODULES.length} · ~{active.minutes} min
+              Module {activeIndex + 1} of {modules.length} · ~{active.minutes} min
             </p>
             <h2 className={s.lessonTitle}>{active.title}</h2>
             <p className={s.lessonSubtitle}>{active.subtitle}</p>
 
             {active.blocks.map(renderBlock)}
 
-            {allDone && activeIndex === MODULES.length - 1 && (
+            {allDone && activeIndex === modules.length - 1 && (
               <div className={s.completeBanner}>
                 <span>🎉</span>
                 <span>
-                  <strong>Guide complete.</strong> All {MODULES.length} modules done — the Paper Shelf in module 5
-                  and the reading path above are yours whenever you need them.
+                  <strong>Course complete.</strong> All {modules.length} modules done — the reference
+                  shelves and reading paths are yours whenever you need them.
                 </span>
               </div>
             )}
 
             <div className={s.footerNav}>
               {activeIndex > 0 && (
-                <button type="button" className={s.btn} onClick={() => goTo(MODULES[activeIndex - 1].id)}>
-                  ← {MODULES[activeIndex - 1].navLabel}
+                <button type="button" className={s.btn} onClick={() => goTo(modules[activeIndex - 1].id)}>
+                  ← {modules[activeIndex - 1].navLabel}
                 </button>
               )}
               <span className={s.footerSpacer} />
               {progress.completedModules.includes(active.id) ? (
-                activeIndex < MODULES.length - 1 && (
-                  <button type="button" className={`${s.btn} ${s.btnPrimary}`} onClick={() => goTo(MODULES[activeIndex + 1].id)}>
-                    {MODULES[activeIndex + 1].navLabel} →
+                activeIndex < modules.length - 1 && (
+                  <button type="button" className={`${s.btn} ${s.btnPrimary}`} onClick={() => goTo(modules[activeIndex + 1].id)}>
+                    {modules[activeIndex + 1].navLabel} →
                   </button>
                 )
               ) : (
                 <button type="button" className={`${s.btn} ${s.btnPrimary}`} onClick={completeAndContinue}>
-                  {activeIndex < MODULES.length - 1 ? 'Mark complete & continue →' : 'Mark complete ✓'}
+                  {activeIndex < modules.length - 1 ? 'Mark complete & continue →' : 'Mark complete ✓'}
                 </button>
               )}
             </div>

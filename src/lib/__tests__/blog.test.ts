@@ -1,25 +1,36 @@
 import { describe, it, expect } from 'vitest'
 import { getAllPosts, getPostBySlug } from '../blog'
+import { COURSE_CATALOG } from '../courseCatalog'
 
 describe('blog content', () => {
-  it('lists the GFM study guide with its interactive flag', () => {
+  it('lists both course summary posts', () => {
     const posts = getAllPosts()
-    const guide = posts.find(p => p.slug === 'graph-foundation-models')
-    expect(guide).toBeDefined()
-    expect(guide!.interactive).toBe('gfm-study-guide')
-    expect(guide!.title).toContain('Graph Foundation Models')
-    expect(guide!.description.length).toBeGreaterThan(0)
-    expect(guide!.date).toBe('2026-07-09')
+    const slugs = posts.map(p => p.slug)
+    expect(slugs).toContain('graph-foundation-models')
+    expect(slugs).toContain('attention-everywhere')
+    for (const post of posts) {
+      expect(post.title.length).toBeGreaterThan(0)
+      expect(post.description.length).toBeGreaterThan(0)
+      expect(post.date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    }
   })
 
-  it('round-trips the interactive flag through getPostBySlug', () => {
-    const post = getPostBySlug('graph-foundation-models')
-    expect(post.meta.interactive).toBe('gfm-study-guide')
-    expect(post.content).toContain('Module 1')
+  it('each course summary post links to its course in the courseware', () => {
+    const gfm = getPostBySlug('graph-foundation-models')
+    expect(gfm.content).toContain('](/learn/graph-foundation-models)')
+
+    const attention = getPostBySlug('attention-everywhere')
+    expect(attention.content).toContain('](/learn/attention-mechanisms)')
   })
 
-  it('leaves regular posts without an interactive flag', () => {
-    const post = getPostBySlug('hello-world')
-    expect(post.meta.interactive).toBeUndefined()
+  it('course links in posts point at real catalog slugs', () => {
+    const validPaths = COURSE_CATALOG.map(c => `/learn/${c.slug}`)
+    for (const post of getAllPosts()) {
+      const { content } = getPostBySlug(post.slug)
+      const learnLinks = [...content.matchAll(/\]\((\/learn\/[^)\s]+)\)/g)].map(m => m[1])
+      for (const link of learnLinks) {
+        expect(validPaths).toContain(link)
+      }
+    }
   })
 })

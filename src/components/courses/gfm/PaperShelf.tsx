@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import s from './gfm.module.css'
+import s from '../engine/course.module.css'
 
 type Family = 'position' | 'kg' | 'anygraph' | 'text' | 'molecules' | 'relational' | 'scale' | 'algorithms'
 

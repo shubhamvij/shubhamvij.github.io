@@ -1,6 +1,6 @@
 'use client'
 import { useMemo, useState } from 'react'
-import s from './gfm.module.css'
+import s from '../engine/course.module.css'
 
 // A fixed 10-node graph laid out for a 340x220 viewBox. Node "features" are RGB
 // colors; one message-passing step averages each node with its neighbors, so

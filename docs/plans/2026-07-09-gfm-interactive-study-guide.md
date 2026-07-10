@@ -111,7 +111,52 @@ Each module: ~600-900 words of prose in short blocks, 1 widget (where applicable
 
 ## Out of scope
 
-- MDX-ifying the blog pipeline; link support in the regex markdown renderer.
-- A desktop icon / start-menu entry for the guide (it lives in Blog).
+- MDX-ifying the blog pipeline.
 - Server-side rendering of lesson content for SEO (site is client-rendered by design;
   metadata/OG/JSON-LD already handled by the existing pipeline).
+
+---
+
+## Addendum (same day): Vijcarta courseware + multi-course engine
+
+User feedback moved courses out of the blog into a dedicated Encarta-style CD-ROM
+program, added a second course, and reduced blog posts to summaries that link in.
+
+### Revised architecture
+
+```
+src/lib/courseCatalog.ts                 # server-safe metadata: slugs, SEO, sitemap
+src/components/learn/                    # the "Vijcarta '26" CD-ROM program
+  BootSplash.tsx                         # DOS autorun -> splash -> library (click-skippable)
+  CourseLibrary.tsx                      # Encarta-style contents screen, progress per card
+  CoursewareShell.tsx                    # boot -> library -> course; slug controlled by HomeClient
+  courses.tsx                            # slug -> CourseDefinition + cover art registry
+  learn.module.css
+src/components/courses/
+  engine/                                # generic course engine
+    CourseShell.tsx                      # generalized shell (was GfmStudyGuide)
+    Quiz.tsx, progress.ts (keyed stores), course.module.css, types.ts
+  gfm/                                   # course 1: Graph Foundation Models (content + 6 labs)
+  attention/                             # course 2: Attention, Everywhere (content + 6 labs)
+content/blog/graph-foundation-models.md  # summary article -> /learn/graph-foundation-models
+content/blog/attention-everywhere.md     # summary article -> /learn/attention-mechanisms
+```
+
+- Routing: `/learn` (library) and `/learn/<slug>` (course) join ROUTABLE_SECTIONS with
+  the same URL-sync pattern as blog; desktop icon + start-menu entry (cdrom.svg);
+  Course JSON-LD; sitemap entries via prebuild.
+- Progress: `useCourseProgress(storageKey)` — per-course keyed external stores
+  (useSyncExternalStore). The gfm key is unchanged so early readers keep progress.
+- Blog renderer gained markdown link support (internal = same tab, external = new tab);
+  the interactive-frontmatter mechanism was removed in favor of the courseware.
+- Overflow fix: the ScalingLab data-gap chart is HTML bars (SVG text clipped);
+  toolbar and footer nav adapt below 520px containers.
+- Attention course modules: attention from scratch → the block (multi-head, residuals)
+  → taming n² (KV cache, MQA/GQA/MLA, FlashAttention, windows) → ViT (patchify, Swin,
+  MAE) → attention-is-a-graph (mask = adjacency; GAT) → graph transformer blocks
+  (Graphormer biases, GraphGPS hybrid, HGT meta-relations, GraphBFF TCA/TAA) → synthesis.
+  Labs: AttentionLab, MultiHeadLab, TransformerBlockDiagram, AttentionMaskLab (dual
+  emphasis), PatchifyLab, TypedAttentionLab. All references verified against
+  arXiv/proceedings on 2026-07-09.
+- Tests assert catalog<->definition sync, unique quiz ids, widget-registry completeness,
+  courseware boot/library/course flow, and per-course progress isolation.

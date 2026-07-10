@@ -1,6 +1,6 @@
 'use client'
 import { ReactNode, useState } from 'react'
-import s from './gfm.module.css'
+import s from './course.module.css'
 
 export interface QuizOption {
   text: ReactNode

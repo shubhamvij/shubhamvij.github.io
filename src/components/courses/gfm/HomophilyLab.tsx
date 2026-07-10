@@ -1,6 +1,6 @@
 'use client'
 import { useMemo, useState } from 'react'
-import s from './gfm.module.css'
+import s from '../engine/course.module.css'
 
 // Deterministic layout: seeded PRNG so server and client render identically.
 function mulberry32(seed: number) {
