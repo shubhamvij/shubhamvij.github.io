@@ -251,7 +251,7 @@ export const MODULES: CourseModule[] = [
                 <A href="https://arxiv.org/abs/2007.14062">BigBird</A> use windows + a few global tokens;{' '}
                 <A href="https://arxiv.org/abs/2310.06825">Mistral</A> ships sliding-window attention in
                 production; <A href="https://arxiv.org/abs/2006.16236">linear attention</A> reorders the math to
-                dodge n² entirely (with quality trade-offs). Play with what &quot;fewer pairs&quot; looks like:
+                dodge n² entirely (with quality trade-offs). Play with what &quot;fewer pairs&quot; looks like in deep dive 3.3 below.
               </li>
             </ul>
           </>
