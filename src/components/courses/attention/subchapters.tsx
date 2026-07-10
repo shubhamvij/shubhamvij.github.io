@@ -56,8 +56,8 @@ export const BLOCK_SUBCHAPTERS: CourseModule[] = [
             RoPE won the LLM default slot: relative behavior, no extra parameters, and it composes with
             KV caches and FlashAttention. Its θ base has become the long-context tuning knob — scale it
             (NTK-aware scaling, YaRN) and a 4k-trained model stretches to 128k. ViTs mostly still use learned
-            absolute embeddings (images are fixed-size grids), which is why module 4&apos;s ViT interpolates its
-            position table when resolution changes.
+            absolute embeddings (images are fixed-size grids), which is why ViTs (module 4) interpolate their
+            position tables when image resolution changes.
           </>
         ),
       },
@@ -359,7 +359,7 @@ export const BLOCK_SUBCHAPTERS: CourseModule[] = [
             prompt: 'SwiGLU uses three matrices instead of two, yet doesn\'t increase the FFN budget. How?',
             options: [
               { text: 'The third matrix is tied to the first', explain: 'All three are independent — the saving comes from width, not tying.' },
-              { text: 'd_ff is shrunk to about two-thirds of the classic 4×d so 3 matrices ≈ the old 2-matrix budget', correct: true, explain: 'E.g. Llama-3-8B: d_ff = 14336 ≈ (2/3)·4·4096. Gating wins at equal parameters, which is why it became the default.' },
+              { text: 'd_ff is shrunk to about two-thirds of the classic 4×d so 3 matrices ≈ the old 2-matrix budget', correct: true, explain: 'E.g. Llama-2-7B: d_ff = 11008 ≈ (2/3)·4·4096. (Llama-3 adds a further width multiplier on top.) Gating wins at equal parameters, which is why it became the default.' },
               { text: 'It quantizes the weights to 8-bit', explain: 'Quantization is orthogonal — the budget balance is architectural.' },
             ],
           },
