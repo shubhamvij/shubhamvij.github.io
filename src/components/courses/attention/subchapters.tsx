@@ -312,7 +312,7 @@ export const BLOCK_SUBCHAPTERS: CourseModule[] = [
             </p>
             <p>
               Two modern turns. <strong>Gating</strong>: SwiGLU replaces the plain MLP with
-              (xW_gate ⊙ xW_in)W_out — three matrices, d_ff shrunk to ~⅔·4d to keep parameters equal, and
+              (Swish(xW_gate) ⊙ xW_in)W_out — three matrices, d_ff shrunk to ~⅔·4d to keep parameters equal, and
               reliably better — the Llama default. <strong>Sparsity</strong>: Mixture-of-Experts replaces{' '}
               <em>one</em> FFN with many and routes each token through the top-k — parameters scale with expert
               count while per-token compute stays near-constant:

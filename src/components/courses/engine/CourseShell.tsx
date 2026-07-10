@@ -206,7 +206,7 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
               <div className={s.completeBanner}>
                 <span>🎉</span>
                 <span>
-                  <strong>Course complete.</strong> All {flat.length} modules done — the reference
+                  <strong>Course complete.</strong> All {flat.length} sections done — the reference
                   shelves and reading paths are yours whenever you need them.
                 </span>
               </div>

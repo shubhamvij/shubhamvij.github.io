@@ -143,6 +143,7 @@ function VecGrid({ label, data, weights }: { label: string; data: number[][] | n
             <span key={`t${i}`} className={s.vecTok}>{tok}</span>
             {data
               ? data[i].map((v, d) => (
+                  // weights are 0..1: negate so flowColor's blue (negative) branch renders a white→blue ramp
                   <span key={`${i}-${d}`} className={s.vecCell} style={{ background: weights ? flowColor(-v * 1.6) : flowColor(v) }}>
                     {v.toFixed(2)}
                   </span>

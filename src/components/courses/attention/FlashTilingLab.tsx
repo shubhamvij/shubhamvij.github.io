@@ -47,7 +47,7 @@ export default function FlashTilingLab() {
               return (
                 <rect
                   key={`${q}-${k}`}
-                  x={8 + k * cell * 2 * 0.5} y={8 + q * cell * 2 * 0.5}
+                  x={8 + k * cell} y={8 + q * cell}
                   width={cell - 1} height={cell - 1}
                   fill={!flash ? '#c86018' : isCurrent ? '#f0d98c' : isDone ? '#dfe8df' : '#f7f5ec'}
                   opacity={!flash ? 0.75 : 1}

@@ -228,7 +228,7 @@ export const MODULES: CourseModule[] = [
               Full attention scores every pair: n tokens → n² work. Double your context, quadruple the compute.
               That&apos;s the tax at <strong>prefill</strong>, when the prompt is processed in one parallel pass. But
               generation is different, and this is the piece most explanations skip: a decoder produces{' '}
-              <strong>one token at a time</strong>, and each new token&apos;s query must score against the key of{' '}
+              <strong>one token at a time</strong>, and each new token&apos;s query must score against the keys of{' '}
               <em>every token so far</em>, then blend their values. Recompute those K/V projections from scratch
               each step and you&apos;re doing t(t+1)/2 projections for t tokens — almost all of it repeated work,
               since past tokens&apos; K and V never change (with a causal mask, tokens can&apos;t see the future, so new
