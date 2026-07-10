@@ -182,7 +182,7 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
           {flat.map(e => (
             <option key={e.module.id} value={e.module.id}>
               {progress.completedModules.includes(e.module.id) ? '✓ ' : ''}
-              {e.parent ? `   └ ${e.module.navLabel}` : e.module.navLabel}
+              {e.parent ? `   └ ${e.module.navLabel}` : e.module.navLabel}
             </option>
           ))}
         </select>
