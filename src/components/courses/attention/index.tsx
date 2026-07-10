@@ -11,6 +11,7 @@ import PositionLab from './PositionLab'
 import HeadMatrixLab from './HeadMatrixLab'
 import ResidualStreamLab from './ResidualStreamLab'
 import ParamBudgetLab from './ParamBudgetLab'
+import HeadShareLab from './HeadShareLab'
 
 const MaskEfficiency = () => <AttentionMaskLab emphasis="efficiency" />
 const MaskGraphs = () => <AttentionMaskLab emphasis="graphs" />
@@ -34,5 +35,6 @@ export const attentionCourse: CourseDefinition = {
     'head-matrix': HeadMatrixLab,
     'residual-stream': ResidualStreamLab,
     'param-budget': ParamBudgetLab,
+    'head-sharing': HeadShareLab,
   },
 }

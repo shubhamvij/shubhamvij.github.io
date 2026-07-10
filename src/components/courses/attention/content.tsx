@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import type { CourseModule } from '../engine/types'
 import { BLOCK_SUBCHAPTERS } from './subchapters'
+import { EFFICIENCY_SUBCHAPTERS } from './efficiencySubchapters'
 
 function A({ href, children }: { href: string; children: ReactNode }) {
   return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
@@ -217,6 +218,7 @@ export const MODULES: CourseModule[] = [
     title: 'The quadratic problem and its fixes',
     subtitle: 'KV caches, fewer heads, smarter kernels, sparser masks',
     minutes: 9,
+    subchapters: EFFICIENCY_SUBCHAPTERS,
     blocks: [
       {
         kind: 'prose',
@@ -266,15 +268,6 @@ export const MODULES: CourseModule[] = [
               { text: 'It approximates the softmax with a cheaper function', explain: 'No approximation — "exact attention" is the headline claim. The trick is elsewhere.' },
               { text: 'It tiles the computation to minimize reads/writes to GPU main memory, never materializing the n×n matrix', correct: true, explain: 'IO-awareness: attention was bottlenecked on memory bandwidth between HBM and on-chip SRAM, not on arithmetic. Restructure the loops, keep tiles on-chip, win.' },
               { text: 'It skips attention for unimportant tokens', explain: 'That\'s the sparse-mask family (Longformer/BigBird). FlashAttention computes every pair — just with drastically less memory traffic.' },
-            ],
-          },
-          {
-            id: 'am3-q2',
-            prompt: 'GQA (grouped-query attention) sits between multi-head and multi-query attention. What exactly is being shared?',
-            options: [
-              { text: 'Key/value heads — several query heads share each K/V head, shrinking the KV cache', correct: true, explain: 'MHA: every query head has its own K/V. MQA: all queries share one. GQA: an intermediate number of K/V heads, each serving a group — most of MQA\'s memory win with less quality loss.' },
-              { text: 'The feed-forward networks between layers', explain: 'FFNs are untouched — the entire MQA/GQA/MLA line is about the attention K/V tensors.' },
-              { text: 'Token embeddings between similar tokens', explain: 'Embeddings aren\'t involved; the KV cache is what\'s being shrunk.' },
             ],
           },
           {

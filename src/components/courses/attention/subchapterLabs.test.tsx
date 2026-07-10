@@ -5,6 +5,7 @@ import PositionLab from './PositionLab'
 import HeadMatrixLab from './HeadMatrixLab'
 import ResidualStreamLab from './ResidualStreamLab'
 import ParamBudgetLab from './ParamBudgetLab'
+import HeadShareLab from './HeadShareLab'
 
 describe('OrderBlindLab', () => {
   it('shows permutation equivariance without positions, broken symmetry with', () => {
@@ -98,5 +99,21 @@ describe('ParamBudgetLab', () => {
     fireEvent.click(screen.getByRole('button', { name: /mixture-of-experts/i }))
     expect(screen.getByText('520M')).toBeDefined()
     expect(screen.getByText('180M')).toBeDefined()
+  })
+})
+
+describe('HeadShareLab', () => {
+  it('cache per token shrinks from MHA to MQA', () => {
+    render(<HeadShareLab />)
+    expect(screen.getByText(/1024 values/)).toBeDefined() // MHA: 2·8·64
+    fireEvent.click(screen.getByRole('button', { name: /^MQA$/ }))
+    expect(screen.getByText(/128 values/)).toBeDefined() // 2·1·64
+  })
+  it('MLA mode shows the latent-vector story', () => {
+    render(<HeadShareLab />)
+    fireEvent.click(screen.getByRole('button', { name: /^MLA$/ }))
+    expect(screen.getByText(/288 values/)).toBeDefined() // d_c=256 + d_R=32
+    // "low-rank latent" appears both in the MLA blurb and the always-on labNote — assert presence, not uniqueness
+    expect(screen.getAllByText(/low-rank latent/i).length).toBeGreaterThan(0)
   })
 })
