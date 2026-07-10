@@ -13,7 +13,10 @@ describe('course catalog <-> definitions sync', () => {
     for (const entry of COURSE_CATALOG) {
       const def = COURSE_DEFINITIONS[entry.slug]
       expect(def.modules.length, `${entry.slug} module count`).toBe(entry.modules)
-      const minutes = def.modules.reduce((sum, m) => sum + m.minutes, 0)
+      const minutes = def.modules.reduce(
+        (sum, m) => sum + m.minutes + (m.subchapters ?? []).reduce((s2, sub) => s2 + sub.minutes, 0),
+        0
+      )
       expect(minutes, `${entry.slug} minutes`).toBe(entry.minutes)
       expect(def.id).toBe(entry.slug)
     }
@@ -30,7 +33,8 @@ describe('course catalog <-> definitions sync', () => {
 
   it('references only registered widgets from every module', () => {
     for (const def of Object.values(COURSE_DEFINITIONS)) {
-      for (const m of def.modules) {
+      const all = def.modules.flatMap(m => [m, ...(m.subchapters ?? [])])
+      for (const m of all) {
         for (const b of m.blocks) {
           if (b.kind === 'widget') {
             expect(def.widgets[b.widget], `${def.id}/${m.id} widget "${b.widget}"`).toBeDefined()
@@ -43,7 +47,8 @@ describe('course catalog <-> definitions sync', () => {
   it('uses globally unique quiz question ids across courses', () => {
     const ids: string[] = []
     for (const def of Object.values(COURSE_DEFINITIONS)) {
-      for (const m of def.modules) {
+      const all = def.modules.flatMap(m => [m, ...(m.subchapters ?? [])])
+      for (const m of all) {
         for (const b of m.blocks) {
           if (b.kind === 'quiz') ids.push(...b.questions.map(q => q.id))
         }
