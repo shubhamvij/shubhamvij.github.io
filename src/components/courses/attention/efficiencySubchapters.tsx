@@ -84,4 +84,94 @@ export const EFFICIENCY_SUBCHAPTERS: CourseModule[] = [
       },
     ],
   },
+  // ------------------------------------------------------------------
+  {
+    id: 'efficiency-flash',
+    navLabel: '3.2 FlashAttention',
+    title: 'Compute the same thing, smarter: FlashAttention',
+    subtitle: 'The bottleneck was memory movement, not FLOPs',
+    minutes: 6,
+    blocks: [
+      {
+        kind: 'prose',
+        body: (
+          <>
+            <p>
+              First, the hardware fact this subchapter turns on. A GPU has two memories: <strong>HBM</strong> —
+              the tens-of-gigabytes &quot;main memory&quot; quoted on the spec sheet, moving ~2 TB/s — and{' '}
+              <strong>on-chip SRAM</strong> — a few dozen megabytes right next to the compute units, roughly 10×
+              faster. Matrix multiplies are so optimized that for attention-sized workloads the arithmetic
+              isn&apos;t the wait — <em>moving data between HBM and SRAM is</em>. Naive attention is a worst case:
+              compute all of S = QKᵀ (n² numbers), write it to HBM, read it back for softmax, write P, read P
+              again to multiply by V. For n = 4096 that&apos;s hundreds of megabytes of round-trips per head per
+              layer, none of which the final output actually needs.
+            </p>
+            <p>
+              FlashAttention&apos;s move: <strong>never let S exist in HBM</strong>. Stream tile-sized blocks of Q
+              and K through SRAM, compute each score tile there, fold it straight into the output, discard it.
+              The obstacle is softmax — it wants the whole row before normalizing — and the fix is the{' '}
+              <strong>online softmax</strong>: keep a running row-max and running denominator, rescaling what
+              you&apos;ve already accumulated whenever a later tile raises the max. Exactly the same output, no
+              approximation. Step through it:
+            </p>
+          </>
+        ),
+      },
+      { kind: 'widget', widget: 'flash-tiling' },
+      {
+        kind: 'callout',
+        icon: '⚡',
+        title: 'Why "IO-aware" became the whole field\'s lens',
+        body: (
+          <>
+            FlashAttention changed no math and beat every &quot;efficient attention&quot; approximation of its era at
+            exact attention. The durable lesson: count bytes moved, not FLOPs — the same lens that explains why
+            the KV cache (module 3) dominates decoding and why MLA happily spends compute to shrink bytes.
+            FlashAttention-2/3 are further scheduling refinements of the same idea, now the default kernel in
+            every serious stack.
+          </>
+        ),
+      },
+      {
+        kind: 'quiz',
+        questions: [
+          {
+            id: 'am3-q1',
+            prompt: 'FlashAttention makes attention several times faster while computing the exact same result. How?',
+            options: [
+              { text: 'It approximates the softmax with a cheaper function', explain: 'No approximation — "exact attention" is the headline claim. The trick is elsewhere.' },
+              { text: 'It tiles the computation to minimize reads/writes to GPU main memory, never materializing the n×n matrix', correct: true, explain: 'IO-awareness: attention was bottlenecked on memory bandwidth between HBM and on-chip SRAM, not on arithmetic. Restructure the loops, keep tiles on-chip, win.' },
+              { text: 'It skips attention for unimportant tokens', explain: 'That\'s the sparse-mask family (subchapter 3.3). FlashAttention computes every pair — just with drastically less memory traffic.' },
+            ],
+          },
+          {
+            id: 'am3-2-q1',
+            prompt: 'Softmax needs a full row of scores to normalize. How does tiling get away with never having one?',
+            options: [
+              { text: 'The online softmax keeps a running max and running denominator per row, rescaling already-accumulated output when a new tile raises the max — algebraically identical to the full-row softmax', correct: true, explain: 'This identity (Milakov & Gimelshein 2018) is the enabling trick: without it, tiling would change the result; with it, tiles can stream and die in SRAM.' },
+              { text: 'It normalizes each tile independently', explain: 'That would change the output — weights would sum to 1 per tile instead of per row.' },
+              { text: 'It skips normalization entirely', explain: 'Then weights wouldn\'t sum to 1 at all — the output would be wrong everywhere.' },
+            ],
+          },
+          {
+            id: 'am3-2-q2',
+            prompt: 'What does FlashAttention NOT reduce?',
+            options: [
+              { text: 'FLOPs — every one of the n² pairs is still scored; only the memory traffic (and wall-clock time) drops', correct: true, explain: 'It\'s still exact, still quadratic compute. If n² arithmetic itself is your problem, you need subchapter 3.3\'s "score fewer pairs" family instead.' },
+              { text: 'Reads and writes to HBM', explain: 'That\'s precisely what it reduces — S never round-trips through HBM.' },
+              { text: 'Peak memory for the score matrix', explain: 'Reduced from n² to one tile — the lab\'s second counter.' },
+            ],
+          },
+        ],
+      },
+      {
+        kind: 'refs',
+        items: [
+          { label: 'FlashAttention — Dao et al. (NeurIPS 2022)', href: 'https://arxiv.org/abs/2205.14135' },
+          { label: 'FlashAttention-2 — Dao (ICLR 2024)', href: 'https://arxiv.org/abs/2307.08691', note: 'better work partitioning, ~2× again' },
+          { label: 'Online normalizer calculation for softmax — Milakov & Gimelshein (2018)', href: 'https://arxiv.org/abs/1805.02867', note: 'the running-max trick' },
+        ],
+      },
+    ],
+  },
 ]

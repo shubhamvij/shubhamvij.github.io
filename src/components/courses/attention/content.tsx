@@ -262,15 +262,6 @@ export const MODULES: CourseModule[] = [
         kind: 'quiz',
         questions: [
           {
-            id: 'am3-q1',
-            prompt: 'FlashAttention makes attention several times faster while computing the exact same result. How?',
-            options: [
-              { text: 'It approximates the softmax with a cheaper function', explain: 'No approximation — "exact attention" is the headline claim. The trick is elsewhere.' },
-              { text: 'It tiles the computation to minimize reads/writes to GPU main memory, never materializing the n×n matrix', correct: true, explain: 'IO-awareness: attention was bottlenecked on memory bandwidth between HBM and on-chip SRAM, not on arithmetic. Restructure the loops, keep tiles on-chip, win.' },
-              { text: 'It skips attention for unimportant tokens', explain: 'That\'s the sparse-mask family (Longformer/BigBird). FlashAttention computes every pair — just with drastically less memory traffic.' },
-            ],
-          },
-          {
             id: 'am3-q3',
             prompt: 'With sliding-window attention (window w), a token can\'t directly see tokens beyond w positions back. How do such models still use long context?',
             options: [
@@ -284,7 +275,6 @@ export const MODULES: CourseModule[] = [
       {
         kind: 'refs',
         items: [
-          { label: 'FlashAttention — Dao et al. (NeurIPS 2022)', href: 'https://arxiv.org/abs/2205.14135', note: 'plus FlashAttention-2 (ICLR 2024): arxiv.org/abs/2307.08691' },
           { label: 'GQA: Grouped-Query Attention — Ainslie et al. (EMNLP 2023)', href: 'https://arxiv.org/abs/2305.13245' },
           { label: 'Fast Transformer Decoding (Multi-Query Attention) — Shazeer (2019)', href: 'https://arxiv.org/abs/1911.02150' },
           { label: 'DeepSeek-V2 (Multi-head Latent Attention) — DeepSeek-AI (2024)', href: 'https://arxiv.org/abs/2405.04434', note: 'KV cache compressed into a latent vector' },

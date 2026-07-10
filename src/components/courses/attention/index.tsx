@@ -12,6 +12,7 @@ import HeadMatrixLab from './HeadMatrixLab'
 import ResidualStreamLab from './ResidualStreamLab'
 import ParamBudgetLab from './ParamBudgetLab'
 import HeadShareLab from './HeadShareLab'
+import FlashTilingLab from './FlashTilingLab'
 
 const MaskEfficiency = () => <AttentionMaskLab emphasis="efficiency" />
 const MaskGraphs = () => <AttentionMaskLab emphasis="graphs" />
@@ -36,5 +37,6 @@ export const attentionCourse: CourseDefinition = {
     'residual-stream': ResidualStreamLab,
     'param-budget': ParamBudgetLab,
     'head-sharing': HeadShareLab,
+    'flash-tiling': FlashTilingLab,
   },
 }

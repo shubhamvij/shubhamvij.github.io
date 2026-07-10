@@ -6,6 +6,7 @@ import HeadMatrixLab from './HeadMatrixLab'
 import ResidualStreamLab from './ResidualStreamLab'
 import ParamBudgetLab from './ParamBudgetLab'
 import HeadShareLab from './HeadShareLab'
+import FlashTilingLab from './FlashTilingLab'
 
 describe('OrderBlindLab', () => {
   it('shows permutation equivariance without positions, broken symmetry with', () => {
@@ -115,5 +116,23 @@ describe('HeadShareLab', () => {
     expect(screen.getByText(/288 values/)).toBeDefined() // d_c=256 + d_R=32
     // "low-rank latent" appears both in the MLA blurb and the always-on labNote — assert presence, not uniqueness
     expect(screen.getAllByText(/low-rank latent/i).length).toBeGreaterThan(0)
+  })
+})
+
+describe('FlashTilingLab', () => {
+  it('naive mode materializes the score matrix; tiled mode never does', () => {
+    render(<FlashTilingLab />)
+    expect(screen.getByText(/256 scores/)).toBeDefined() // 16×16 written to HBM
+    fireEvent.click(screen.getByRole('button', { name: /FlashAttention/ }))
+    expect(screen.getByText(/0 scores/)).toBeDefined()
+  })
+  it('steps through tiles with the online-softmax narration', () => {
+    render(<FlashTilingLab />)
+    fireEvent.click(screen.getByRole('button', { name: /FlashAttention/ }))
+    fireEvent.click(screen.getByRole('button', { name: /process next tile/i }))
+    // "tile 1/16" and "running max" each appear in two places (SVG label / feedback narration,
+    // and feedback narration / the always-on labNote's <strong>) — assert presence, not uniqueness
+    expect(screen.getAllByText(/tile 1\/16/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/running max/i).length).toBeGreaterThan(0)
   })
 })
