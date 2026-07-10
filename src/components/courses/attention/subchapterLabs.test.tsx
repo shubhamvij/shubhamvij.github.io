@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import OrderBlindLab from './OrderBlindLab'
 import PositionLab from './PositionLab'
+import HeadMatrixLab from './HeadMatrixLab'
 
 describe('OrderBlindLab', () => {
   it('shows permutation equivariance without positions, broken symmetry with', () => {
@@ -43,5 +44,24 @@ describe('PositionLab', () => {
     render(<PositionLab />)
     fireEvent.click(screen.getByRole('button', { name: /ALiBi/ }))
     expect(screen.getByText(/linear distance penalty/i)).toBeDefined()
+  })
+})
+
+describe('HeadMatrixLab', () => {
+  it('slicing into more heads shrinks d_head but not the parameter count', () => {
+    render(<HeadMatrixLab />)
+    // defaults: d_model=512, h=8 → d_head=64; attn params 4·512² = 1,048,576
+    expect(screen.getByText(/d_head = 64/)).toBeDefined()
+    expect(screen.getAllByText(/1,048,576/).length).toBeGreaterThan(0)
+    fireEvent.change(screen.getByLabelText(/number of heads/i), { target: { value: '4' } }) // index 4 → h=16
+    expect(screen.getByText(/d_head = 32/)).toBeDefined()
+    expect(screen.getAllByText(/1,048,576/).length).toBeGreaterThan(0) // unchanged
+  })
+
+  it('fewer K/V heads shrink the KV cache readout', () => {
+    render(<HeadMatrixLab />)
+    expect(screen.getByText(/0\.54 GB/)).toBeDefined() // g=8 (=h), 8k ctx, 32 layers, fp16
+    fireEvent.change(screen.getByLabelText(/K\/V heads/i), { target: { value: '1' } }) // index 1 → g=2
+    expect(screen.getByText(/0\.13 GB/)).toBeDefined()
   })
 })
