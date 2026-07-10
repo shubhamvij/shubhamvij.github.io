@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import OrderBlindLab from './OrderBlindLab'
 import PositionLab from './PositionLab'
 import HeadMatrixLab from './HeadMatrixLab'
+import ResidualStreamLab from './ResidualStreamLab'
 
 describe('OrderBlindLab', () => {
   it('shows permutation equivariance without positions, broken symmetry with', () => {
@@ -63,5 +64,21 @@ describe('HeadMatrixLab', () => {
     expect(screen.getByText(/0\.54 GB/)).toBeDefined() // g=8 (=h), 8k ctx, 32 layers, fp16
     fireEvent.change(screen.getByLabelText(/K\/V heads/i), { target: { value: '1' } }) // index 1 → g=2
     expect(screen.getByText(/0\.13 GB/)).toBeDefined()
+  })
+})
+
+describe('ResidualStreamLab', () => {
+  it('shows vanishing signal without residuals and stable signal with them', () => {
+    render(<ResidualStreamLab />)
+    expect(screen.getByText(/100%/)).toBeDefined() // residuals + norm: healthy
+    fireEvent.click(screen.getByRole('button', { name: /residuals ON/i }))
+    // 16 layers of 0.8× shrink → 0.8^16 ≈ 2.8% of the input signal
+    expect(screen.getByText(/2\.8% of the input signal/)).toBeDefined()
+  })
+
+  it('toggles between pre-norm and post-norm placement', () => {
+    render(<ResidualStreamLab />)
+    fireEvent.click(screen.getByRole('button', { name: /post-norm/i }))
+    expect(screen.getByText(/original 2017 placement/i)).toBeDefined()
   })
 })
