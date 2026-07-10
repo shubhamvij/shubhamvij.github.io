@@ -84,9 +84,9 @@ export default function ParamBudgetLab() {
           ))}
         </div>
         <div className={s.labControls}>
-          <span className={s.labStat}>total ≈ {fmt(total)}</span>
-          {moe && <span className={s.labStat}>active/token ≈ {fmt(active)}</span>}
-          <span className={s.labStat}>FFN share of block params {ffnShare}%</span>
+          <span className={s.labStat}>total ≈ <span className={s.labStatValue}>{fmt(total)}</span></span>
+          {moe && <span className={s.labStat}>active/token ≈ <span className={s.labStatValue}>{fmt(active)}</span></span>}
+          <span className={s.labStat}>FFN share of block params <span className={s.labStatValue}>{ffnShare}%</span></span>
         </div>
         <p className={s.labNote}>
           These are the real formulas, and they land on the real sizes: vocab·d for embeddings, (2d² + 2d·d_kv)

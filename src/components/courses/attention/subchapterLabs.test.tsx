@@ -88,15 +88,15 @@ describe('ParamBudgetLab', () => {
   it('reproduces real model sizes from the component formulas', () => {
     render(<ParamBudgetLab />)
     // GPT-2 small is the default preset: 38.6M emb + 28.3M attn + 56.6M ffn ≈ 124M
-    expect(screen.getByText(/total ≈ 124M/)).toBeDefined()
+    expect(screen.getByText('124M')).toBeDefined()
     fireEvent.click(screen.getByRole('button', { name: /Llama-3-8B/ }))
-    expect(screen.getByText(/total ≈ 8\.0B/)).toBeDefined()
+    expect(screen.getByText('8.0B')).toBeDefined()
   })
 
   it('MoE multiplies total but not active parameters', () => {
     render(<ParamBudgetLab />)
     fireEvent.click(screen.getByRole('button', { name: /mixture-of-experts/i }))
-    expect(screen.getByText(/total ≈ 520M/)).toBeDefined()
-    expect(screen.getByText(/active\/token ≈ 180M/)).toBeDefined()
+    expect(screen.getByText('520M')).toBeDefined()
+    expect(screen.getByText('180M')).toBeDefined()
   })
 })
