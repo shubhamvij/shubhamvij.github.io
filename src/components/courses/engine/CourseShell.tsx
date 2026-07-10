@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState } from 'react'
 import s from './course.module.css'
-import type { CourseDefinition, LessonBlock } from './types'
+import type { CourseDefinition, CourseModule, LessonBlock } from './types'
 import { useCourseProgress } from './progress'
 import Quiz from './Quiz'
 
@@ -11,6 +11,27 @@ interface Props {
   backLabel?: string
 }
 
+/** One row of the flattened reading order: a module or a subchapter with its context. */
+interface FlatEntry {
+  module: CourseModule
+  /** Top-level index of this module (or of its parent, for subchapters). */
+  topIndex: number
+  parent?: CourseModule
+  subIndex?: number
+  subCount?: number
+}
+
+function flatten(modules: CourseModule[]): FlatEntry[] {
+  const flat: FlatEntry[] = []
+  modules.forEach((m, mi) => {
+    flat.push({ module: m, topIndex: mi })
+    m.subchapters?.forEach((sub, si) => {
+      flat.push({ module: sub, topIndex: mi, parent: m, subIndex: si, subCount: m.subchapters!.length })
+    })
+  })
+  return flat
+}
+
 export default function CourseShell({ course, onBack, backLabel = '← Back' }: Props) {
   const { progress, markModuleComplete, recordQuizAnswer, setLastModule, resetProgress } = useCourseProgress(course.storageKey)
   const [navChoice, setNavChoice] = useState<string | null>(null)
@@ -18,18 +39,20 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
   const paneRef = useRef<HTMLDivElement>(null)
 
   const modules = course.modules
+  const flat = flatten(modules)
 
   // Until the reader navigates, resume wherever they left off (falling back to module 1).
-  const resumeId = progress.lastModuleId && modules.some(m => m.id === progress.lastModuleId)
+  const resumeId = progress.lastModuleId && flat.some(e => e.module.id === progress.lastModuleId)
     ? progress.lastModuleId
-    : modules[0].id
+    : flat[0].module.id
   const activeId = navChoice ?? resumeId
 
-  const activeIndex = modules.findIndex(m => m.id === activeId)
-  const active = modules[activeIndex]
-  const completedCount = modules.filter(m => progress.completedModules.includes(m.id)).length
-  const pct = Math.round((completedCount / modules.length) * 100)
-  const allDone = completedCount === modules.length
+  const activeIndex = flat.findIndex(e => e.module.id === activeId)
+  const entry = flat[activeIndex]
+  const active = entry.module
+  const completedCount = flat.filter(e => progress.completedModules.includes(e.module.id)).length
+  const pct = Math.round((completedCount / flat.length) * 100)
+  const allDone = completedCount === flat.length
 
   const goTo = (id: string) => {
     setNavChoice(id)
@@ -39,8 +62,8 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
 
   const completeAndContinue = () => {
     markModuleComplete(active.id)
-    if (activeIndex < modules.length - 1) {
-      goTo(modules[activeIndex + 1].id)
+    if (activeIndex < flat.length - 1) {
+      goTo(flat[activeIndex + 1].module.id)
     }
   }
 
@@ -51,7 +74,7 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
     }
     resetProgress()
     setConfirmingReset(false)
-    goTo(modules[0].id)
+    goTo(flat[0].module.id)
   }
 
   const renderBlock = (block: LessonBlock, i: number) => {
@@ -103,6 +126,33 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
     }
   }
 
+  const sidebarItem = (e: FlatEntry) => {
+    const m = e.module
+    const isSub = e.parent !== undefined
+    const isLastSub = isSub && e.subIndex === (e.subCount ?? 0) - 1
+    return (
+      <button
+        key={m.id}
+        type="button"
+        className={[
+          s.moduleItem,
+          m.id === activeId ? s.moduleItemActive : '',
+          isSub ? s.subModuleItem : '',
+          isSub && !isLastSub ? s.subModuleItemMid : '',
+        ].filter(Boolean).join(' ')}
+        onClick={() => goTo(m.id)}
+      >
+        <span className={s.moduleTick}>{progress.completedModules.includes(m.id) ? '✓' : ''}</span>
+        <span className={s.moduleLabel}>{m.navLabel}</span>
+        <span className={s.moduleMinutes}>{m.minutes}m</span>
+      </button>
+    )
+  }
+
+  const kicker = entry.parent
+    ? `Module ${entry.topIndex + 1} · Deep dive ${(entry.subIndex ?? 0) + 1} of ${entry.subCount} · ~${active.minutes} min`
+    : `Module ${entry.topIndex + 1} of ${modules.length} · ~${active.minutes} min`
+
   return (
     <div className={s.guide}>
       <div className={s.toolbar}>
@@ -129,9 +179,10 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
           onChange={e => goTo(e.target.value)}
           aria-label="Jump to module"
         >
-          {modules.map(m => (
-            <option key={m.id} value={m.id}>
-              {progress.completedModules.includes(m.id) ? '✓ ' : ''}{m.navLabel}
+          {flat.map(e => (
+            <option key={e.module.id} value={e.module.id}>
+              {progress.completedModules.includes(e.module.id) ? '✓ ' : ''}
+              {e.parent ? `   └ ${e.module.navLabel}` : e.module.navLabel}
             </option>
           ))}
         </select>
@@ -140,35 +191,22 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
       <div className={s.body}>
         <nav className={s.sidebar}>
           <p className={s.sidebarHeading}>Modules</p>
-          {modules.map(m => (
-            <button
-              key={m.id}
-              type="button"
-              className={`${s.moduleItem} ${m.id === activeId ? s.moduleItemActive : ''}`}
-              onClick={() => goTo(m.id)}
-            >
-              <span className={s.moduleTick}>{progress.completedModules.includes(m.id) ? '✓' : ''}</span>
-              <span className={s.moduleLabel}>{m.navLabel}</span>
-              <span className={s.moduleMinutes}>{m.minutes}m</span>
-            </button>
-          ))}
+          {flat.map(sidebarItem)}
         </nav>
 
         <div className={s.lessonPane} ref={paneRef}>
           <div className={s.lessonInner}>
-            <p className={s.lessonKicker}>
-              Module {activeIndex + 1} of {modules.length} · ~{active.minutes} min
-            </p>
+            <p className={s.lessonKicker}>{kicker}</p>
             <h2 className={s.lessonTitle}>{active.title}</h2>
             <p className={s.lessonSubtitle}>{active.subtitle}</p>
 
             {active.blocks.map(renderBlock)}
 
-            {allDone && activeIndex === modules.length - 1 && (
+            {allDone && activeIndex === flat.length - 1 && (
               <div className={s.completeBanner}>
                 <span>🎉</span>
                 <span>
-                  <strong>Course complete.</strong> All {modules.length} modules done — the reference
+                  <strong>Course complete.</strong> All {flat.length} modules done — the reference
                   shelves and reading paths are yours whenever you need them.
                 </span>
               </div>
@@ -176,20 +214,20 @@ export default function CourseShell({ course, onBack, backLabel = '← Back' }: 
 
             <div className={s.footerNav}>
               {activeIndex > 0 && (
-                <button type="button" className={s.btn} onClick={() => goTo(modules[activeIndex - 1].id)}>
-                  ← {modules[activeIndex - 1].navLabel}
+                <button type="button" className={s.btn} onClick={() => goTo(flat[activeIndex - 1].module.id)}>
+                  ← {flat[activeIndex - 1].module.navLabel}
                 </button>
               )}
               <span className={s.footerSpacer} />
               {progress.completedModules.includes(active.id) ? (
-                activeIndex < modules.length - 1 && (
-                  <button type="button" className={`${s.btn} ${s.btnPrimary}`} onClick={() => goTo(modules[activeIndex + 1].id)}>
-                    {modules[activeIndex + 1].navLabel} →
+                activeIndex < flat.length - 1 && (
+                  <button type="button" className={`${s.btn} ${s.btnPrimary}`} onClick={() => goTo(flat[activeIndex + 1].module.id)}>
+                    {flat[activeIndex + 1].module.navLabel} →
                   </button>
                 )
               ) : (
                 <button type="button" className={`${s.btn} ${s.btnPrimary}`} onClick={completeAndContinue}>
-                  {activeIndex < modules.length - 1 ? 'Mark complete & continue →' : 'Mark complete ✓'}
+                  {activeIndex < flat.length - 1 ? 'Mark complete & continue →' : 'Mark complete ✓'}
                 </button>
               )}
             </div>

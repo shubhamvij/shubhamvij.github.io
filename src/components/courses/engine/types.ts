@@ -16,6 +16,8 @@ export interface CourseModule {
   subtitle: string
   minutes: number
   blocks: LessonBlock[]
+  /** Optional deep-dive children, rendered indented under this module. One level only. */
+  subchapters?: CourseModule[]
 }
 
 export interface CourseDefinition {
