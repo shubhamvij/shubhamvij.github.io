@@ -1,5 +1,4 @@
 'use client'
-import { useCallback, useState } from 'react'
 import s from './learn.module.css'
 import BootSplash from './BootSplash'
 import CourseLibrary from './CourseLibrary'
@@ -10,11 +9,16 @@ interface Props {
   /** Current course slug (controlled by the window manager / URL). */
   slug: string | null
   onNavigate: (slug: string | null) => void
+  /**
+   * Boot state is owned by the caller (HomeClient) so it survives content
+   * remounts — minimize/restore and viewport-breakpoint changes unmount the
+   * window body. Like a program: boots when opened, stays booted until closed.
+   */
+  booted: boolean
+  onBooted: () => void
 }
 
-export default function CoursewareShell({ slug, onNavigate }: Props) {
-  const [booted, setBooted] = useState(false)
-  const handleBootDone = useCallback(() => setBooted(true), [])
+export default function CoursewareShell({ slug, onNavigate, booted, onBooted }: Props) {
 
   // Course prose may cross-link other courses (/learn/<slug>); swap in place
   // instead of reloading the page.
@@ -30,7 +34,7 @@ export default function CoursewareShell({ slug, onNavigate }: Props) {
   if (!booted) {
     return (
       <div className={s.shell}>
-        <BootSplash onDone={handleBootDone} />
+        <BootSplash onDone={onBooted} />
       </div>
     )
   }

@@ -25,11 +25,14 @@ profile collision.
 
 ## Gotchas
 
-- **Screensaver:** the desktop sleeps after 30s without input
-  (content/settings.yaml) and a three.js canvas then swallows all clicks —
-  Playwright actionability checks will spin forever instead of waking it.
-  Sprinkle `page.mouse.move(...)` between waits; any locator failure that
-  retries >30s cascades into this. Keep `page.setDefaultTimeout(6000)`.
+- **Screensaver:** the desktop sleeps after 60s without input
+  (content/settings.yaml; localStorage `screenSaver.timeout` overrides it —
+  set it low in tests to exercise sleep quickly) and a three.js canvas then
+  swallows all clicks — Playwright actionability checks will spin forever
+  instead of waking it. Sprinkle `page.mouse.move(...)` between waits; any
+  locator failure that retries past the timeout cascades into this. Keep
+  `page.setDefaultTimeout(6000)`. A visible (non-minimized) Vijcarta window
+  suppresses idle sleep entirely.
 - **Autoplay policy is untestable under automation:** CDP grants sticky user
   activation (`navigator.userActivation.hasBeenActive === true` on a fresh
   page, even headed, even with `--autoplay-policy=user-gesture-required`).

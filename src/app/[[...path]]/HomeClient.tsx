@@ -66,6 +66,9 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
   const [sleeping, setSleeping] = useState(false)
   const [blogSlug, setBlogSlug] = useState<string | null>(initialSection === 'blog' ? initialSlug : null)
   const [learnSlug, setLearnSlug] = useState<string | null>(initialSection === 'learn' ? initialSlug : null)
+  // Vijcarta boots once per "program run": owned here so it survives window
+  // content remounts (minimize/restore, resize); reset when the window closes.
+  const [learnBooted, setLearnBooted] = useState(false)
   const [financeShareCode, setFinanceShareCode] = useState<string | null>(null)
   const suppressUrlSync = useRef(false)
   const closeGuardsRef = useRef<Record<string, (() => boolean) | null>>({})
@@ -104,9 +107,14 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
     setSleeping(false)
   }, [])
 
-  useIdleTimer(idleTimeout * 1000, handleSleep, phase === 'desktop' && !sleeping)
+  const handleLearnBooted = useCallback(() => setLearnBooted(true), [])
 
   const { windows, openWindow, closeWindow, focusWindow, minimizeWindow, toggleMaximize, updateWindowGeometry } = useWindowManager()
+
+  // No screen saver while Vijcarta is on screen — like a media player, an open
+  // course suppresses idle sleep; a minimized one doesn't.
+  const learnVisible = windows.some(w => w.id === 'learn' && !w.isMinimized)
+  useIdleTimer(idleTimeout * 1000, handleSleep, phase === 'desktop' && !sleeping && !learnVisible)
 
   // Open initial window from URL on mount, restoring cookie-saved windows
   const initializedRef = useRef(false)
@@ -196,7 +204,10 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
       }
     }
     if (id === 'blog') setBlogSlug(null)
-    if (id === 'learn') setLearnSlug(null)
+    if (id === 'learn') {
+      setLearnSlug(null)
+      setLearnBooted(false) // next open boots the CD-ROM again
+    }
   }, [closeWindow, windows])
 
   // A window's content can register a guard (e.g. unsaved changes) that intercepts the close.
@@ -284,6 +295,8 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
       if (!section) {
         ROUTABLE_SECTIONS.forEach(s => closeWindow(s))
         setBlogSlug(null)
+        setLearnSlug(null)
+        setLearnBooted(false)
       } else if (WINDOW_TITLES[section]) {
         openWindow(section, WINDOW_TITLES[section])
         if (section === 'blog') {
@@ -303,7 +316,7 @@ export default function HomeClient({ socialLinks, defaultScreenSaver, defaultIdl
   function getWindowContent(id: string) {
     switch (id) {
       case 'blog': return <BlogList initialSlug={blogSlug} onNavigate={handleBlogNavigate} onInternalNavigate={handleInternalNavigate} />
-      case 'learn': return <CoursewareShell slug={learnSlug} onNavigate={handleLearnNavigate} />
+      case 'learn': return <CoursewareShell slug={learnSlug} onNavigate={handleLearnNavigate} booted={learnBooted} onBooted={handleLearnBooted} />
       case 'resume': return <ResumeViewer />
       case 'research': return <ScholarFeed />
       case 'about': return <AboutContent />

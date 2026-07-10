@@ -17,9 +17,16 @@ beforeEach(() => {
   invalidateCourseProgressCaches()
 })
 
+// Mirrors HomeClient: the caller owns both the slug and the booted flag, so
+// boot state survives content remounts (window minimize/restore, resize).
+function ControlledShell({ slug, onNavigate }: { slug: string | null; onNavigate: (s: string | null) => void }) {
+  const [booted, setBooted] = useState(false)
+  return <CoursewareShell slug={slug} onNavigate={onNavigate} booted={booted} onBooted={() => setBooted(true)} />
+}
+
 function Harness({ initialSlug = null }: { initialSlug?: string | null }) {
   const [slug, setSlug] = useState<string | null>(initialSlug)
-  return <CoursewareShell slug={slug} onNavigate={setSlug} />
+  return <ControlledShell slug={slug} onNavigate={setSlug} />
 }
 
 function skipBoot() {
@@ -63,26 +70,43 @@ describe('CoursewareShell', () => {
   })
 
   it('falls back to the library for an unknown slug', () => {
-    render(<CoursewareShell slug="not-a-course" onNavigate={vi.fn()} />)
+    render(<ControlledShell slug="not-a-course" onNavigate={vi.fn()} />)
     skipBoot()
     expect(screen.getByText('Contents')).toBeDefined()
   })
 
   it('swaps courses in place once booted — no second boot sequence', () => {
-    const { rerender } = render(<CoursewareShell slug={null} onNavigate={vi.fn()} />)
+    const { rerender } = render(<ControlledShell slug={null} onNavigate={vi.fn()} />)
     skipBoot()
     expect(screen.getByText('Contents')).toBeDefined()
 
     // A launch link elsewhere on the desktop updates the slug prop; the course
     // must appear immediately, without replaying the CD-ROM intro.
-    rerender(<CoursewareShell slug="attention-mechanisms" onNavigate={vi.fn()} />)
+    rerender(<ControlledShell slug="attention-mechanisms" onNavigate={vi.fn()} />)
     expect(screen.getByRole('heading', { name: 'Attention, from scratch' })).toBeDefined()
     expect(screen.queryByText(/autorun\.exe/)).toBeNull()
   })
 
+  it('boot state lives with the caller: a remount while booted skips the splash', () => {
+    // Minimize/restore (and breakpoint changes) unmount and remount window
+    // content, so the shell must report boot completion upward instead of
+    // remembering it locally — like a program that stays running.
+    const onBooted = vi.fn()
+    const { unmount } = render(
+      <CoursewareShell slug={null} onNavigate={vi.fn()} booted={false} onBooted={onBooted} />
+    )
+    skipBoot()
+    expect(onBooted).toHaveBeenCalledTimes(1)
+
+    unmount()
+    render(<CoursewareShell slug={null} onNavigate={vi.fn()} booted={true} onBooted={vi.fn()} />)
+    expect(screen.queryByText(/autorun\.exe/)).toBeNull()
+    expect(screen.getByText('Contents')).toBeDefined()
+  })
+
   it('cross-course links inside lessons swap the course through onNavigate', () => {
     const onNavigate = vi.fn()
-    render(<CoursewareShell slug="attention-mechanisms" onNavigate={onNavigate} />)
+    render(<ControlledShell slug="attention-mechanisms" onNavigate={onNavigate} />)
     skipBoot()
     // Module 7 prose links the GFM course.
     fireEvent.click(screen.getByRole('button', { name: /7\. One mental model/ }))
