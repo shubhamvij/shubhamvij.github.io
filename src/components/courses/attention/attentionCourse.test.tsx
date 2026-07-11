@@ -133,4 +133,11 @@ describe('Attention course through CourseShell', () => {
     fireEvent.click(screen.getAllByText('multi-head attention')[0])
     expect(screen.getByText(/what am I looking for\?/)).toBeDefined()
   })
+
+  it('2.3 explains why residuals add instead of concatenating', () => {
+    render(<CourseShell course={attentionCourse} />)
+    fireEvent.click(screen.getByRole('button', { name: /2\.3 Residuals & LayerNorm/ }))
+    expect(screen.getByText('Why add, not concatenate?')).toBeDefined()
+    expect(screen.getByText(/instead of CONCATENATING it\?/)).toBeDefined()
+  })
 })

@@ -220,6 +220,26 @@ export const BLOCK_SUBCHAPTERS: CourseModule[] = [
       },
       { kind: 'widget', widget: 'residual-stream' },
       {
+        kind: 'callout',
+        icon: '⚖️',
+        title: 'Why add, not concatenate?',
+        body: (
+          <>
+            Heads&apos; outputs get concatenated (module 2), DenseNets concatenate every skip — so why is the
+            residual stream a running <em>sum</em>, not a growing list? <strong>Stackability:</strong>{' '}
+            concatenation grows the width at every sublayer (d → 2d → 4d → …); 192 sublayers deep nothing fits,
+            and every layer would need different-shaped weights. Adding keeps output shape = input shape — the
+            LEGO property. <strong>Editable memory:</strong> an add writes the update into the <em>same</em>{' '}
+            feature space, so a later layer can strengthen, refine, or cancel an earlier layer&apos;s write;
+            concatenation is append-only — old features sit frozen in their own columns forever.{' '}
+            <strong>And the two are cousins:</strong> W·[x; f(x)] = W₁x + W₂f(x), so concat-then-mix IS a
+            learned add. Multi-head attention uses exactly that (concat once, at fixed width, then W_O). The
+            residual connection is the special case with the mix frozen to identity — frozen precisely so the
+            gradient highway can never be trained away.
+          </>
+        ),
+      },
+      {
         kind: 'prose',
         body: (
           <>
@@ -273,6 +293,15 @@ export const BLOCK_SUBCHAPTERS: CourseModule[] = [
               { text: 'dropping the mean-subtraction (and bias) — only rescaling by the root-mean-square, cheaper with matching quality', correct: true, explain: 'Zhang & Sennrich\'s ablation: re-centering barely matters, re-scaling is the active ingredient. Llama-class models ship it.' },
               { text: 'normalizing over the batch instead', explain: 'RMSNorm keeps LayerNorm\'s per-token axis — it removes an operation, not the axis.' },
               { text: 'adding a second learned matrix', explain: 'It *removes* parameters (the bias), rather than adding any.' },
+            ],
+          },
+          {
+            id: 'am2-3-q5',
+            prompt: 'Why does the residual stream ADD each sublayer\'s output instead of CONCATENATING it?',
+            options: [
+              { text: 'Concatenation would be too slow to compute', explain: 'One concat is nearly free — the problem is shape, not speed: width doubling at every sublayer means nothing stacks.' },
+              { text: 'Adding keeps output shape = input shape so blocks stack, and lands edits in the same feature space where later layers can refine or cancel them — concat grows the width and freezes old features in place', correct: true, explain: 'And W·[x; f(x)] = W₁x + W₂f(x): concat-then-mix is just a learned add. The residual freezes that mix to identity so the gradient highway survives training.' },
+              { text: 'Softmax requires all inputs to have equal width', explain: 'Softmax normalizes attention scores — it never sees the residual stream\'s width.' },
             ],
           },
         ],
