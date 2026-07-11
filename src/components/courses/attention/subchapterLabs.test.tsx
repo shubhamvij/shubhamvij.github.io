@@ -68,6 +68,26 @@ describe('PositionLab', () => {
     fireEvent.click(screen.getByRole('button', { name: /ALiBi/ }))
     expect(screen.getByText(/linear distance penalty/i)).toBeDefined()
   })
+
+  it('injection map: default tab hooks position at the input, once', () => {
+    render(<PositionLab />)
+    expect(screen.getByText(/the layers above never see position again/i)).toBeDefined()
+    expect(screen.getByRole('img', { name: /sinusoidal encoding is added to the embedding at the input/i })).toBeDefined()
+  })
+
+  it('injection map: RoPE moves the hook inside attention', () => {
+    render(<PositionLab />)
+    fireEvent.click(screen.getByRole('button', { name: /RoPE/ }))
+    expect(screen.getByText(/nothing added at the input/i)).toBeDefined()
+    expect(screen.getByText(/rotated right after their projections/i)).toBeDefined()
+  })
+
+  it('injection map: ALiBi hooks between the scores and the softmax', () => {
+    render(<PositionLab />)
+    fireEvent.click(screen.getByRole('button', { name: /ALiBi/ }))
+    expect(screen.getByText(/no position vectors anywhere/i)).toBeDefined()
+    expect(screen.getByText(/between QKᵀ and softmax/i)).toBeDefined()
+  })
 })
 
 describe('HeadMatrixLab', () => {

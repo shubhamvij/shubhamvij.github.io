@@ -175,6 +175,105 @@ function AlibiPanel() {
   )
 }
 
+// ---------- Injection map: where each scheme hooks into the block ----------
+
+type Slot = 'add' | 'rotate' | 'bias'
+
+const INJECTION: Record<Tab, { slot: Slot; aria: string; caption: ReactNode }> = {
+  Sinusoidal: {
+    slot: 'add',
+    aria: 'Injection map: sinusoidal encoding is added to the embedding at the input, once',
+    caption: (
+      <>sin/cos barcode <strong>⊕-added to the token embedding — once, at the input</strong>; the layers above never see position again</>
+    ),
+  },
+  Learned: {
+    slot: 'add',
+    aria: 'Injection map: learned absolute encoding is added to the embedding at the input, once',
+    caption: (
+      <>trained table row <strong>⊕-added to the token embedding — once, at the input</strong> — the same ⊕ the Order-Blindness Lab&apos;s positions toggle flips</>
+    ),
+  },
+  RoPE: {
+    slot: 'rotate',
+    aria: 'Injection map: RoPE rotates Q and K inside attention, at every layer',
+    caption: (
+      <><strong>nothing added at the input</strong> — Q and K are rotated right after their projections, inside attention, at every layer</>
+    ),
+  },
+  ALiBi: {
+    slot: 'bias',
+    aria: 'Injection map: ALiBi biases the attention scores inside attention, at every layer',
+    caption: (
+      <><strong>no position vectors anywhere</strong> — −slope·distance joins the scores between QKᵀ and softmax, at every layer</>
+    ),
+  },
+}
+
+const SLOT_TITLES: Record<Slot, string> = {
+  add: 'input injection — used by sinusoidal & learned absolute',
+  rotate: 'Q/K rotation — used by RoPE',
+  bias: 'score bias — used by ALiBi',
+}
+
+interface MapNode { label: string; x: number; w: number; slot?: Slot }
+
+const MAP_NODES: MapNode[] = [
+  { label: 'embed', x: 8, w: 36 },
+  { label: '⊕ pos', x: 58, w: 34, slot: 'add' },
+  { label: 'make Q,K,V', x: 106, w: 56 },
+  { label: '↻ rotate Q,K', x: 176, w: 62, slot: 'rotate' },
+  { label: 'QKᵀ/√d', x: 252, w: 42 },
+  { label: '+ dist bias', x: 308, w: 56, slot: 'bias' },
+  { label: 'softmax', x: 378, w: 44 },
+  { label: '·V', x: 436, w: 24 },
+]
+
+/** Persistent pipeline strip: same on every tab, only the active hook moves. */
+function InjectionMap({ tab }: { tab: Tab }) {
+  const active = INJECTION[tab]
+  return (
+    <>
+      <svg viewBox="0 0 480 84" className={s.labCanvas} role="img" aria-label={active.aria}>
+        <text x={8} y={13} fontSize={8.5} fill="#888" letterSpacing={0.8}>WHERE IT ENTERS THE BLOCK</text>
+        {/* once-vs-every-layer regions, in the block diagram's embed/MHA tints */}
+        <rect x={4} y={20} width={94} height={34} rx={3} fill="#d8e3f5" opacity={0.55} />
+        <rect x={100} y={20} width={364} height={34} rx={3} fill="#cfe0f5" opacity={0.4} />
+        <line x1={8} y1={62} x2={94} y2={62} stroke="#9ab0cc" />
+        <line x1={104} y1={62} x2={460} y2={62} stroke="#9ab0cc" />
+        <text x={51} y={74} textAnchor="middle" fontSize={8} fill="#666">at the input · once</text>
+        <text x={282} y={74} textAnchor="middle" fontSize={8} fill="#666">inside attention · every layer ×N</text>
+        {MAP_NODES.map((nd, i) => {
+          const isSlot = nd.slot !== undefined
+          const on = isSlot && nd.slot === active.slot
+          return (
+            <g key={nd.label}>
+              {i > 0 && <text x={nd.x - 8} y={40.5} textAnchor="middle" fontSize={9} fill="#999">→</text>}
+              <rect
+                x={nd.x} y={27} width={nd.w} height={20} rx={3}
+                fill={on ? '#fff7e0' : isSlot ? '#f6f4ec' : '#fff'}
+                stroke={on ? '#0a246a' : isSlot ? '#b0a898' : '#8898a8'}
+                strokeWidth={on ? 2 : 1}
+                strokeDasharray={isSlot && !on ? '3 2' : undefined}
+              >
+                {isSlot && <title>{SLOT_TITLES[nd.slot!]}</title>}
+              </rect>
+              <text
+                x={nd.x + nd.w / 2} y={40} textAnchor="middle" fontSize={8}
+                fontWeight={on ? 'bold' : 'normal'}
+                fill={on ? '#0a246a' : isSlot ? '#a09880' : '#333'}
+              >
+                {nd.label}
+              </text>
+            </g>
+          )
+        })}
+      </svg>
+      <p className={s.flowShape} style={{ margin: '4px 0 8px' }}>{active.caption}</p>
+    </>
+  )
+}
+
 export default function PositionLab() {
   const [tab, setTab] = useState<Tab>('Sinusoidal')
 
@@ -222,6 +321,7 @@ export default function PositionLab() {
             </button>
           ))}
         </div>
+        <InjectionMap tab={tab} />
         {panel[tab]}
       </div>
     </div>
