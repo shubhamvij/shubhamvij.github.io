@@ -62,19 +62,22 @@ describe('RelationGraphLab', () => {
 describe('TextGlueLab', () => {
   it('starts on OFA: trained GNN, GNN predicts', () => {
     render(<TextGlueLab />)
-    expect(screen.getByText('trained here: the GNN + class-node MLP head')).toBeDefined()
+    const trainedStat = screen.getByText(/^trained here:/)
+    expect(within(trainedStat).getByText('the GNN + class-node MLP head')).toBeDefined()
     expect(screen.getByText('GNN predicts')).toBeDefined()
   })
 
   it('switches wirings and flips the frozen/trained readouts', () => {
     render(<TextGlueLab />)
     fireEvent.click(screen.getByRole('button', { name: 'GraphGPT' }))
-    expect(screen.getByText('trained here: the projector — nothing else')).toBeDefined()
+    const trainedStatGraphGPT = screen.getByText(/^trained here:/)
+    expect(within(trainedStatGraphGPT).getByText('the projector — nothing else')).toBeDefined()
     expect(screen.getByText('LLM predicts')).toBeDefined()
     fireEvent.click(screen.getByRole('button', { name: 'LLaGA' }))
     expect(screen.getByText(/0 params/)).toBeDefined()
     fireEvent.click(screen.getByRole('button', { name: 'UniGraph' }))
-    expect(screen.getByText('trained here: LM + GNN jointly, end to end')).toBeDefined()
+    const trainedStatUniGraph = screen.getByText(/^trained here:/)
+    expect(within(trainedStatUniGraph).getByText('LM + GNN jointly, end to end')).toBeDefined()
   })
 
   it('explains a slot on click', () => {

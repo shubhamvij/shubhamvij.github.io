@@ -111,7 +111,7 @@ export default function TextGlueLab() {
             const st = FILL[slot.state]
             const empty = slot.label === ''
             return (
-              <g key={i} onClick={() => !empty && setPicked(i)} style={{ cursor: empty ? 'default' : 'pointer' }} data-testid={`slot-${i}`}>
+              <g key={i} onClick={() => !empty && setPicked(i)} style={{ cursor: empty ? 'default' : 'pointer' }}>
                 <rect
                   x={x} y={26} width={86} height={46} rx={4}
                   fill={empty ? 'none' : st.fill}
@@ -135,8 +135,8 @@ export default function TextGlueLab() {
           <text x={10} y={104} fontSize={8.5} fill="#333" fontWeight="bold">conditioning: <tspan fontWeight="normal">{def.conditioning}</tspan></text>
         </svg>
         <div className={s.labControls}>
-          <span className={s.labStat}>trained here: {def.trained}</span>
-          <span className={s.labStat}>{def.locus}</span>
+          <span className={s.labStat}>trained here: <span className={s.labStatValue}>{def.trained}</span></span>
+          <span className={s.labStat}><span className={s.labStatValue}>{def.locus}</span></span>
         </div>
         {blurb && <p className={s.labNote}>{blurb}</p>}
         {!blurb && (
