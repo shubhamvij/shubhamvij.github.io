@@ -126,7 +126,8 @@ function RopePanel() {
         both vectors rotate, the angle <em>between</em> them (hence the score) depends only on the offset m−n:
         press <strong>shift both +5</strong> and watch the score not move. Different pairs get geometrically spaced
         θᵢ — fast pairs resolve nearby order like a second hand; slow pairs carry long-range position like an hour
-        hand.
+        hand. In the block anatomy&apos;s attention stepper this sits between step 1 (make Q, K, V) and step 2
+        (score + softmax): project first, rotate, then score — the embedding itself is never touched.
       </p>
     </>
   )
@@ -169,7 +170,8 @@ function AlibiPanel() {
         vectors, no rotations. Each head gets its own slope (geometric series 1/2, 1/4, …), so some heads stay
         local while others keep long reach. Because the rule &quot;further = fainter&quot; is the same at any length, ALiBi
         models <strong>extrapolate</strong>: train at 1k tokens, run at 4k, and position 3000 needs no new
-        parameters — the penalty just keeps going.
+        parameters — the penalty just keeps going. In stepper terms it lives inside step 2 — after QKᵀ, before
+        the softmax.
       </p>
     </>
   )

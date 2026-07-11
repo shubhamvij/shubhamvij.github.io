@@ -88,6 +88,14 @@ describe('PositionLab', () => {
     expect(screen.getByText(/no position vectors anywhere/i)).toBeDefined()
     expect(screen.getByText(/between QKᵀ and softmax/i)).toBeDefined()
   })
+
+  it('RoPE and ALiBi notes anchor to the attention stepper steps', () => {
+    render(<PositionLab />)
+    fireEvent.click(screen.getByRole('button', { name: /RoPE/ }))
+    expect(screen.getByText(/project first, rotate, then score/i)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /ALiBi/ }))
+    expect(screen.getByText(/after QKᵀ, before the softmax/i)).toBeDefined()
+  })
 })
 
 describe('HeadMatrixLab', () => {
