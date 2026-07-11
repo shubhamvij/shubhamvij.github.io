@@ -133,10 +133,26 @@ quotes in the session record):
   Baselines are "task-specific heterogeneous graph transformers"
   (HGT/HAN/GraphGPS), not "GNNs".
 
-Still to fact-check during implementation: JMP / MACE / UMA molecular-wing
-claims (5.1 sidebar — agent pass pending at spec-update time; fold results
-in before writing 5.1 prose), Finkelshtein et al. equivariance-recipe
-phrasing, and the assembled Zoo Map cell strings as a whole.
+- **Molecular wing (JMP / UMA / MACE-MP-0)**: JMP pretrained on ~120M
+  DFT-labeled systems (OC20 100M + OC22 8M + ANI-1x 2M + Transition-1x
+  10M), backbone GemNet-OC — call it a "geometric MPNN", NOT "equivariant"
+  (its internal features are invariant scalars; reserve "equivariant" for
+  eSEN/MACE); pretraining = supervised multi-task energy+force regression
+  with per-dataset heads. UMA: eSEN equivariant GNN + MoLE (mixture of
+  linear experts routed on global features only — charge, spin, DFT task,
+  composition — so experts collapse to one dense matrix per system:
+  UMA-M 1.4B total / ~50M active params); ~half-billion structures, >30B
+  atoms; single shared energy head. MACE-MP-0: ACE-style high-body-order
+  equivariant message passing (4-body, 2 layers), trained on MPtrj (~1.5M
+  Materials Project configs); "out of the box" claim carries the paper's
+  own fine-tuning caveat. CORRECTION to shipped teaser text: inputs are
+  atomic numbers + 3D positions with radius-based neighbor graphs — NOT
+  "atoms and bonds"; and cross-domain transfer is engineered (per-dataset
+  heads / task conditioning), not automatic.
+
+Still to fact-check during implementation: Finkelshtein et al.
+equivariance-recipe phrasing, and the assembled Zoo Map cell strings as a
+whole.
 
 Refuted 1-2 (do NOT teach without re-verification): that Wang et al.'s
 universal-GFM category subdivides into "graph models as predictors / language
@@ -222,7 +238,10 @@ relation) pair — this is what "query conditioning inside message passing"
 means on the Zoo Map). What transfers (both GNNs' weights) vs what is
 recomputed per KG (the relation graph itself). Closing sidebar paragraph:
 the molecular wing (JMP/UMA) as the other domain vocabulary — the periodic
-table is a god-given token set; kept brief, no lab.
+table as token set, where a "token" is an atom = element + 3D position
+(radius neighbor graphs, not bonds), and transfer across chemistry is
+engineered via per-dataset heads (JMP) or input-side task/charge/spin
+conditioning (UMA); kept brief, no lab.
 
 Widget `relation-graph` — **Relation-Graph Builder**, two linked panels:
 
