@@ -146,7 +146,7 @@ const MHA_STEPS: { chip: string; heading: string; items: StageItem[]; shape: str
       { label: 'attention output (the edit)', data: FLOW.a, cols: DCOLS },
     ],
     shape: '[4×3] ⌢ [4×3] = [4×6] → W_O → [4×6]',
-    note: 'Concatenation happens HERE — at fixed, planned width (3+3=6), once — and W_O immediately mixes the heads\' writes into shared directions of the residual stream. Without W_O each head would be locked to its own 3 columns forever (deep dive 2.2).',
+    note: 'Concatenation happens HERE — at fixed, planned width (3+3=6), once — and W_O immediately mixes the heads\' writes into shared directions of the residual stream. Without W_O each head\'s write would be locked to its own 3 columns of the stream (deep dive 2.2).',
   },
 ]
 
