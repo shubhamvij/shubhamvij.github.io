@@ -33,15 +33,26 @@ export const BLOCK_SUBCHAPTERS: CourseModule[] = [
           <>
             <p>
               So position must be <em>injected</em>. Every scheme answers two questions: <strong>where</strong>{' '}
-              does position enter (added to embeddings once at the input, or applied inside attention at every
-              layer?) and <strong>what</strong> does it encode (my absolute index, or my distance to you?).
-              The four classic answers:
+              does position enter, and <strong>what</strong> does it encode (my absolute index, or my distance
+              to you?). The &quot;where&quot; has exactly two families — the map at the top of the lab below
+              shows each scheme&apos;s hook into the block you dissected on the module page:
             </p>
             <ul>
-              <li><strong>Sinusoidal</strong> (Transformer, 2017) — fixed sin/cos barcode added at the input. Absolute, zero parameters, defined for any length.</li>
-              <li><strong>Learned absolute</strong> (GPT-2, BERT) — a trainable row per position, added at the input. Absolute, simple, cannot represent positions past the training length.</li>
-              <li><strong>RoPE</strong> (2021; Llama, Qwen, DeepSeek) — rotate each Q/K dimension-pair by position×θ, inside attention, every layer. Scores depend only on relative offset.</li>
-              <li><strong>ALiBi</strong> (2022) — no vectors at all: subtract slope×distance from each attention score. Relative, parameter-free, extrapolates well.</li>
+              <li>
+                <strong>At the input, once — a vector ⊕-added to the token embedding</strong>{' '}
+                (what the positions toggle above just did):
+                <ul>
+                  <li><strong>Sinusoidal</strong> (Transformer, 2017) — fixed sin/cos barcode. Absolute, zero parameters, defined for any length.</li>
+                  <li><strong>Learned absolute</strong> (GPT-2, BERT) — a trainable row per position. Absolute, simple, cannot represent positions past the training length.</li>
+                </ul>
+              </li>
+              <li>
+                <strong>Inside attention, at every layer — no position vectors at all</strong>:
+                <ul>
+                  <li><strong>RoPE</strong> (2021; Llama, Qwen, DeepSeek) — rotate each Q/K dimension-pair by position×θ, right after the Q/K projections. Scores then depend only on relative offset.</li>
+                  <li><strong>ALiBi</strong> (2022) — subtract slope×distance from each score, just before the softmax. Relative, parameter-free, extrapolates well.</li>
+                </ul>
+              </li>
             </ul>
           </>
         ),

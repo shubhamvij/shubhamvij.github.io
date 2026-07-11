@@ -8,6 +8,7 @@ import ParamBudgetLab from './ParamBudgetLab'
 import HeadShareLab from './HeadShareLab'
 import FlashTilingLab from './FlashTilingLab'
 import KvCacheLab from './KvCacheLab'
+import { BLOCK_SUBCHAPTERS } from './subchapters'
 
 describe('OrderBlindLab', () => {
   it('shows permutation equivariance without positions, broken symmetry with', () => {
@@ -200,5 +201,15 @@ describe('KvCacheLab', () => {
     expect(screen.getByText(/1\.07 GB/)).toBeDefined()
     fireEvent.change(screen.getByLabelText(/context length/i), { target: { value: '4' } }) // 131072
     expect(screen.getByText(/17\.18 GB/)).toBeDefined()
+  })
+})
+
+describe('2.1 Embeddings & positions prose', () => {
+  it('groups the four PE schemes into the two injection families', () => {
+    const m21 = BLOCK_SUBCHAPTERS[0]
+    expect(m21.id).toBe('block-embeddings')
+    render(<>{m21.blocks.map((b, i) => (b.kind === 'prose' ? <div key={i}>{b.body}</div> : null))}</>)
+    expect(screen.getByText(/At the input, once — a vector ⊕-added to the token embedding/)).toBeDefined()
+    expect(screen.getByText(/Inside attention, at every layer — no position vectors at all/)).toBeDefined()
   })
 })
