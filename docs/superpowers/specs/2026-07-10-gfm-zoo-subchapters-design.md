@@ -90,18 +90,53 @@ KumoRFM-2 79.60 avg AUROC on RelBenchV1 binary classification vs RelGNN
 underperformance and "reduces to historical mean"; the AUROC 0.5-vs-1.0
 column-encoder expressivity demo (purpose-built synthetic).
 
-NOT verified this pass — **must be independently fact-checked against the
-primary papers during implementation** (standing course practice;
-plan-embedded prose has carried transcription errors before):
+Verified 2026-07-11 (four-agent pass against the primary papers; verbatim
+quotes in the session record):
 
-- GraphAny (LinearGNN channel set, entropy-normalized distance features,
-  invariance argument), PRODIGY prompt-graph mechanics, G2T-FM / GraphPFN
-  specifics (5.3 material).
-- GraphBFF TCA/TAA mechanics, the ~85%-of-parameters figure, fusion
-  expressiveness claim, Finkelshtein et al. equivariance recipe (5.4
-  material) — some already appear in shipped course text but re-verify
-  anything restated.
-- JMP / MACE / UMA molecular-wing claims (5.1 sidebar).
+- **GraphAny**: five LinearGNN channels X/ĀX/Ā²X/(I−Ā)X/(I−Ā)²X
+  (row-normalized Ā); closed-form W* = F_L⁺Y_L on the target graph's
+  labeled nodes; learned MLP over t(t−1) entropy-normalized pairwise
+  distance features → attention over channels; permutation invariance
+  proved, attention module verbatim "independent to feature dimension d
+  and label dimension c". CORRECTION to shipped text: trained on one graph
+  using 120 LABELED nodes of Wisconsin (251-node graph), evaluated on 30
+  new graphs at 67.26% avg. Heterophilic graphs prefer "LinearHGC1, Linear
+  or LinearSGC1" — identity/high-pass, not exclusively high-pass.
+- **PRODIGY**: prompt graph = data graphs + per-class label nodes;
+  examples→label-node edges carry true/false attributes; second GNN
+  message-passes; readout = cosine similarity to label-node embeddings;
+  no parameter updates; pretrained on MAG240M + Wiki (neighbor matching +
+  multi-task).
+- **G2T-FM**: row = original features + neighbor mean/max/min (numerical)
+  / mean one-hot (categorical) + degree, PageRank, Laplacian eigenvectors,
+  PEARL learnable encodings (NO RWSE); backbone TabPFNv2 (also
+  TabPFN-2.5/LimiX in the current revision); both ICL (frozen) and
+  fine-tuned regimes, FT stronger.
+- **GraphPFN**: LimiX-based PFN with adjacency-masked sparse multi-head
+  attention adapters after every block; context/query attention masking;
+  pretrained on 1,600,000 synthetic datasets (multi-level degree-corrected
+  SBM + preferential attachment; graph-aware SCMs with MLP+GNN neurons).
+- **GraphBFF**: per-NODE-TYPE input projections W_τ + edge encoder (the
+  numerical/categorical/text feature-GROUPING scheme is related work it
+  critiques, not its own input stage — REFUTED as a GraphBFF description);
+  TCA = independent masked attention per edge-type set S with own
+  W_Q/W_K/W_V + edge bias, softmax within the S-restricted subset, outputs
+  summed, "about 85%" of parameters; TAA = per-node-type projection then
+  shared Q/K/V over sampled 2-hop ≤10/hop neighborhoods; fusion = learned
+  FFN Φ(h_tca, h_taa) inside a standard residual+LN+FFN block; Theorem 4.1
+  strictly-more-expressive (witness function); masked link prediction with
+  1:1 uniform negatives, concat + 2-layer MLP scorer, BCE, supervised
+  edges removed from the input graph; ~50B nodes+edges combined, 12 node
+  types / 20 relation types, 1B supervision edges, ≤12h on 64 B200 GPUs;
+  KL-Batching (cluster packing by ascending KL vs global type
+  distribution) + Round-Robin Batching over supervision-edge types.
+  Baselines are "task-specific heterogeneous graph transformers"
+  (HGT/HAN/GraphGPS), not "GNNs".
+
+Still to fact-check during implementation: JMP / MACE / UMA molecular-wing
+claims (5.1 sidebar — agent pass pending at spec-update time; fold results
+in before writing 5.1 prose), Finkelshtein et al. equivariance-recipe
+phrasing, and the assembled Zoo Map cell strings as a whole.
 
 Refuted 1-2 (do NOT teach without re-verification): that Wang et al.'s
 universal-GFM category subdivides into "graph models as predictors / language
@@ -257,18 +292,35 @@ sub-taxonomy source).
 
 ### 5.3 No features, no problem — structure + in-context (~7 min) — `zoo-in-context`
 
-Prose (all claims re-verified in the fact-check pass): the bet — abandon
-feature identity; lean on quantities every graph has, plus labeled examples
-at inference. GraphAny as the pure case: a bank of closed-form LinearGNN
-channels (identity, low-pass neighbor averages, high-pass differences)
-solved analytically on the target graph's own labeled nodes — zero learned
-input weights — and a learned attention over the CHANNELS' PREDICTIONS,
-computed from entropy-normalized pairwise distances (dimension- and
-permutation-invariant by construction). PRODIGY: few-shot examples wired
-into a prompt graph so message passing itself is the adapter. The PFN line:
-G2T-FM / GraphPFN turn each node into a table row (features + neighborhood
-aggregates + structural encodings) for a TabPFN-style prior-fitted
-transformer, pretrained on synthetic graphs.
+Prose (verified against the primary papers, 2026-07-11 agent pass): the
+bet — abandon feature identity; lean on quantities every graph has, plus
+labeled examples at inference. GraphAny as the pure case: FIVE closed-form
+LinearGNN channels — X, ĀX, Ā²X, (I−Ā)X, (I−Ā)²X with Ā the row-normalized
+adjacency ("identical, low-pass and high-pass spectral filters") — each
+solved analytically on the target graph's own labeled nodes via the
+pseudo-inverse (W* = F_L⁺Y_L; "requires no training"), and a learned MLP
+attention over the CHANNELS' PREDICTIONS, fed t(t−1) entropy-normalized
+pairwise squared-distance features (permutation-invariant by proof;
+verbatim "independent to feature dimension d and label dimension c").
+Training-setup fact: trained on ONE graph using Wisconsin's 120 LABELED
+nodes (the graph has 251 nodes — the currently shipped "120-node graph"
+phrasing is wrong and gets corrected when m5-q3 moves here), generalizing
+to 30 new graphs at 67.26% average accuracy. PRODIGY: few-shot examples
+wired into a prompt graph — data graphs (sampled k-hop neighborhoods) plus
+one LABEL NODE per class, examples connected to label nodes with true/false
+edge attributes — a second GNN message-passes over it and the prediction is
+cosine similarity between query and label-node embeddings; "without
+optimizing any parameters"; pretrained on MAG240M + Wiki with neighbor
+matching + multi-task objectives. The PFN line: G2T-FM turns each node
+into a table row (original features + per-feature neighbor mean/max/min
+aggregates + structural encodings: degree, PageRank, Laplacian
+eigenvectors, learnable PEARL embeddings) for a tabular FM (TabPFNv2
+primarily), used in-context or fine-tuned; GraphPFN instead BAKES the
+graph in — it starts from the LimiX tabular FM and adds adjacency-masked
+sparse attention adapters to every block, pretrained on 1.6M synthetic
+attributed graphs from a hand-designed prior (multi-level stochastic block
+models + preferential attachment; graph-aware structural causal models for
+attributes).
 
 Widget `channel-ensemble` — **Channel Ensemble Lab** (GraphAny):
 
@@ -276,14 +328,19 @@ Widget `channel-ensemble` — **Channel Ensemble Lab** (GraphAny):
   cross-community edges live; distinct implementation from module 4's
   HomophilyLab — that one scores a copy-your-neighbors rule; this one runs
   real least-squares LinearGNN channels).
-- Small-multiple panels, one per channel (X, AX, A²X, (I−A)X …): per-node
-  predicted class shown as node fill; per-channel accuracy chip.
+- Small-multiple panels, one per channel — all FIVE, matching the paper:
+  X, ĀX, Ā²X, (I−Ā)X, (I−Ā)²X (row-normalized Ā), labeled Linear /
+  LinearSGC1 / LinearSGC2 / LinearHGC1 / LinearHGC2: per-node predicted
+  class shown as node fill; per-channel accuracy chip. Each channel solved
+  by real least squares (pseudo-inverse) on the toy graph's labeled nodes.
 - A bar row: the attention weights over channels (computed live from the
   channel predictions' validation accuracy as an honest stand-in for the
   learned attention, labeled as such).
-- Drag homophily 1.0 → 0.0: low-pass channels' accuracy collapses,
-  high-pass rises, attention bars visibly cross — "it doesn't learn your
-  features; it learns which filter to trust, per graph."
+- Drag homophily 1.0 → 0.0: the low-pass channels' accuracy collapses and
+  the identity/high-pass channels take over; attention bars visibly cross —
+  "it doesn't learn your features; it learns which filter to trust, per
+  graph." (Wording matches the paper: heterophilic graphs prefer
+  LinearHGC1, Linear or LinearSGC1 — not exclusively high-pass.)
 
 Callout: prelims — "the attention over channel predictions is exactly
 scaled dot-product attention over a 5-token sequence: Attention course
@@ -297,18 +354,39 @@ Refs: GraphAny, PRODIGY, G2T-FM, GraphPFN, TabPFN.
 
 ### 5.4 Typed attention at industrial scale — GraphBFF (~7 min) — `zoo-graphbff`
 
-Prose (re-verify TCA/TAA details and the 85% figure against the paper):
-the bet — enterprise features sort into a few kinds; give each group a
-shared learned transformation (FT-Transformer per-feature tokenizers → the
-graph case) and make attention type-aware. The GraphBFF block: TCA
-(type-conditioned attention — separate sparse attention per relation type,
-where ~85% of the 1.4B parameters live) FUSED with TAA (type-agnostic
-attention over sampled neighborhoods); the pair provably more expressive
-than either alone; masked link prediction as the only objective.
-Finkelshtein et al.'s equivariance recipe as the theory backstop: symmetry
-principles dictate which layers a node-level GFM may have. Honest cost
-paragraph (kept from current module): shared per-group transforms cap
-expressivity; the grouping is a practitioner decision.
+Prose (verified against arXiv 2602.04768v2, 2026-07-11 agent pass): the
+bet — make the ARCHITECTURE type-aware and let scale do the rest. Input
+stage: each node type carries its own feature vector and a per-NODE-TYPE
+learned linear projection W_τ into the shared hidden dimension, plus an
+edge encoder (NOT per-modality group encoders — see below). The GraphBFF
+block: TCA (type-conditioned attention — an independent masked attention
+with its own W_Q/W_K/W_V and edge-bias per edge-type SET S ⊆ relation
+types, softmax normalized only within each S-restricted neighbor subset;
+singleton sets recover strict per-relation attention; set outputs summed;
+"about 85%" of the 1.4B parameters live here) FUSED with TAA
+(type-agnostic attention: per-node-type input projection, then one shared
+Q/K/V attention over a sampled neighborhood — 2 hops, ≤10 per hop in the
+paper) — fusion is a learned FFN Φ(h_tca, h_taa), then the standard
+residual + LayerNorm + block-FFN wrapper. Theorem 4.1: the pair is
+strictly more expressive than either alone (witness function neither
+realizes). Objective: masked link prediction — sampled positive edges
+removed from the input graph, 1:1 uniform negatives, concat + 2-layer MLP
+scorer, BCE; 1B supervision edges.
+
+The feature-GROUPING idea (partition features into numerical/categorical/
+text groups with a shared transformation per group — the FT-Transformer /
+TabFM lineage: G2T-FM, Finkelshtein et al.) is the OTHER wing of this bet:
+GraphBFF's related-work section describes it, credits it with making
+unseen schemas usable, and critiques its cost — "they can limit
+expressivity by forcing semantically distinct features through the same
+transformation"; grouping is a practitioner-driven open question. GraphBFF
+itself does NOT adopt it (its own inputs are per-node-type projections);
+the paper states its framework is compatible with any of those methods.
+Keep the honest-cost paragraph but attribute the grouping scheme to the
+TabFM-lineage models, never to GraphBFF's own input stage. Finkelshtein et
+al.'s equivariance recipe stays as the theory backstop for the family.
+Baseline naming: HGT/HAN/GraphGPS are "task-specific heterogeneous graph
+transformers" (the paper's framing), not "GNNs".
 
 Explicit division of labor with the attention course: its module 6 ("Graph
 transformer blocks") built the WHY of typed softmax (Typed Attention Lab);
@@ -318,16 +396,21 @@ link back rather than repeat.
 Widget `bff-anatomy` — **BFF Block Anatomy**, a 5-step forward-pass
 stepper on a small heterogeneous graph (3 node types, 3 relation types):
 
-1. Typed features enter per-group encoders: a numeric column, a categorical
-   one-hot, a text embedding each pass through their OWN small tokenizer →
-   same d (columns visibly align into one matrix).
+1. Per-node-type input projections: each node type's differently-sized raw
+   feature vector (e.g., user 4-dim, merchant 6-dim, device 3-dim) passes
+   through its OWN W_τ into the same hidden d (columns visibly align into
+   one matrix). Caption notes the alternative feature-grouping wing and
+   its trade-off in one line.
 2. TCA: per-relation-type attention masks light up as separate sparse
-   softmaxes (reuses the visual grammar of the attention course's typed
-   lab, one softmax per color).
-3. TAA: one shared attention over the sampled neighborhood (all edges, one
-   softmax).
-4. Fusion: the two messages combine into the node update.
-5. Masked-link head: one edge hidden, candidate scores rank live.
+   softmaxes, each with its own parameter chip (reuses the visual grammar
+   of the attention course's typed lab, one softmax per color; caption
+   notes the general form is per edge-type SET).
+3. TAA: one shared attention over the sampled 2-hop neighborhood (all
+   edge colors, one softmax; "sampled ≤10/hop" note).
+4. Fusion: h_tca and h_taa enter a small FFN Φ box → the node update
+   (labeled "learned combination", not a sum).
+5. Masked-link head: one edge hidden from the input, concat + MLP scores
+   candidates, ranked live.
 
 - Persistent parameter meter: where the 1.4B parameters live (TCA share
   highlighted), so the "~85%" claim is a picture.
