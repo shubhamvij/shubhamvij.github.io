@@ -91,22 +91,25 @@ describe('TextGlueLab', () => {
 describe('ChannelEnsembleLab', () => {
   it('renders all five LinearGNN channels', () => {
     render(<ChannelEnsembleLab />)
+    // getAllByText, not getByText: whichever channel is currently on top also appears
+    // as the nested value inside the "top filter: <value>" stat, so that one name has
+    // two matches. Same multi-match tolerance ZooMapLab's tests use above.
     for (const name of ['Linear', 'LinearSGC1', 'LinearSGC2', 'LinearHGC1', 'LinearHGC2']) {
-      expect(screen.getByText(name)).toBeDefined()
+      expect(screen.getAllByText(name).length).toBeGreaterThan(0)
     }
   })
 
-  it('shifts the trusted filter as homophily drops', () => {
+  it('shows the U-shape: low-pass wins at the ends, identity/high-pass in the mixed middle', () => {
     render(<ChannelEnsembleLab />)
     const slider = screen.getByLabelText(/homophily/i)
-    fireEvent.change(slider, { target: { value: '0' } })   // 100% homophily
-    const topAtHomophily = screen.getByText(/top filter:/).textContent
-    expect(topAtHomophily).toMatch(/LinearSGC/)
-    fireEvent.change(slider, { target: { value: '14' } })  // 0% homophily
-    const topAtHeterophily = screen.getByText(/top filter:/).textContent
-    // Paper: heterophilic graphs prefer LinearHGC1, Linear or LinearSGC1 —
-    // the toy graph lands on one of the identity/high-pass channels.
-    expect(topAtHeterophily).toMatch(/LinearHGC|Linear\b/)
-    expect(topAtHeterophily).not.toBe(topAtHomophily)
+    const topText = () => screen.getByText(/^top filter:/).textContent ?? ''
+    fireEvent.change(slider, { target: { value: '0' } })   // 100% homophily: low-pass wins
+    expect(topText()).toMatch(/LinearSGC/)
+    fireEvent.change(slider, { target: { value: '6' } })   // ~57% homophily: mixed middle
+    expect(topText()).toMatch(/LinearHGC|Linear\b/)
+    expect(topText()).not.toMatch(/LinearSGC/)
+    fireEvent.change(slider, { target: { value: '14' } })  // 0% homophily: cleanly bipartite —
+    // ĀX becomes a perfect community-flip detector, so low-pass wins again.
+    expect(topText()).toMatch(/LinearSGC/)
   })
 })

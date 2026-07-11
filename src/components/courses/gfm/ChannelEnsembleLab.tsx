@@ -168,18 +168,21 @@ export default function ChannelEnsembleLab() {
           ))}
         </div>
         <div className={s.labControls}>
-          <span className={s.labStat}>top filter: {channels[topIdx].name}</span>
+          <span className={s.labStat}>top filter: <span className={s.labStatValue}>{channels[topIdx].name}</span></span>
           <span className={s.labStat}>ensemble accuracy <span className={s.labStatValue}>{Math.round(ensembleAcc * 100)}%</span></span>
           <span className={s.labStat}>learned input weights <span className={s.labStatValue}>0</span></span>
         </div>
         <p className={s.labNote}>
           Five <strong>LinearGNN channels</strong> — X, ĀX, Ā²X, (I−Ā)X, (I−Ā)²X — each solved in closed form
           (least squares via the pseudo-inverse) on this graph&apos;s eight labeled nodes; node fill = prediction,
-          ring = truth. Drag homophily down: the low-pass channels (ĀX, Ā²X) collapse — averaging your neighbors
-          is exactly wrong at 0% — and the identity/high-pass channels take over. The α bars here are an honest
-          stand-in (softmax over held-out accuracy) for GraphAny&apos;s learned attention, which reads
-          entropy-normalized distances <em>between the channels&apos; predictions</em> — quantities that exist for
-          any graph, any feature width, any label count. It never learns your features; it learns{' '}
+          ring = truth. Now sweep homophily and watch the U-shape: at 100% the low-pass channels win (averaging
+          your neighbors denoises). Near 50% they bottom out — an even class mix means neighbor averages carry no
+          signal at all. And at 0% they resurrect: on a cleanly bipartite graph, ĀX flips the community perfectly,
+          and the closed-form solve learns the inverted rule without blinking — module 4&apos;s lesson that 0%
+          homophily is as far from random as 100%. The α bars are an honest stand-in (softmax over held-out
+          accuracy plus margin) for GraphAny&apos;s learned attention, which reads entropy-normalized distances{' '}
+          <em>between the channels&apos; predictions</em> — quantities that exist for any graph, any feature width,
+          any label count. It never learns your features; it learns{' '}
           <strong>which filter to trust</strong>.
         </p>
       </div>
