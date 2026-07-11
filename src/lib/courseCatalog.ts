@@ -22,10 +22,10 @@ export const COURSE_CATALOG: CourseCatalogEntry[] = [
     title: 'Graph Foundation Models',
     subtitle: 'From message passing to billion-parameter graph models',
     description:
-      'An interactive course on Graph Foundation Models: message passing, the heterogeneity trilemma, the GFM zoo, and the billion-scale frontier — with hands-on labs, quizzes, and 46 referenced papers.',
+      'An interactive course on Graph Foundation Models: message passing, the heterogeneity trilemma, and the GFM zoo — with architecture deep dives on ULTRA, text-as-glue LLM hybrids, GraphAny and graph PFNs, GraphBFF\'s typed attention, and relational foundation models like KumoRFM-2.',
     modules: 7,
-    minutes: 66,
-    highlights: '46 referenced papers',
+    minutes: 101,
+    highlights: '12 interactive labs · 5 deep dives · 63 referenced papers',
   },
   {
     slug: 'attention-mechanisms',

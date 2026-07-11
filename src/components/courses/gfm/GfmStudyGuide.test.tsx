@@ -5,6 +5,8 @@ import { gfmCourse } from './index'
 import { MODULES } from './content'
 import { invalidateCourseProgressCaches } from '../engine/progress'
 
+const FLAT_COUNT = MODULES.reduce((n, m) => n + 1 + (m.subchapters?.length ?? 0), 0)
+
 beforeEach(() => {
   const store = new Map<string, string>()
   Object.defineProperty(window, 'localStorage', {
@@ -41,7 +43,7 @@ describe('GFM course through CourseShell', () => {
     render(<CourseShell course={gfmCourse} />)
     fireEvent.click(screen.getByRole('button', { name: /Mark complete & continue/ }))
     expect(screen.getByRole('heading', { name: 'How machines learn on graphs' })).toBeDefined()
-    expect(screen.getByText(`${Math.round(100 / MODULES.length)}% complete`)).toBeDefined()
+    expect(screen.getByText(`${Math.round(100 / FLAT_COUNT)}% complete`)).toBeDefined()
   })
 
   it('persists progress across remounts and resumes the last module', () => {
@@ -51,7 +53,7 @@ describe('GFM course through CourseShell', () => {
 
     render(<CourseShell course={gfmCourse} />)
     expect(screen.getByRole('heading', { name: 'How machines learn on graphs' })).toBeDefined()
-    expect(screen.getByText(`${Math.round(100 / MODULES.length)}% complete`)).toBeDefined()
+    expect(screen.getByText(`${Math.round(100 / FLAT_COUNT)}% complete`)).toBeDefined()
   })
 
   it('records quiz answers through the shared progress store', () => {
@@ -75,5 +77,24 @@ describe('GFM course through CourseShell', () => {
     render(<CourseShell course={gfmCourse} onBack={onBack} backLabel="← Library" />)
     fireEvent.click(screen.getByRole('button', { name: /Library/ }))
     expect(onBack).toHaveBeenCalled()
+  })
+
+  it('renders the five zoo deep dives in the sidebar and navigates to 5.1', () => {
+    render(<CourseShell course={gfmCourse} />)
+    const nav = screen.getByRole('navigation')
+    for (const label of ['5.1 ULTRA: relations', '5.2 Text as glue', '5.3 Structure + in-context', '5.4 GraphBFF: typed attention', '5.5 The relational bet']) {
+      expect(within(nav).getByText(label)).toBeDefined()
+    }
+    fireEvent.click(screen.getByRole('button', { name: /5\.1 ULTRA/ }))
+    expect(screen.getByRole('heading', { name: 'A vocabulary of relations — ULTRA' })).toBeDefined()
+    expect(screen.getByText(/Module 5 · Deep dive 1 of 5/)).toBeDefined()
+    expect(screen.getByText('Relation-Graph Builder')).toBeDefined()
+  })
+
+  it('threads deep dives into prev/next order after module 5', () => {
+    render(<CourseShell course={gfmCourse} />)
+    fireEvent.click(screen.getByRole('button', { name: /5\. The GFM zoo/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Mark complete & continue/ }))
+    expect(screen.getByRole('heading', { name: 'A vocabulary of relations — ULTRA' })).toBeDefined()
   })
 })

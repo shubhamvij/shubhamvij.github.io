@@ -6,6 +6,12 @@ import HomophilyLab from './HomophilyLab'
 import ScalingLab from './ScalingLab'
 import TaskMatcher from './TaskMatcher'
 import PaperShelf from './PaperShelf'
+import ZooMapLab from './ZooMapLab'
+import RelationGraphLab from './RelationGraphLab'
+import TextGlueLab from './TextGlueLab'
+import ChannelEnsembleLab from './ChannelEnsembleLab'
+import BffAnatomyLab from './BffAnatomyLab'
+import LabelInjectionLab from './LabelInjectionLab'
 
 const ScalingLaws = () => <ScalingLab initialView="laws" />
 const DataGap = () => <ScalingLab initialView="gap" />
@@ -25,5 +31,11 @@ export const gfmCourse: CourseDefinition = {
     'data-gap': DataGap,
     'task-matcher': TaskMatcher,
     'paper-shelf': PaperShelf,
+    'zoo-map': ZooMapLab,
+    'relation-graph': RelationGraphLab,
+    'text-glue': TextGlueLab,
+    'channel-ensemble': ChannelEnsembleLab,
+    'bff-anatomy': BffAnatomyLab,
+    'label-injection': LabelInjectionLab,
   },
 }

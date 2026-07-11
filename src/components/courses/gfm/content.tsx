@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import type { CourseModule } from '../engine/types'
+import { ZOO_SUBCHAPTERS } from './zooSubchapters'
 
 function A({ href, children }: { href: string; children: ReactNode }) {
   return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
@@ -450,78 +451,89 @@ export const MODULES: CourseModule[] = [
   {
     id: 'zoo',
     navLabel: '5. The GFM zoo',
-    title: 'The GFM zoo: four bets on a vocabulary',
-    subtitle: 'Domain-specific, text-as-glue, structure + in-context, and typed-features-at-scale',
-    minutes: 12,
+    title: 'The GFM zoo: five bets on a vocabulary',
+    subtitle: 'Five families, five answers to "what is the transferable unit?" — each with its own deep dive',
+    minutes: 9,
+    subchapters: ZOO_SUBCHAPTERS,
     blocks: [
       {
         kind: 'prose',
         body: (
           <>
             <p>
-              There is no consensus GFM recipe yet. What exists is a zoo of models, each dodging the heterogeneity
-              trilemma a different way. Four strategies cover essentially everything:
+              There is no consensus GFM recipe yet. What exists is a zoo of models, each dodging module 4&apos;s
+              heterogeneity trilemma by betting on a different <strong>vocabulary</strong> — a different answer
+              to &quot;what is the basic transferable unit?&quot;. Five bets cover essentially everything, and
+              each gets an architecture deep dive below this module in the sidebar.
             </p>
             <p>
-              <strong>Bet 1: stay inside one domain — where a vocabulary already exists.</strong>{' '}
-              Chemistry has a god-given shared vocabulary: the periodic table. Every molecule is atoms and bonds, so
-              models like <A href="https://arxiv.org/abs/2310.16802">JMP</A> (pretrained on ~120M structures),{' '}
-              <A href="https://arxiv.org/abs/2401.00096">MACE-MP-0</A>, and Meta&apos;s{' '}
-              <A href="https://arxiv.org/abs/2506.23971">UMA</A> transfer across all of chemistry and materials
-              science. Knowledge graphs seem harder — every KG invents its own relations — but{' '}
-              <A href="https://arxiv.org/abs/2310.04562">ULTRA</A> found a beautiful trick: represent each relation
-              not by an embedding but by <em>how it interacts with other relations</em> (do they share head
-              entities? tail entities?). That &quot;graph of relations&quot; is vocabulary-free, so one pretrained ULTRA does
-              zero-shot link prediction on 57 different KGs, often beating models trained on each one.
+              <strong>Bet 1: stay inside one domain — where a vocabulary already exists.</strong> Chemistry
+              tokenizes <em>atoms</em> — an element plus a 3D position — and models like{' '}
+              <A href="https://arxiv.org/abs/2310.16802">JMP</A> and Meta&apos;s{' '}
+              <A href="https://arxiv.org/abs/2506.23971">UMA</A> transfer across chemistry with per-dataset
+              heads or task conditioning absorbing the label mismatches. Knowledge graphs seemed harder — every
+              KG invents its own relations — until <A href="https://arxiv.org/abs/2310.04562">ULTRA</A>{' '}
+              represented each relation by <em>how it interacts with other relations</em>: a vocabulary computed
+              from the data, never learned. One pretrained ULTRA does zero-shot link prediction on 57 KGs.{' '}
+              <em>→ deep dive 5.1</em>
             </p>
             <p>
-              <strong>Bet 2: make everything text.</strong> If your nodes have names and descriptions, describe every
-              node and edge in English, embed with a language model, and the feature spaces align by construction.{' '}
-              <A href="https://arxiv.org/abs/2310.00149">One-for-All</A> did this across citation, molecule, and KG
-              datasets — and unified node/link/graph tasks with &quot;nodes-of-interest&quot; prompt graphs.{' '}
+              <strong>Bet 2: make everything text.</strong> Describe nodes and edges in English, embed with a
+              language model, and feature spaces align by construction —{' '}
+              <A href="https://arxiv.org/abs/2310.00149">One-for-All</A>,{' '}
               <A href="https://arxiv.org/abs/2310.13023">GraphGPT</A>,{' '}
               <A href="https://arxiv.org/abs/2402.08170">LLaGA</A>, and{' '}
-              <A href="https://arxiv.org/abs/2402.13630">UniGraph</A> wire graphs into LLMs directly. The catch:
-              it only works for <em>text-attributed</em> graphs — no help for a payment network or a protein.
+              <A href="https://arxiv.org/abs/2402.13630">UniGraph</A> share the bet but are four different
+              machines: who predicts (GNN or LLM), whether a graph encoder exists at all, and what actually
+              trains. The shared ceiling: text-attributed graphs only. <em>→ deep dive 5.2</em>
             </p>
             <p>
-              <strong>Bet 3: bet on structure + in-context learning.</strong> Throw away feature identity entirely
-              and lean on quantities that exist in every graph.{' '}
-              <A href="https://arxiv.org/abs/2405.20445">GraphAny</A> solves closed-form linear GNNs on the target
-              graph&apos;s own labeled nodes and learns only a dimension-invariant attention over their predictions —
-              trained on one 120-node graph, it classifies on any graph.{' '}
-              <A href="https://arxiv.org/abs/2305.12600">PRODIGY</A> wires few-shot examples into a &quot;prompt graph&quot;
-              so message passing itself performs the adaptation. And a whole 2025 line imports TabPFN&apos;s prior-fitted
-              trick: <A href="https://arxiv.org/abs/2508.20906">G2T-FM</A> turns each node into a table row
-              (features + neighborhood aggregates + structural embeddings) for a tabular FM, while{' '}
-              <A href="https://arxiv.org/abs/2509.21489">GraphPFN</A> pretrains on millions of <em>synthetic</em>{' '}
-              graphs sampled from a hand-designed prior.
+              <strong>Bet 3: bet on structure + in-context learning.</strong> Throw away feature identity and
+              lean on what every graph has. <A href="https://arxiv.org/abs/2405.20445">GraphAny</A> solves five
+              closed-form spectral filters on the target graph&apos;s own labels and learns only a
+              dimension-independent attention over their predictions — trained on one graph (120 labeled nodes
+              of Wisconsin), it classifies on 30 unseen graphs.{' '}
+              <A href="https://arxiv.org/abs/2305.12600">PRODIGY</A> wires few-shot examples into a prompt
+              graph; <A href="https://arxiv.org/abs/2508.20906">G2T-FM</A> and{' '}
+              <A href="https://arxiv.org/abs/2509.21489">GraphPFN</A> import TabPFN&apos;s prior-fitted trick —
+              GraphPFN pretrains on 1.6M synthetic graphs. <em>→ deep dive 5.3</em>
             </p>
             <p>
-              <strong>Bet 4: typed feature groups at industrial scale.</strong> Enterprise graphs aren&apos;t text and
-              aren&apos;t one domain — but their features do sort into a few kinds: numerical, categorical, text,
-              timestamps. So: partition features into groups, give each group a shared learned transformation, and
-              make the architecture <em>type-aware</em>. This is the TabFM lineage
-              (<A href="https://arxiv.org/abs/2106.11959">FT-Transformer</A>&apos;s per-feature tokenizers) extended to
-              graphs — the line the GraphBFF excerpt describes, including{' '}
-              <A href="https://arxiv.org/abs/2506.14291">Finkelshtein et al.&apos;s equivariance recipe</A>, which derives
-              from symmetry principles which layers a node-level GFM is even <em>allowed</em> to have. The excerpt
-              is honest about the cost: forcing semantically different features through shared transforms limits
-              expressivity, and choosing the grouping is a practitioner decision — an open question, not a solved one.
+              <strong>Bet 4: type-aware attention at industrial scale.</strong> Enterprise graphs aren&apos;t
+              text and aren&apos;t one domain, but they have a fixed set of node and relation <em>types</em>.{' '}
+              <A href="https://arxiv.org/abs/2602.04768">GraphBFF</A> gives each node type its own input
+              projection and each relation-type set its own sparse attention (TCA, ~85% of its 1.4B parameters),
+              fused with a shared attention (TAA) that is provably necessary — pretrained with masked link
+              prediction on ~50B nodes and edges. The related feature-grouping wing (
+              <A href="https://arxiv.org/abs/2508.20906">G2T-FM</A>,{' '}
+              <A href="https://arxiv.org/abs/2506.14291">Finkelshtein et al.</A>) trades expressivity for
+              unseen-schema compatibility — an open question. <em>→ deep dive 5.4</em>
             </p>
+            <p>
+              <strong>Bet 5: the row under a schema.</strong> The newest family treats the relational database
+              itself as the domain: <A href="https://arxiv.org/abs/2604.12596">KumoRFM-2</A> injects in-context
+              labels directly into the input tables and runs hierarchical attention within tables, across
+              foreign keys, and across context examples — fully frozen at inference. Its rivals answer the same
+              question with label propagation (Griffin, RT<sub>zero</sub>) or flatten-then-TabPFN pipelines
+              (RDBLearn). <em>→ deep dive 5.5</em>
+            </p>
+            <p>Compare any two inhabitants of the zoo on the five axes that actually differ:</p>
           </>
         ),
       },
+      { kind: 'widget', widget: 'zoo-map' },
       {
         kind: 'callout',
         icon: '🧭',
         title: 'One map to hold onto',
         body: (
           <>
-            Ask of any GFM paper: <em>what does it treat as the vocabulary?</em> Atoms (JMP), relation-interaction
-            patterns (ULTRA), English words (OFA), structural statistics + labeled examples in context (GraphAny,
-            GraphPFN), or typed feature groups (G2T-FM, GraphBFF). Every strength and every limitation flows from
-            that one choice.
+            Ask of any GFM paper: <em>what does it treat as the vocabulary?</em> Atoms (JMP, UMA),
+            relation-interaction patterns (ULTRA), English words (OFA and kin), structural statistics + labeled
+            examples in context (GraphAny, GraphPFN), typed nodes at scale (GraphBFF), or rows under a schema
+            (KumoRFM-2). Every strength and every limitation flows from that one choice — and per Mao et al.,
+            the vocabulary needn&apos;t be a literal tokenizer: sometimes it is a <em>model</em> that maps
+            graphs into a shared space.
           </>
         ),
       },
@@ -530,39 +542,30 @@ export const MODULES: CourseModule[] = [
         kind: 'quiz',
         questions: [
           {
-            id: 'm5-q1',
-            prompt: 'ULTRA transfers to knowledge graphs with completely unseen relation types. What makes that possible?',
+            id: 'm5-q5',
+            prompt: 'A 2026 paper\'s transferable unit is "a row under a database schema, with in-context labels as data." Which bet is it making?',
             options: [
-              { text: 'It represents relations by their interaction structure (shared heads/tails) instead of learned per-relation embeddings', correct: true, explain: 'No vocabulary-tied parameters exist, so nothing needs re-learning on a new KG — the "graph of relations" is computable for any KG.' },
-              { text: 'It\'s trained on every public knowledge graph', explain: 'It\'s pretrained on only 3 KGs (more in later variants) — coverage isn\'t the trick; representation invariance is.' },
-              { text: 'It converts relations to text and embeds them with an LLM', explain: 'That\'s the Bet-2 (OFA/GraphGPT) approach. ULTRA never looks at names — it\'s deliberately text-free.' },
+              { text: 'The relational bet (KumoRFM-2\'s family)', correct: true, explain: 'Rows-under-schemas are the fifth vocabulary — the newest family in the zoo, with three competing architectures for it.' },
+              { text: 'Text as glue', explain: 'No language model or text description is involved — the labels enter as table data.' },
+              { text: 'A domain vocabulary like ULTRA\'s', explain: 'ULTRA\'s unit is the relation (via interactions), not the row — though both are domain-scoped bets.' },
             ],
           },
           {
-            id: 'm5-q2',
-            prompt: 'What\'s the main limitation of the "make everything text" strategy (OFA, GraphGPT, LLaGA)?',
+            id: 'm5-q6',
+            prompt: 'Your payment network has no meaningful text on nodes or edges. Which bet is structurally unable to help?',
             options: [
-              { text: 'Text embeddings are too small', explain: 'Dimensionality isn\'t the issue — alignment is achieved. The issue is which graphs get to play at all.' },
-              { text: 'It only applies to graphs whose nodes/edges have meaningful text descriptions', correct: true, explain: 'Citation networks and product graphs qualify; payment networks, sensor meshes, and most enterprise graphs don\'t. The vocabulary is borrowed, so only text-shaped data can use it.' },
-              { text: 'LLMs cannot process graph structure at all', explain: 'Too strong — with alignment projectors and structure-aware templates they can, to a degree. The binding constraint is the text requirement.' },
+              { text: 'Bet 2 — text as glue: its vocabulary is borrowed from English, so text-free graphs get nothing', correct: true, explain: 'OFA/GraphGPT/LLaGA/UniGraph all require meaningful node text. Bets 3, 4, and 5 are exactly the families built for graphs like yours.' },
+              { text: 'Bet 3 — structure + in-context', explain: 'Structure + labels exist in every graph — this bet is schema-free by design.' },
+              { text: 'Bet 4 — typed attention at scale', explain: 'GraphBFF\'s natural habitat is precisely the text-free enterprise graph.' },
             ],
           },
           {
-            id: 'm5-q3',
-            prompt: 'GraphAny was trained on a single 120-node graph yet classifies nodes on any unseen graph. Which design makes the feature dimension irrelevant?',
+            id: 'm5-q7',
+            prompt: 'GraphGPT and LLaGA agree on "the LLM predicts" and "only a projector trains." On the Zoo Map, which axis separates them?',
             options: [
-              { text: 'It zero-pads all features to a maximum dimension', explain: 'Padding still ties parameters to positions with inconsistent meanings — module 4\'s trap.' },
-              { text: 'Its learnable part only sees (entropy-normalized) distances between predictions of closed-form linear GNNs, which are dimension- and permutation-invariant', correct: true, explain: 'The LinearGNNs are solved analytically per-graph (no learned input weights); the learned attention operates on invariant quantities, so nothing depends on the training graph\'s schema.' },
-              { text: 'It uses a bigger transformer', explain: 'There\'s no transformer here at all — it\'s the invariance of the learned component that does the work.' },
-            ],
-          },
-          {
-            id: 'm5-q4',
-            prompt: 'The GraphBFF excerpt says feature-grouping approaches "can limit expressivity by forcing semantically distinct features through the same transformation." What trade-off is being described?',
-            options: [
-              { text: 'Speed vs. accuracy', explain: 'The concern isn\'t compute cost — it\'s what the shared transform can represent.' },
-              { text: 'Compatibility vs. expressivity: shared per-group transforms make unseen schemas usable, but "age" and "transaction amount" may deserve different treatment', correct: true, explain: 'Grouping is what makes a pretrained model run on new node types at all — the price is squeezing distinct semantics through one function. And the grouping itself is a design choice with no principled answer yet.' },
-              { text: 'Memory vs. depth', explain: 'Not the axis in question — the excerpt is about representational capacity under shared transformations.' },
+              { text: 'How graph structure reaches the LLM: GraphGPT uses a pretrained graph encoder; LLaGA uses parameter-free templates — no graph encoder at all', correct: true, explain: 'Same family, same locus, same frozen/trained split — the encoder-presence axis is the whole difference, which is why the Zoo Map dims their matching rows.' },
+              { text: 'The pretraining corpus size', explain: 'Data scale isn\'t one of the five architecture axes on the map.' },
+              { text: 'Whether attention is used', explain: 'Both run transformer LLMs — attention is everywhere in this zoo.' },
             ],
           },
         ],
@@ -570,13 +573,9 @@ export const MODULES: CourseModule[] = [
       {
         kind: 'refs',
         items: [
-          { label: 'ULTRA: Towards Foundation Models for Knowledge Graph Reasoning — Galkin et al. (ICLR 2024)', href: 'https://arxiv.org/abs/2310.04562' },
-          { label: 'ULTRA explained by its author — Galkin (blog, 2023)', href: 'https://towardsdatascience.com/ultra-foundation-models-for-knowledge-graph-reasoning-9f8f4a0d7f09/' },
-          { label: 'One for All: Towards Training One Graph Model for All Classification Tasks — Liu et al. (ICLR 2024)', href: 'https://arxiv.org/abs/2310.00149' },
-          { label: 'GraphAny / Fully-inductive Node Classification on Arbitrary Graphs — Zhao et al. (ICLR 2025)', href: 'https://arxiv.org/abs/2405.20445' },
-          { label: 'Turning Tabular Foundation Models into Graph Foundation Models (G2T-FM) — Eremeev et al. (NeurIPS 2025)', href: 'https://arxiv.org/abs/2508.20906' },
-          { label: 'From Molecules to Materials (JMP) — Shoghi et al. (ICLR 2024)', href: 'https://arxiv.org/abs/2310.16802' },
-          { label: 'Equivariance Everywhere All At Once: A Recipe for Graph Foundation Models — Finkelshtein et al. (2025)', href: 'https://arxiv.org/abs/2506.14291' },
+          { label: 'Position: Graph Foundation Models Are Already Here — Mao et al. (ICML 2024)', href: 'https://arxiv.org/abs/2402.02216', note: 'the graph-vocabulary argument this module is built on' },
+          { label: 'Graph Foundation Models: A Comprehensive Survey — Wang et al. (2025)', href: 'https://arxiv.org/abs/2505.15116', note: 'orthogonal cut: universal / domain-specific / task-specific' },
+          { label: 'Foundation Models in Graph & Geometric Deep Learning — Galkin & Bronstein (2024)', href: 'https://towardsdatascience.com/foundation-models-in-graph-geometric-deep-learning-f363e2576f58/', note: 'the landscape read' },
         ],
       },
     ],
