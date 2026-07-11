@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import ZooMapLab from './ZooMapLab'
 import RelationGraphLab from './RelationGraphLab'
+import TextGlueLab from './TextGlueLab'
 
 describe('ZooMapLab', () => {
   it('compares ULTRA vs GraphBFF by default', () => {
@@ -54,5 +55,31 @@ describe('RelationGraphLab', () => {
   it('shows the zero-learned-embeddings stat', () => {
     render(<RelationGraphLab />)
     expect(screen.getByText(/learned per-relation embeddings/)).toBeDefined()
+  })
+})
+
+describe('TextGlueLab', () => {
+  it('starts on OFA: trained GNN, GNN predicts', () => {
+    render(<TextGlueLab />)
+    expect(screen.getByText('trained here: the GNN + class-node MLP head')).toBeDefined()
+    expect(screen.getByText('GNN predicts')).toBeDefined()
+  })
+
+  it('switches wirings and flips the frozen/trained readouts', () => {
+    render(<TextGlueLab />)
+    fireEvent.click(screen.getByRole('button', { name: 'GraphGPT' }))
+    expect(screen.getByText('trained here: the projector — nothing else')).toBeDefined()
+    expect(screen.getByText('LLM predicts')).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: 'LLaGA' }))
+    expect(screen.getByText(/0 params/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: 'UniGraph' }))
+    expect(screen.getByText('trained here: LM + GNN jointly, end to end')).toBeDefined()
+  })
+
+  it('explains a slot on click', () => {
+    render(<TextGlueLab />)
+    fireEvent.click(screen.getByRole('button', { name: 'GraphGPT' }))
+    fireEvent.click(screen.getByText('projector'))
+    expect(screen.getByText(/single linear layer/)).toBeDefined()
   })
 })
