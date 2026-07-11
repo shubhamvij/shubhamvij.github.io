@@ -12,9 +12,9 @@ const NOISE: [number, number][] = [
 const X: [number, number][] = NOISE.map((n, i) => (i < 7 ? [0.4 + n[0], n[1]] : [n[0], 0.4 + n[1]]))
 const LABEL = (i: number) => (i < 7 ? 0 : 1)
 
-const LABELED = [0, 1, 2, 7, 8, 9]
-const REF = [0, 1, 7, 8]      // used to SOLVE each channel (GraphAny's V_ref)
-const TARGET = [2, 9]         // held out to weight channels (GraphAny's V_target)
+const LABELED = [0, 1, 2, 3, 7, 8, 9, 10]
+const REF = [0, 1, 7, 8]           // used to SOLVE each channel (GraphAny's V_ref)
+const TARGET = [2, 3, 9, 10]       // held out to weight channels (GraphAny's V_target)
 
 // Two 7-rings; slider swaps within-edges for cross-edges (v of 14).
 const WITHIN: [number, number][] = [
@@ -74,6 +74,13 @@ function predict(F: Mat, W: Mat): number[] {
   return F.map(f => (f[0] * W[0][0] + f[1] * W[1][0] >= f[0] * W[0][1] + f[1] * W[1][1] ? 0 : 1))
 }
 
+/** Decision margin (trueClass score − otherClass score) for one node under one channel's W. */
+function marginAt(f: Mat, W: Mat, i: number): number {
+  const s0 = f[i][0] * W[0][0] + f[i][1] * W[1][0]
+  const s1 = f[i][0] * W[0][1] + f[i][1] * W[1][1]
+  return LABEL(i) === 0 ? s0 - s1 : s1 - s0
+}
+
 function acc(pred: number[], rows: number[]): number {
   return rows.filter(i => pred[i] === LABEL(i)).length / rows.length
 }
@@ -93,10 +100,14 @@ export default function ChannelEnsembleLab() {
     const chans = F.map((f, ci) => {
       const W = solve(f, REF)
       const pred = predict(f, W)
-      return { name: CHANNEL_NAMES[ci], pred, evalAcc: acc(pred, unlabeled), targetAcc: acc(pred, TARGET) }
+      const targetAcc = acc(pred, TARGET)
+      const meanMargin = TARGET.reduce((p, i) => p + marginAt(f, W, i), 0) / TARGET.length
+      const logit = 3 * targetAcc + Math.max(-1, Math.min(1, meanMargin))
+      return { name: CHANNEL_NAMES[ci], pred, evalAcc: acc(pred, unlabeled), targetAcc, logit }
     })
-    // Honest stand-in for the learned attention: softmax over held-out accuracy.
-    const exps = chans.map(c => Math.exp(3 * c.targetAcc))
+    // Honest stand-in for the learned attention: softmax over held-out accuracy, with
+    // mean decision-margin on the held-out nodes as a continuous tiebreak.
+    const exps = chans.map(c => Math.exp(c.logit))
     const z = exps.reduce((p, q) => p + q, 0)
     const att = exps.map(e => e / z)
     const top = att.indexOf(Math.max(...att))
@@ -146,7 +157,7 @@ export default function ChannelEnsembleLab() {
           {channels.map((c, ci) => (
             <div key={c.name} style={{ textAlign: 'center', fontSize: 10 }}>
               <div style={{ fontWeight: ci === topIdx ? 'bold' : 'normal' }}>
-                {c.name} · {Math.round(c.evalAcc * 100)}%
+                <span>{c.name}</span> · {Math.round(c.evalAcc * 100)}%
               </div>
               {miniGraph(c.pred, c.name)}
               <div style={{ height: 6, background: '#e4e0cf', borderRadius: 2 }}>
@@ -157,13 +168,13 @@ export default function ChannelEnsembleLab() {
           ))}
         </div>
         <div className={s.labControls}>
-          <span className={s.labStat}>top filter: <span className={s.labStatValue}>{channels[topIdx].name}</span></span>
+          <span className={s.labStat}>top filter: {channels[topIdx].name}</span>
           <span className={s.labStat}>ensemble accuracy <span className={s.labStatValue}>{Math.round(ensembleAcc * 100)}%</span></span>
           <span className={s.labStat}>learned input weights <span className={s.labStatValue}>0</span></span>
         </div>
         <p className={s.labNote}>
           Five <strong>LinearGNN channels</strong> — X, ĀX, Ā²X, (I−Ā)X, (I−Ā)²X — each solved in closed form
-          (least squares via the pseudo-inverse) on this graph&apos;s six labeled nodes; node fill = prediction,
+          (least squares via the pseudo-inverse) on this graph&apos;s eight labeled nodes; node fill = prediction,
           ring = truth. Drag homophily down: the low-pass channels (ĀX, Ā²X) collapse — averaging your neighbors
           is exactly wrong at 0% — and the identity/high-pass channels take over. The α bars here are an honest
           stand-in (softmax over held-out accuracy) for GraphAny&apos;s learned attention, which reads
