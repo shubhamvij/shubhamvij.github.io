@@ -310,10 +310,10 @@ principles dictate which layers a node-level GFM may have. Honest cost
 paragraph (kept from current module): shared per-group transforms cap
 expressivity; the grouping is a practitioner decision.
 
-Explicit division of labor with the attention course: its module 7 built
-the WHY of typed softmax (Typed Attention Lab); this deep dive assembles
-the full industrial model around that primitive — link back rather than
-repeat.
+Explicit division of labor with the attention course: its module 6 ("Graph
+transformer blocks") built the WHY of typed softmax (Typed Attention Lab);
+this deep dive assembles the full industrial model around that primitive —
+link back rather than repeat.
 
 Widget `bff-anatomy` — **BFF Block Anatomy**, a 5-step forward-pass
 stepper on a small heterogeneous graph (3 node types, 3 relation types):
@@ -332,7 +332,7 @@ stepper on a small heterogeneous graph (3 node types, 3 relation types):
 - Persistent parameter meter: where the 1.4B parameters live (TCA share
   highlighted), so the "~85%" claim is a picture.
 
-Callout: prelims — Attention course module 7 (typed attention: the
+Callout: prelims — Attention course module 6 (typed attention: the
 TCA-vs-shared intuition), deep dive 2.2 (heads/W_O), module 3 (why sampled
 sparse attention — cost).
 
