@@ -131,7 +131,7 @@ export default function TextGlueLab() {
               </g>
             )
           })}
-          <text x={10} y={14} fontSize={8.5} fill="#555">❄ frozen · 🔥 trained · ∅ parameter-free · dashed = absent</text>
+          <text x={10} y={14} fontSize={8.5} fill="#555">❄ frozen · 🔥 trained · ∅ parameter-free · dashed = raw data in / slot absent</text>
           <text x={10} y={104} fontSize={8.5} fill="#333" fontWeight="bold">conditioning: <tspan fontWeight="normal">{def.conditioning}</tspan></text>
         </svg>
         <div className={s.labControls}>

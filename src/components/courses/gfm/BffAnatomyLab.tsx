@@ -36,7 +36,7 @@ function softmax(logits: number[]): number[] {
 // Fixed toy attention logits for the focus node U1 (real softmax, fixed inputs).
 const TCA_PAID = softmax([0.8, 0.3])            // over {M1, M2}
 const TAA_ALL = softmax([0.5, 0.2, 0.6, 0.1])   // over sampled 2-hop {M1, M2, D1, U2}
-// Fixed toy scores for the masked-link step (concat + MLP on fixed embeddings).
+// Hand-fixed illustrative scores for the masked-link step (the caption describes the real scorer).
 const LINK_SCORES: { pair: string; v: number }[] = [
   { pair: 'U2 — M2 (masked true edge)', v: 0.86 },
   { pair: 'U2 — M1', v: 0.41 },
@@ -70,7 +70,6 @@ export default function BffAnatomyLab() {
   const [step, setStep] = useState(0)
 
   const focus = 'U1'
-  const focusEdges = EDGES.filter(e => e.a === focus || e.b === focus)
 
   const edgeWeight = (e: { a: string; b: string; t: EType }): number | null => {
     if (step === 1) {

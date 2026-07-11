@@ -174,7 +174,7 @@ export default function ChannelEnsembleLab() {
         </div>
         <p className={s.labNote}>
           Five <strong>LinearGNN channels</strong> — X, ĀX, Ā²X, (I−Ā)X, (I−Ā)²X — each solved in closed form
-          (least squares via the pseudo-inverse) on this graph&apos;s eight labeled nodes; node fill = prediction,
+          (least squares via the pseudo-inverse) on this graph&apos;s labeled nodes (four fit the weights, four are held out to weight the ensemble); node fill = prediction,
           ring = truth. Now sweep homophily and watch the U-shape: at 100% the low-pass channels win (averaging
           your neighbors denoises). Near 50% they bottom out — an even class mix means neighbor averages carry no
           signal at all. And at 0% they resurrect: on a cleanly bipartite graph, ĀX flips the community perfectly,

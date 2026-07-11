@@ -12,7 +12,7 @@ export interface CourseCatalogEntry {
   description: string
   modules: number
   minutes: number
-  /** Extra meta shown on the library card, e.g. "46 referenced papers" */
+  /** Extra meta shown on the library card, e.g. "51 referenced sources" */
   highlights: string
 }
 
