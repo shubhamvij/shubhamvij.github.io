@@ -49,6 +49,13 @@ function attend(order: number[], positions: boolean): number[][] {
 
 const IDENTITY = [0, 1, 2, 3, 4]
 
+// Two tokens get persistent colors so readers can follow them (and their
+// output vectors) through every shuffle.
+const TRACK: Record<number, { color: string; fill: string }> = {
+  0: { color: '#2b6fd0', fill: '#dce8f8' }, // cat
+  1: { color: '#2f8e2f', fill: '#def0de' }, // sat
+}
+
 export default function OrderBlindLab() {
   const [permIdx, setPermIdx] = useState(-1) // -1 = original order
   const [positions, setPositions] = useState(false)
@@ -56,13 +63,13 @@ export default function OrderBlindLab() {
   const order = permIdx === -1 ? IDENTITY : PERMS[permIdx]
   const shuffled = permIdx !== -1
 
-  const { outputs, same } = useMemo(() => {
+  const { outputs, changed, same } = useMemo(() => {
     const base = attend(IDENTITY, positions)
     const outs = attend(order, positions)
-    // Equivariance check: does slot i of the shuffled run equal the original
-    // output of the token now sitting in slot i?
-    const eq = outs.every((o, i) => o.every((val, d) => Math.abs(val - base[order[i]][d]) < 1e-9))
-    return { outputs: outs, same: eq }
+    // Equivariance check, per slot: does slot i of the shuffled run equal the
+    // original output of the token now sitting in slot i?
+    const diff = outs.map((o, i) => o.some((val, d) => Math.abs(val - base[order[i]][d]) > 1e-9))
+    return { outputs: outs, changed: diff, same: !diff.some(Boolean) }
   }, [order, positions])
 
   const W = 480
@@ -85,33 +92,52 @@ export default function OrderBlindLab() {
           <button type="button" className={`${s.chip} ${positions ? s.chipOn : ''}`} onClick={() => setPositions(p => !p)}>
             positions {positions ? 'ON' : 'off'}
           </button>
+          <span className={s.labStat}>
+            tracking <span style={{ color: TRACK[0].color, fontWeight: 'bold' }}>cat</span> &{' '}
+            <span style={{ color: TRACK[1].color, fontWeight: 'bold' }}>sat</span>
+          </span>
         </div>
+        <p className={s.flowShape} style={{ margin: '2px 0 4px' }}>
+          no single query here — <strong>every token is a query</strong> at once; each card shows that
+          token&apos;s attention output{shuffled ? ' (= same vector as before the shuffle, ≠ changed)' : ''}
+        </p>
         <svg viewBox={`0 0 ${W} 120`} className={s.labCanvas} role="img" aria-label="Per-token attention output vectors">
-          {order.map((tok, i) => (
-            <g key={i}>
-              <rect x={i * slot + 6} y={8} width={slot - 12} height={20} rx={3} fill="#fff" stroke="#7f9db9" />
-              <text x={i * slot + slot / 2} y={22} textAnchor="middle" fontSize={11} fontFamily="Tahoma, sans-serif">{TOKENS[tok]}</text>
-              {/* 4 output dims as signed bars around a midline */}
-              {outputs[i].map((val, d) => {
-                const bx = i * slot + 14 + d * ((slot - 28) / 4)
-                const h = Math.min(34, Math.abs(val) * 55)
-                return (
-                  <rect
-                    key={d}
-                    x={bx}
-                    y={val >= 0 ? 72 - h : 72}
-                    width={(slot - 28) / 4 - 3}
-                    height={Math.max(1.5, h)}
-                    fill={val >= 0 ? '#2b6fd0' : '#c86018'}
-                  />
-                )
-              })}
-              <text x={i * slot + slot / 2} y={116} textAnchor="middle" fontSize={8} fill="#666">
-                [{outputs[i].slice(0, 2).map(v2 => v2.toFixed(2)).join(', ')}, …]
-              </text>
-            </g>
-          ))}
           <line x1={0} y1={72} x2={W} y2={72} stroke="#ccc" strokeWidth={1} />
+          {order.map((tok, i) => {
+            const track = TRACK[tok]
+            return (
+              <g key={i}>
+                {/* tracked tokens get a color band behind their whole card, vector included */}
+                {track && <rect x={i * slot + 4} y={4} width={slot - 8} height={104} rx={4} fill={track.fill} opacity={0.55} />}
+                <rect x={i * slot + 6} y={8} width={slot - 12} height={20} rx={3} fill={track ? track.fill : '#fff'} stroke={track ? track.color : '#7f9db9'} strokeWidth={track ? 1.8 : 1} />
+                <text x={i * slot + slot / 2} y={22} textAnchor="middle" fontSize={11} fontFamily="Tahoma, sans-serif" fontWeight={track ? 'bold' : 'normal'} fill={track ? track.color : '#000'}>{TOKENS[tok]}</text>
+                {/* same vector as in the original order, or changed? */}
+                {shuffled && (
+                  <text x={i * slot + slot - 13} y={42} textAnchor="middle" fontSize={11} fontWeight="bold" fill={changed[i] ? '#c0392b' : '#2f8e2f'}>
+                    {changed[i] ? '≠' : '='}
+                  </text>
+                )}
+                {/* 4 output dims as signed bars around a midline */}
+                {outputs[i].map((val, d) => {
+                  const bx = i * slot + 14 + d * ((slot - 28) / 4)
+                  const h = Math.min(34, Math.abs(val) * 55)
+                  return (
+                    <rect
+                      key={d}
+                      x={bx}
+                      y={val >= 0 ? 72 - h : 72}
+                      width={(slot - 28) / 4 - 3}
+                      height={Math.max(1.5, h)}
+                      fill={val >= 0 ? '#2b6fd0' : '#c86018'}
+                    />
+                  )
+                })}
+                <text x={i * slot + slot / 2} y={116} textAnchor="middle" fontSize={8} fill={shuffled && changed[i] ? '#c0392b' : '#666'}>
+                  [{outputs[i].slice(0, 2).map(v2 => v2.toFixed(2)).join(', ')}, …]
+                </text>
+              </g>
+            )
+          })}
         </svg>
         <div className={`${s.feedback} ${same ? s.feedbackCorrect : s.feedbackWrong}`}>
           <span className={s.feedbackIcon}>{same ? '✓' : '✗'}</span>
@@ -124,11 +150,15 @@ export default function OrderBlindLab() {
           </span>
         </div>
         <p className={s.labNote}>
-          This is a real attention head (fixed toy weights, d=4) running in your browser. Attention is{' '}
-          <strong>permutation-equivariant</strong>: shuffle the input and the outputs shuffle identically, because{' '}
-          <code>softmax(QKᵀ)·V</code> contains no notion of an index. Toggle <strong>positions</strong> to add a
-          position vector to each embedding — now slot 0 and slot 4 genuinely differ, and word order becomes
-          information the model can use.
+          This is a real attention head (fixed toy weights, d=4) running in your browser — and there is no
+          single &quot;query token&quot;: all five tokens query the whole sentence simultaneously, so each card is one
+          token&apos;s output. Attention is <strong>permutation-equivariant</strong>: shuffle the input and the
+          outputs shuffle identically, because <code>softmax(QKᵀ)·V</code> contains no notion of an index —
+          follow the colored <strong style={{ color: TRACK[0].color }}>cat</strong> and{' '}
+          <strong style={{ color: TRACK[1].color }}>sat</strong> cards and the <strong>&quot;=&quot;</strong> badges:
+          their vectors are bit-identical, just relocated. Toggle <strong>positions</strong> to add a position
+          vector to each embedding and every card flips to <strong>&quot;≠&quot;</strong> — even tokens that kept their slot change,
+          because their neighbours&apos; K and V moved. Word order is now information the model can use.
         </p>
       </div>
     </div>

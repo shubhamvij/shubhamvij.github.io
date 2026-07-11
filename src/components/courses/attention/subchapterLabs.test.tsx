@@ -17,6 +17,24 @@ describe('OrderBlindLab', () => {
     fireEvent.click(screen.getByRole('button', { name: /positions/i }))
     expect(screen.getByText(/outputs changed/i)).toBeDefined()
   })
+
+  it('says every token is a query and tags cat/sat for tracking', () => {
+    render(<OrderBlindLab />)
+    expect(screen.getByText(/every token is a query/i)).toBeDefined()
+    expect(screen.getByText(/tracking/i)).toBeDefined()
+  })
+
+  it('per-card badges: all = while equivariant, all ≠ once positions break the symmetry', () => {
+    render(<OrderBlindLab />)
+    // original order: nothing to compare against, no badges
+    expect(screen.queryAllByText('=')).toHaveLength(0)
+    expect(screen.queryAllByText('≠')).toHaveLength(0)
+    fireEvent.click(screen.getByRole('button', { name: /shuffle/i }))
+    expect(screen.getAllByText('=')).toHaveLength(5)
+    fireEvent.click(screen.getByRole('button', { name: /positions/i }))
+    expect(screen.getAllByText('≠')).toHaveLength(5)
+    expect(screen.queryAllByText('=')).toHaveLength(0)
+  })
 })
 
 describe('PositionLab', () => {
