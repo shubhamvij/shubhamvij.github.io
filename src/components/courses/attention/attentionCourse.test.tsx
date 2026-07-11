@@ -100,9 +100,13 @@ describe('Attention course through CourseShell', () => {
     fireEvent.click(screen.getAllByText('feed-forward network')[0])
     expect(screen.getByText(/4×6 → 4×24 → 4×6/)).toBeDefined()
     fireEvent.click(screen.getAllByText('token embeddings + positions')[0])
-    expect(screen.getByText(/tokens \[4\] → vectors \[4×6\]/)).toBeDefined()
-    // the ⊕ decomposition: embedding operand, position rows, sum
-    expect(screen.getByText('token embedding (lookup row)')).toBeDefined()
+    expect(screen.getByText(/ids \[4\] → fetch rows of E \[V×6\]/)).toBeDefined()
+    // the lookup: table sketch with real GPT-2 ids, in id order, tagged by token
+    expect(screen.getByText(/embedding table E/)).toBeDefined()
+    expect(screen.getByText('id 464')).toBeDefined()
+    expect(screen.getByText('→ The')).toBeDefined()
+    // the ⊕ decomposition: fetched rows, position rows, sum
+    expect(screen.getByText('fetched rows (sentence order)')).toBeDefined()
     expect(screen.getByText('pos 0')).toBeDefined()
     expect(screen.getByText('what enters the block')).toBeDefined()
   })

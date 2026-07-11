@@ -2,6 +2,9 @@
 // forward pass through a pre-norm block. 4 tokens, d=6, 2 heads × d_head=3,
 // d_ff=24, fixed seeded weights, no biases, LayerNorm with γ=1, β=0.
 export const FLOW_TOKENS = ['The', 'cat', 'sat', 'here']
+// Real GPT-2 tokenizer ids for "The cat sat here" (one token per word),
+// verified with js-tiktoken's gpt2 encoding.
+export const TOKEN_IDS = [464, 3797, 3332, 994]
 export const D_MODEL = 6
 export const N_HEADS = 2
 export const D_HEAD = 3 // D_MODEL / N_HEADS

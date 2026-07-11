@@ -829,3 +829,18 @@
   text-align: center;
   padding: 1px 0 2px;
 }
+.vecEllipsisRow {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #8a94a8;
+  font-size: 11px;
+  line-height: 9px;
+  padding: 1px 0;
+  letter-spacing: 3px;
+}
+.vecFetchTag {
+  font-size: 8.5px;
+  color: #555;
+  padding: 2px 0 2px 5px;
+  white-space: nowrap;
+}

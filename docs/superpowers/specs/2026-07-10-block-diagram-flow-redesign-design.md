@@ -182,6 +182,40 @@ speed, is the problem), "softmax requires equal widths" (unrelated).
   claim, add-vs-concat callout, quiz wording) — course prose errors have
   slipped through implementers before.
 
+## Addendum (2026-07-11): embedding lookup + size-match clarity
+
+User feedback after the initial ship: (a) it is unclear that the position
+vector MUST match the embedding width, and (b) it is unclear where the token
+embedding comes from — the table lookup is invisible to a new practitioner.
+
+Changes to the embed stage (user approved the table-sketch option over a
+compact id column):
+
+- New `EmbTable` visual as the stage's first item: the embedding table E
+  drawn as a tall table — faded ⋮ filler rows between the four fetched rows,
+  each row labeled `id <n>` on the left and tagged `→ <token>` on the right,
+  values heat-shaded like the other grids. Rows appear in **id order**
+  (table order ≠ sentence order — deliberately part of the lesson). Caption:
+  "embedding table E — V×6, learned (V ≈ 50k; ids from the GPT-2 tokenizer)".
+- Real ids, verified by executing the GPT-2 tokenizer (js-tiktoken):
+  "The cat sat here" → [464, 3797, 3332, 994], one token per word.
+  `TOKEN_IDS` exported from `blockFlow.ts` and locked by a test.
+- Stage items become: EmbTable → (op "fetch 4 rows →") → fetched-rows grid
+  (sentence order) ⊕ position grid = sum grid.
+- Size-match constraint made explicit: the position grid label gains
+  "also 6-dim", and the note states that elementwise ⊕ forces the position
+  vector to the embedding width (a concatenated position code would dodge
+  the constraint but grow the width — 2.3's add-vs-concat trade-off;
+  RoPE/ALiBi need no position vector at all).
+- Shape line: `ids [4] → fetch rows of E [V×6] → [4×6] ⊕ [4×6] = [4×6]`.
+- The embed PART blurb prepends the lookup ("each token id fetches a row of
+  a learned V×d embedding table").
+- `StageItem` union gains `{ custom: 'emb-table' }`; tests assert the table
+  caption, an id row, a fetch tag, and the new shape line.
+- Fact-check: the only new empirical claim (the ids) is verified by running
+  the tokenizer; the remaining statements repeat claims confirmed in the
+  Task-5 review, so no second review pass is dispatched.
+
 ## Rejected alternatives
 
 - **Static all-at-once MHA panel** (no stepper): everything visible but ~6

@@ -1,7 +1,7 @@
 'use client'
 import { Fragment, useState } from 'react'
 import s from '../engine/course.module.css'
-import { FLOW, FLOW_TOKENS, EMB, POS, D_HEAD } from './blockFlow'
+import { FLOW, FLOW_TOKENS, TOKEN_IDS, EMB, POS, D_HEAD } from './blockFlow'
 
 interface Part {
   id: string
@@ -16,7 +16,7 @@ interface Part {
 
 // One pre-norm transformer block, drawn as a residual "highway" with two stops.
 const PARTS: Part[] = [
-  { id: 'embed', label: 'token embeddings + positions', x: 130, y: 250, w: 220, h: 26, color: '#d8e3f5', blurb: 'Tokens become vectors. Position information is added here (learned or sinusoidal) or injected inside attention itself (RoPE rotates Q/K; ALiBi biases scores by distance) — attention alone is order-blind, so without this "cat sat" = "sat cat". Deep dive: 2.1.' },
+  { id: 'embed', label: 'token embeddings + positions', x: 130, y: 250, w: 220, h: 26, color: '#d8e3f5', blurb: 'Tokens become vectors: each token id fetches a row of a learned V×d embedding table. Position information is then added (learned or sinusoidal) or injected inside attention itself (RoPE rotates Q/K; ALiBi biases scores by distance) — attention alone is order-blind, so without this "cat sat" = "sat cat". Deep dive: 2.1.' },
   { id: 'ln1', label: 'LayerNorm', x: 155, y: 208, w: 78, h: 22, color: '#f4f2e8', blurb: 'Normalizes each token vector before attention (the "pre-norm" placement modern LLMs use). Keeps activations in a healthy range so 100-layer stacks train stably. Deep dive: 2.3.' },
   { id: 'mha', label: 'multi-head attention', x: 145, y: 168, w: 170, h: 30, color: '#cfe0f5', blurb: 'The communication step: the only place tokens exchange information. Every token queries every other token (module 1) with several heads in parallel (this module). Cost: O(n²) in sequence length — the villain of module 3. Deep dive: 2.2.' },
   { id: 'add1', label: '⊕ add (residual)', x: 155, y: 130, w: 130, h: 22, color: '#e3f6e3', blurb: 'The attention output is ADDED to the input, not substituted for it. The untouched copy flowing around every sublayer is the residual stream — an information highway that makes very deep stacks trainable and lets layers make small, composable edits. Why add rather than concatenate? Concat would double the width at every sublayer — nothing would stack. Deep dive: 2.3.' },
@@ -40,7 +40,7 @@ interface GridSpec {
   headSplit?: boolean // label d₁–d₃ / d₄–d₆ column groups as head 1 / head 2
   headIndex?: number // whole grid belongs to one head (e.g. a 4×3 head output)
 }
-type StageItem = GridSpec | { op: string }
+type StageItem = GridSpec | { op: string } | { custom: 'emb-table' }
 
 interface FlowStage {
   items: StageItem[]
@@ -51,14 +51,16 @@ interface FlowStage {
 const FLOW_STAGES: Record<string, FlowStage> = {
   embed: {
     items: [
-      { label: 'token embedding (lookup row)', data: EMB, cols: DCOLS },
+      { custom: 'emb-table' },
+      { op: 'fetch 4 rows →' },
+      { label: 'fetched rows (sentence order)', data: EMB, cols: DCOLS },
       { op: '⊕' },
-      { label: 'position vector (sinusoidal)', data: POS, rows: POS_ROWS, cols: DCOLS },
+      { label: 'position vector (sinusoidal — also 6-dim)', data: POS, rows: POS_ROWS, cols: DCOLS },
       { op: '=' },
       { label: 'what enters the block', data: FLOW.x0, cols: DCOLS },
     ],
-    shape: 'tokens [4] → vectors [4×6]',
-    note: '"cat" anywhere in any text fetches the SAME embedding row, and pos 1 adds the SAME vector no matter which token sits there — only the sum knows both. After the ⊕, "cat at position 1" ≠ "cat at position 3": that is how order sneaks into an otherwise order-blind mechanism. Deep dive 2.1 covers the schemes that inject position inside attention instead (RoPE, ALiBi).',
+    shape: 'ids [4] → fetch rows of E [V×6] → [4×6] ⊕ [4×6] = [4×6]',
+    note: '"Embed" is a lookup, not a computation: the tokenizer turns each token into an integer id, and row id of E is fetched — the same row wherever that token appears, in any text. The rows are ordinary weights, trained end-to-end. And the position vector gets no say in its size: elementwise ⊕ forces it to the same 6 dims. (Concatenating a small position code instead would dodge that but grow the width — 2.3\'s add-vs-concat trade-off; RoPE/ALiBi need no position vector at all.) After the ⊕, "cat at position 1" ≠ "cat at position 3" — order has snuck into an order-blind mechanism. Deep dive: 2.1.',
   },
   ln1: {
     items: [
@@ -205,12 +207,42 @@ function VecGrid({ g }: { g: GridSpec }) {
   )
 }
 
+// The embedding table drawn as what it is: a huge learned lookup table with a
+// handful of rows fetched. Rows sit in id order — table order ≠ sentence
+// order; the → tags map each row back to the token that fetched it.
+const EMB_TABLE_ROWS = FLOW_TOKENS
+  .map((tok, i) => ({ tok, id: TOKEN_IDS[i], emb: EMB[i] }))
+  .sort((a, b) => a.id - b.id)
+
+function EmbTable() {
+  return (
+    <div>
+      <div className={s.vecGrid} style={{ gridTemplateColumns: 'auto repeat(6, auto) auto' }}>
+        <span className={s.vecEllipsisRow}>⋮</span>
+        {EMB_TABLE_ROWS.map(r => (
+          <Fragment key={r.id}>
+            <span className={s.vecTok}>id {r.id}</span>
+            {r.emb.map((v, d) => (
+              <span key={d} className={s.vecCell} style={{ background: flowColor(v) }}>{v.toFixed(2)}</span>
+            ))}
+            <span className={s.vecFetchTag}>→ {r.tok}</span>
+            <span className={s.vecEllipsisRow}>⋮</span>
+          </Fragment>
+        ))}
+      </div>
+      <p className={s.flowShape}>embedding table E — V×6, learned (V ≈ 50k; ids from the GPT-2 tokenizer)</p>
+    </div>
+  )
+}
+
 function StageItems({ items }: { items: StageItem[] }) {
   return (
     <div className={s.flowGrids}>
-      {items.map((it, i) => 'op' in it
-        ? <span key={`op${i}`} className={s.flowArrow}>{it.op}</span>
-        : <VecGrid key={`g${i}`} g={it} />)}
+      {items.map((it, i) => {
+        if ('custom' in it) return <EmbTable key={`c${i}`} />
+        if ('op' in it) return <span key={`op${i}`} className={s.flowArrow}>{it.op}</span>
+        return <VecGrid key={`g${i}`} g={it} />
+      })}
     </div>
   )
 }

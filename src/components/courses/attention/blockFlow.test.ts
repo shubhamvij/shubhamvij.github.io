@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { FLOW, FLOW_TOKENS, EMB, POS, posVec, D_MODEL, D_HEAD, N_HEADS, D_FF } from './blockFlow'
+import { FLOW, FLOW_TOKENS, TOKEN_IDS, EMB, POS, posVec, D_MODEL, D_HEAD, N_HEADS, D_FF } from './blockFlow'
 
 const argmax = (r: number[]) => r.indexOf(Math.max(...r))
 const maxAbs = (m: number[][]) => Math.max(...m.flat().map(Math.abs))
@@ -23,6 +23,12 @@ describe('blockFlow forward pass', () => {
       expect(ho).toHaveLength(4)
       for (const row of ho) expect(row).toHaveLength(D_HEAD)
     }
+  })
+
+  it('token ids are the real GPT-2 tokenizer ids for "The cat sat here"', () => {
+    // verified against js-tiktoken's gpt2 encoding: one token per word
+    expect(TOKEN_IDS).toEqual([464, 3797, 3332, 994])
+    expect(TOKEN_IDS).toHaveLength(FLOW_TOKENS.length)
   })
 
   it('x0 is exactly token embedding + position vector, elementwise', () => {
