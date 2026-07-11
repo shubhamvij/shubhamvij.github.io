@@ -122,13 +122,13 @@ describe('BffAnatomyLab', () => {
     expect(screen.getByText(/1 · Per-node-type projection/i)).toBeDefined()
     const next = screen.getByRole('button', { name: /next ▸/i })
     fireEvent.click(next)
-    expect(screen.getByText(/2 · TCA — type-conditioned attention/i)).toBeDefined()
+    expect(screen.getByText(/one softmax per relation-type set/i)).toBeDefined()
     fireEvent.click(next)
-    expect(screen.getByText(/3 · TAA — type-agnostic attention/i)).toBeDefined()
+    expect(screen.getByText(/one shared softmax/i)).toBeDefined()
     fireEvent.click(next)
-    expect(screen.getByText(/4 · Fusion Φ/i)).toBeDefined()
+    expect(screen.getByText(/learned combination/i)).toBeDefined()
     fireEvent.click(next)
-    expect(screen.getByText(/5 · Masked-link head/i)).toBeDefined()
+    expect(screen.getByText(/masked link/i)).toBeDefined()
   })
 
   it('always shows where the parameters live', () => {
