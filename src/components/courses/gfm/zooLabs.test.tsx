@@ -4,6 +4,7 @@ import ZooMapLab from './ZooMapLab'
 import RelationGraphLab from './RelationGraphLab'
 import TextGlueLab from './TextGlueLab'
 import ChannelEnsembleLab from './ChannelEnsembleLab'
+import BffAnatomyLab from './BffAnatomyLab'
 
 describe('ZooMapLab', () => {
   it('compares ULTRA vs GraphBFF by default', () => {
@@ -111,5 +112,26 @@ describe('ChannelEnsembleLab', () => {
     fireEvent.change(slider, { target: { value: '14' } })  // 0% homophily: cleanly bipartite —
     // ĀX becomes a perfect community-flip detector, so low-pass wins again.
     expect(topText()).toMatch(/LinearSGC/)
+  })
+})
+
+describe('BffAnatomyLab', () => {
+  it('steps through the five stages of one forward pass', () => {
+    render(<BffAnatomyLab />)
+    expect(screen.getByText(/1 · Per-node-type projection/i)).toBeDefined()
+    const next = screen.getByRole('button', { name: /next ▸/i })
+    fireEvent.click(next)
+    expect(screen.getByText(/2 · TCA — type-conditioned attention/i)).toBeDefined()
+    fireEvent.click(next)
+    expect(screen.getByText(/3 · TAA — type-agnostic attention/i)).toBeDefined()
+    fireEvent.click(next)
+    expect(screen.getByText(/4 · Fusion Φ/i)).toBeDefined()
+    fireEvent.click(next)
+    expect(screen.getByText(/5 · Masked-link head/i)).toBeDefined()
+  })
+
+  it('always shows where the parameters live', () => {
+    render(<BffAnatomyLab />)
+    expect(screen.getByText(/≈85% of 1.4B params/)).toBeDefined()
   })
 })
