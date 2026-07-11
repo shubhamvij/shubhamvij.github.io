@@ -1073,7 +1073,19 @@ export default function ChannelEnsembleLab() {
 - [ ] **Step 4: Run the test, verify it passes honestly**
 
 Run: `npx vitest run src/components/courses/gfm/zooLabs.test.tsx`
-Expected: PASS. The regex assertions are deliberately loose (`/LinearSGC/`, `/LinearHGC|Linear\b/`) per the paper's own finding that heterophilic graphs prefer LinearHGC1, Linear or LinearSGC1. If the top filter does not CHANGE across the slider sweep, the toy features are too strong or too weak — adjust the 0.4 signal constant (try 0.3 or 0.5), re-run, and keep the first value where the crossover appears; do not touch the solver.
+
+> **SUPERSEDED (2026-07-11, controller):** the original predicate ("low-pass
+> dies at 0%") is mathematically wrong for a clean bipartite toy — at 0%
+> homophily ĀX is a perfect community-flip detector and the closed-form
+> solve learns the inverted rule (module 4's own lesson). The corrected,
+> honest behavior is a U-SHAPE: /LinearSGC/ tops at v=0 (100% homophily),
+> identity/high-pass (/Linear\b|LinearHGC/) top at the MIXED midpoint
+> (search v ∈ {6, 8, 10} for the low-pass dip and pin the test to that v),
+> and /LinearSGC/ resurges at v=14. The attention stand-in gained a
+> mean-margin tiebreak over TARGET = 4 held-out nodes (accuracy alone ties
+> on tiny sets). The labNote teaches the U-shape and ties it to module 4's
+> "0% is as far from random as 100%" quiz. See ledger + spec (amended) —
+> the fix commits carry the authoritative code.
 
 - [ ] **Step 5: Commit**
 
@@ -2017,11 +2029,11 @@ Insert before the closing `]` of `ZOO_SUBCHAPTERS`:
           },
           {
             id: 'm5-3-q1',
-            prompt: 'At 0% homophily in the lab, the ensemble keeps working while ĀX collapses. What is GraphAny actually learning?',
+            prompt: 'In the lab, the low-pass channels (ĀX, Ā²X) bottom out near 50% homophily — then recover at 0%. Why?',
             options: [
-              { text: 'Which spectral filter to trust for THIS graph — read off from how the channels\' predictions relate, not from the features', correct: true, explain: 'Low-pass filters encode "neighbors agree"; high-pass and identity channels survive heterophily. The attention picks per-graph — the regime is inferred, never baked in (module 4\'s lesson).' },
-              { text: 'Better node features for heterophilic graphs', explain: 'GraphAny never learns features — its channels have zero learned input weights.' },
-              { text: 'To rewire the graph until it becomes homophilic', explain: 'The graph is never modified — only the weighting over fixed filters changes.' },
+              { text: 'Near 50% a node\'s neighbors are an even class mix, so neighbor averages carry no signal; at 0% neighbors are reliably the OTHER class — an inverted rule the closed-form solve learns just as easily', correct: true, explain: 'Module 4\'s lesson in a working model: heterophily is a different signal, not an absent one — mixing is what kills a filter. GraphAny\'s attention reads the regime off the channel predictions, per graph.' },
+              { text: 'The closed-form solver overfits at low homophily', explain: 'The solve is exact least squares either way — at 0% it simply learns the flip, and low-pass becomes perfectly informative again.' },
+              { text: 'High-pass filters only work when homophily is exactly zero', explain: 'Identity/high-pass channels win across the whole MIXED regime — the dip is around 50%, not only at 0%.' },
             ],
           },
           {
