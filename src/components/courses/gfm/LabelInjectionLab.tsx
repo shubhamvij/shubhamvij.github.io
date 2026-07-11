@@ -35,9 +35,9 @@ const P_NO = W[1] + W[2] // U2 and U3 are "no"
 
 const STEP_CAPTIONS = [
   'A tiny relational database: three tables joined by primary/foreign keys. The task: will U4 churn? Three users have known outcomes — they are the in-context examples.',
-  'Step 1 — inject: the context users\' labels are written INTO the users table as a new column. Conditioning enters before any model runs — earlier than every other model in this zoo.',
+  'Step 1 — inject: the context users’ labels are written INTO the users table as a new column. Conditioning enters before any model runs — earlier than every other model in this zoo.',
   'Step 2 — within each table, attention alternates over columns and rows, producing TASK-CONDITIONED row embeddings: because the label column is present, the network can learn task-relevant extractions per row.',
-  'Step 3 — attention follows primary/foreign-key edges: U4\'s row gathers from U4\'s orders (O4, O5), which gather from their items. No quadratic all-cell attention — only key-joined rows talk.',
+  'Step 3 — attention follows primary/foreign-key edges: U4’s row gathers from U4’s orders (O4, O5), which gather from their items. No quadratic all-cell attention — only key-joined rows talk.',
   'Step 4 — cross-sample attention: the query row attends over the context rows, weighted by learned similarity — then the prediction reads out. No gradient step ever ran.',
 ]
 
