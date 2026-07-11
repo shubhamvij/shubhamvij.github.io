@@ -50,9 +50,9 @@ const MODELS: ZooModel[] = [
     cells: {
       token: 'nodes/edges described in text, LM-embedded',
       backbone: 'edge-type-aware GNN',
-      conditioning: "prompt + class nodes appended to the graph",
+      conditioning: 'prompt + class nodes appended to the graph',
       trained: 'LM frozen; GNN trained',
-      locus: "the GNN: P(class i) = sigmoid(MLP(h_class_i))",
+      locus: 'the GNN: P(class i) = sigmoid(MLP(h_class_i))',
     },
   },
   {
@@ -90,7 +90,7 @@ const MODELS: ZooModel[] = [
     cells: {
       token: 'pairwise distances between channel predictions',
       backbone: '5 closed-form LinearGNNs + an attention MLP',
-      conditioning: "the target graph's own labels (closed-form solve)",
+      conditioning: 'the target graph’s own labels (closed-form solve)',
       trained: 'only the attention MLP is ever trained',
       locus: 'weighted vote over LinearGNN channels',
     },
@@ -154,6 +154,7 @@ export default function ZooMapLab() {
               onClick={() => pick(m.id)}
             >
               {m.name} <span style={{ opacity: 0.65 }}>&apos;{m.year.slice(2)}</span>
+              <span style={{ display: 'block', fontSize: 9, opacity: 0.75 }}>{m.dive}</span>
             </button>
           ))}
         </div>
@@ -194,13 +195,6 @@ export default function ZooMapLab() {
           for several of these models the transferable unit is <em>a model</em> that maps graphs into a shared
           space, not a symbol table.
         </p>
-        <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid #ddd', fontSize: 9, opacity: 0.6 }}>
-          Models: {MODELS.map((m, i) => (
-            <span key={m.id}>
-              {i > 0 && ' • '}{m.name} ({m.dive})
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   )
