@@ -98,8 +98,21 @@ describe('Attention course through CourseShell', () => {
     render(<CourseShell course={attentionCourse} />)
     fireEvent.click(screen.getByRole('button', { name: /2\. The transformer block/ }))
     fireEvent.click(screen.getAllByText('feed-forward network')[0])
-    expect(screen.getByText(/4×4 → 4×8 → 4×4/)).toBeDefined()
+    expect(screen.getByText(/4×6 → 4×24 → 4×6/)).toBeDefined()
     fireEvent.click(screen.getAllByText('token embeddings + positions')[0])
-    expect(screen.getByText(/tokens \[4\] → vectors \[4×4\]/)).toBeDefined()
+    expect(screen.getByText(/tokens \[4\] → vectors \[4×6\]/)).toBeDefined()
+    // the ⊕ decomposition: embedding operand, position rows, sum
+    expect(screen.getByText('token embedding (lookup row)')).toBeDefined()
+    expect(screen.getByText('pos 0')).toBeDefined()
+    expect(screen.getByText('what enters the block')).toBeDefined()
+  })
+
+  it('residual add stage shows residual + edit = updated stream', () => {
+    render(<CourseShell course={attentionCourse} />)
+    fireEvent.click(screen.getByRole('button', { name: /2\. The transformer block/ }))
+    fireEvent.click(screen.getAllByText('⊕ add (residual)')[0])
+    expect(screen.getByText('residual copy (pre-norm input)')).toBeDefined()
+    expect(screen.getByText('attention edit')).toBeDefined()
+    expect(screen.getByText('updated stream')).toBeDefined()
   })
 })

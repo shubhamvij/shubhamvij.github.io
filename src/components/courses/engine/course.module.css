@@ -817,3 +817,15 @@
   margin: 6px 0 0;
   line-height: 1.4;
 }
+.vecColHead {
+  font-size: 7.5px;
+  color: #778;
+  text-align: center;
+  padding: 1px 2px;
+}
+.vecHeadLabel {
+  font-size: 8px;
+  font-weight: bold;
+  text-align: center;
+  padding: 1px 0 2px;
+}
