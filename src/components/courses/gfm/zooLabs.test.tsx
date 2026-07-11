@@ -3,6 +3,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import ZooMapLab from './ZooMapLab'
 import RelationGraphLab from './RelationGraphLab'
 import TextGlueLab from './TextGlueLab'
+import ChannelEnsembleLab from './ChannelEnsembleLab'
 
 describe('ZooMapLab', () => {
   it('compares ULTRA vs GraphBFF by default', () => {
@@ -81,5 +82,28 @@ describe('TextGlueLab', () => {
     fireEvent.click(screen.getByRole('button', { name: 'GraphGPT' }))
     fireEvent.click(screen.getByText('projector'))
     expect(screen.getByText(/single linear layer/)).toBeDefined()
+  })
+})
+
+describe('ChannelEnsembleLab', () => {
+  it('renders all five LinearGNN channels', () => {
+    render(<ChannelEnsembleLab />)
+    for (const name of ['Linear', 'LinearSGC1', 'LinearSGC2', 'LinearHGC1', 'LinearHGC2']) {
+      expect(screen.getByText(name)).toBeDefined()
+    }
+  })
+
+  it('shifts the trusted filter as homophily drops', () => {
+    render(<ChannelEnsembleLab />)
+    const slider = screen.getByLabelText(/homophily/i)
+    fireEvent.change(slider, { target: { value: '0' } })   // 100% homophily
+    const topAtHomophily = screen.getByText(/top filter:/).textContent
+    expect(topAtHomophily).toMatch(/LinearSGC/)
+    fireEvent.change(slider, { target: { value: '14' } })  // 0% homophily
+    const topAtHeterophily = screen.getByText(/top filter:/).textContent
+    // Paper: heterophilic graphs prefer LinearHGC1, Linear or LinearSGC1 —
+    // the toy graph lands on one of the identity/high-pass channels.
+    expect(topAtHeterophily).toMatch(/LinearHGC|Linear\b/)
+    expect(topAtHeterophily).not.toBe(topAtHomophily)
   })
 })
