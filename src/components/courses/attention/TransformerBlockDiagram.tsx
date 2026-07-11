@@ -69,15 +69,6 @@ const FLOW_STAGES: Record<string, FlowStage> = {
     shape: '[4×6] → [4×6]',
     note: 'Each ROW — one token\'s 6 numbers — is rescaled to mean 0, variance 1. Compare a row across the two grids: per token, never across the batch.',
   },
-  mha: {
-    items: [
-      { label: 'normalized input', data: FLOW.x1, cols: DCOLS },
-      { op: '→' },
-      { label: 'attention output (the edit)', data: FLOW.a, cols: DCOLS },
-    ],
-    shape: '[4×6] → [4×6]',
-    note: 'The attention edit for each token — a mix of the other tokens\' value vectors.',
-  },
   add1: {
     items: [
       { label: 'residual copy (pre-norm input)', data: FLOW.x0, cols: DCOLS },
@@ -119,6 +110,45 @@ const FLOW_STAGES: Record<string, FlowStage> = {
     note: 'Output shape = input shape, so the next block consumes this directly — stack 96 of them and you have a GPT.',
   },
 }
+
+// ---------- MHA stepper: the one stage that gets a step-through ----------
+const MHA_STEPS: { chip: string; heading: string; items: StageItem[]; shape: string; note: string }[] = [
+  {
+    chip: '1 · make Q, K, V',
+    heading: 'every token is projected three ways',
+    items: [
+      { label: 'x (normalized input)', data: FLOW.x1, cols: DCOLS },
+      { op: '→' },
+      { label: 'Q — "what am I looking for?"', data: FLOW.q, cols: DCOLS, headSplit: true },
+      { label: 'K — "what do I advertise?"', data: FLOW.k, cols: DCOLS, headSplit: true },
+      { label: 'V — "what I hand over if you attend to me"', data: FLOW.v, cols: DCOLS, headSplit: true },
+    ],
+    shape: 'x·W_Q, x·W_K, x·W_V — [4×6] each',
+    note: 'Three learned matrix multiplies, nothing more. The colored groups mark the head split: columns d₁–d₃ belong to head 1, d₄–d₆ to head 2 — "2 heads" slices the same three matrices into subspaces, it does not add new networks (deep dive 2.2).',
+  },
+  {
+    chip: '2 · score + softmax',
+    heading: 'each head compares its own Q slice with its own K slice',
+    items: [
+      { label: 'head 1 pattern (rows sum to 1)', data: FLOW.headWeights[0], cols: FLOW_TOKENS, weights: true, headIndex: 0 },
+      { label: 'head 2 pattern (rows sum to 1)', data: FLOW.headWeights[1], cols: FLOW_TOKENS, weights: true, headIndex: 1 },
+    ],
+    shape: 'softmax(Q_h·K_hᵀ / √3) → [4×4] per head — row = query token, column = who it attends to',
+    note: 'Same four tokens, two different learned lenses: head 1 leans toward "The"/"cat" while head 2 locks onto "sat"/"here". And note the shape — this token×token grid has 4 columns because there are 4 tokens to look at, not because d=6. It is a different kind of matrix from the [4×6] activations.',
+  },
+  {
+    chip: '3 · mix + combine',
+    heading: 'each head blends V by its pattern; W_O merges the heads',
+    items: [
+      { label: 'head 1 out (weights₁·V₁)', data: FLOW.headOut[0], cols: ['d₁', 'd₂', 'd₃'], headIndex: 0 },
+      { label: 'head 2 out (weights₂·V₂)', data: FLOW.headOut[1], cols: ['d₄', 'd₅', 'd₆'], headIndex: 1 },
+      { op: 'concat → ×W_O →' },
+      { label: 'attention output (the edit)', data: FLOW.a, cols: DCOLS },
+    ],
+    shape: '[4×3] ⌢ [4×3] = [4×6] → W_O → [4×6]',
+    note: 'Concatenation happens HERE — at fixed, planned width (3+3=6), once — and W_O immediately mixes the heads\' writes into shared directions of the residual stream. Without W_O each head would be locked to its own 3 columns forever (deep dive 2.2).',
+  },
+]
 
 const flowColor = (v: number) => {
   const t = Math.max(-1.6, Math.min(1.6, v)) / 1.6
@@ -185,6 +215,26 @@ function StageItems({ items }: { items: StageItem[] }) {
   )
 }
 
+function MhaStepper() {
+  const [step, setStep] = useState(0)
+  const st = MHA_STEPS[step]
+  return (
+    <div>
+      <div className={s.chipRow}>
+        {MHA_STEPS.map((m, i) => (
+          <button key={m.chip} type="button" className={`${s.chip} ${step === i ? s.chipOn : ''}`} onClick={() => setStep(i)}>
+            {m.chip}
+          </button>
+        ))}
+      </div>
+      <p className={s.flowTitle} style={{ margin: '6px 0 4px' }}>step {step + 1} of 3 — {st.heading}</p>
+      <StageItems items={st.items} />
+      <p className={s.flowShape}>{st.shape}</p>
+      <p className={s.flowNote}>{st.note}</p>
+    </div>
+  )
+}
+
 export default function TransformerBlockDiagram() {
   const [selected, setSelected] = useState('mha')
   const part = PARTS.find(p => p.id === selected)!
@@ -238,7 +288,12 @@ export default function TransformerBlockDiagram() {
           <span className={s.feedbackIcon}>▸</span>
           <span><strong>{part.label}:</strong> {part.blurb}</span>
         </div>
-        {(() => {
+        {selected === 'mha' ? (
+          <div className={s.flowPanel}>
+            <p className={s.flowTitle}>data through &quot;{part.label}&quot; — real numbers, computed live</p>
+            <MhaStepper />
+          </div>
+        ) : (() => {
           const flow = FLOW_STAGES[selected]
           if (!flow) return null
           return (

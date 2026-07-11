@@ -115,4 +115,22 @@ describe('Attention course through CourseShell', () => {
     expect(screen.getByText('attention edit')).toBeDefined()
     expect(screen.getByText('updated stream')).toBeDefined()
   })
+
+  it('multi-head attention stage steps through Q/K/V → scores → mix', () => {
+    render(<CourseShell course={attentionCourse} />)
+    fireEvent.click(screen.getByRole('button', { name: /2\. The transformer block/ }))
+    // mha is the default selection; step 1 shows the three projections with role captions
+    expect(screen.getByText(/what am I looking for\?/)).toBeDefined()
+    expect(screen.getByText(/what do I advertise\?/)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /2 · score \+ softmax/ }))
+    expect(screen.getByText('head 1 pattern (rows sum to 1)')).toBeDefined()
+    expect(screen.getByText('head 2 pattern (rows sum to 1)')).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /3 · mix \+ combine/ }))
+    expect(screen.getByText(/head 1 out/)).toBeDefined()
+    expect(screen.getByText('attention output (the edit)')).toBeDefined()
+    // leaving and returning resets to step 1
+    fireEvent.click(screen.getAllByText('LayerNorm')[0])
+    fireEvent.click(screen.getAllByText('multi-head attention')[0])
+    expect(screen.getByText(/what am I looking for\?/)).toBeDefined()
+  })
 })
