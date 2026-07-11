@@ -5,6 +5,7 @@ import RelationGraphLab from './RelationGraphLab'
 import TextGlueLab from './TextGlueLab'
 import ChannelEnsembleLab from './ChannelEnsembleLab'
 import BffAnatomyLab from './BffAnatomyLab'
+import LabelInjectionLab from './LabelInjectionLab'
 
 describe('ZooMapLab', () => {
   it('compares ULTRA vs GraphBFF by default', () => {
@@ -133,5 +134,30 @@ describe('BffAnatomyLab', () => {
   it('always shows where the parameters live', () => {
     render(<BffAnatomyLab />)
     expect(screen.getByText(/≈85% of 1.4B params/)).toBeDefined()
+  })
+})
+
+describe('LabelInjectionLab', () => {
+  it('injects context labels into the users table at step 1', () => {
+    render(<LabelInjectionLab />)
+    expect(screen.queryByText('churn?')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /next ▸/i }))
+    expect(screen.getByText('churn?')).toBeDefined()
+    expect(screen.getAllByText('?').length).toBeGreaterThan(0)
+  })
+
+  it('ends frozen: prediction with zero weight updates', () => {
+    render(<LabelInjectionLab />)
+    const next = screen.getByRole('button', { name: /next ▸/i })
+    for (let i = 0; i < 4; i++) fireEvent.click(next)
+    expect(screen.getByText(/churn\(U4\) =/)).toBeDefined()
+    expect(screen.getByText(/weights updated/)).toBeDefined()
+    expect(screen.getByText('0', { selector: 'span' })).toBeDefined()
+  })
+
+  it('contrasts with the flatten-to-one-row pipeline', () => {
+    render(<LabelInjectionLab />)
+    fireEvent.click(screen.getByRole('button', { name: /flatten instead/i }))
+    expect(screen.getAllByText(/task-conditioned extraction/).length).toBeGreaterThan(0)
   })
 })
