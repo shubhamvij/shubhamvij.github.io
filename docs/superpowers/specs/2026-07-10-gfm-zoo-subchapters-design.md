@@ -260,8 +260,10 @@ Callout: why this transfers to 57 unseen KGs — nothing in the parameters
 names any relation. Prelim pointer: message passing basics → module 2 of
 this course (no attention-course dependency here).
 
-Quiz: moved `m5-q1` + new `m5-1-q1` (which edge type h2t is, from an
-example), `m5-1-q2` (what is recomputed on a new KG vs what transfers).
+Quiz: moved `m5-q1` + new `m5-1-q1` (identify an interaction edge type
+from an example — the shipped example is t2h: P1 tails `authored`, heads
+`cites`; planning shorthand here previously said h2t),
+`m5-1-q2` (what is recomputed on a new KG vs what transfers).
 
 Refs: ULTRA (Galkin et al. ICLR 2024), NBFNet (Zhu et al. 2021), Galkin's
 ULTRA blog, JMP (Shoghi et al.), UMA (Meta 2025).
@@ -357,11 +359,16 @@ Widget `channel-ensemble` — **Channel Ensemble Lab** (GraphAny):
   continuous, honest stand-in for the learned attention, labeled as such;
   margin added 2026-07-11 because accuracy alone over a tiny held-out set
   ties and the tie-break silently favored the first channel).
-- Drag homophily 1.0 → 0.0: the low-pass channels' accuracy collapses and
-  the identity/high-pass channels take over; attention bars visibly cross —
-  "it doesn't learn your features; it learns which filter to trust, per
-  graph." (Wording matches the paper: heterophilic graphs prefer
-  LinearHGC1, Linear or LinearSGC1 — not exclusively high-pass.)
+- Drag homophily 1.0 → 0.0 and the honest math shows a U-SHAPE (design
+  corrected 2026-07-11): low-pass wins at 100% (averaging denoises), dies
+  near ~50% (neighbor composition ≈ mixed, so neighbor averages carry no
+  class signal) where identity/high-pass take over, and RESURRECTS at 0%
+  (a clean bipartite toy makes ĀX a perfect community-flip detector, and
+  the closed-form solve happily learns the inverted rule — module 4's own
+  "0% is as far from random as 100%" lesson, now visible in a working
+  model). Attention bars cross twice. "It doesn't learn your features; it
+  learns which filter to trust, per graph." (Paper wording preserved:
+  heterophilic graphs prefer LinearHGC1, Linear or LinearSGC1.)
 
 Callout: prelims — "the attention over channel predictions is exactly
 scaled dot-product attention over a 5-token sequence: Attention course
