@@ -68,7 +68,7 @@ const MODELS: ZooModel[] = [
   {
     id: 'llaga', name: 'LLaGA', year: '2024', family: 'text as glue', color: '#c86018', dive: 'deep dive 5.2',
     cells: {
-      token: 'template-ordered node sequences (+ Laplacian PE)',
+      token: 'template-ordered node sequences (tree template adds Laplacian PE)',
       backbone: 'no graph encoder — frozen LLM only',
       conditioning: 'parameter-free structure templates',
       trained: 'everything frozen except one projector',

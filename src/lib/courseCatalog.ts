@@ -25,7 +25,7 @@ export const COURSE_CATALOG: CourseCatalogEntry[] = [
       'An interactive course on Graph Foundation Models: message passing, the heterogeneity trilemma, and the GFM zoo — with architecture deep dives on ULTRA, text-as-glue LLM hybrids, GraphAny and graph PFNs, GraphBFF\'s typed attention, and relational foundation models like KumoRFM-2.',
     modules: 7,
     minutes: 101,
-    highlights: '12 interactive labs · 5 deep dives · 63 referenced papers',
+    highlights: '12 interactive labs · 5 deep dives · 51 referenced sources',
   },
   {
     slug: 'attention-mechanisms',

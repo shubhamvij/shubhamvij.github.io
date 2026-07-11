@@ -123,7 +123,7 @@ export const ZOO_SUBCHAPTERS: CourseModule[] = [
       {
         kind: 'refs',
         items: [
-          { label: 'ULTRA: Towards Foundation Models for Knowledge Graph Reasoning — Galkin et al. (ICLR 2024)', href: 'https://arxiv.org/abs/2310.04562' },
+          { label: 'Towards Foundation Models for Knowledge Graph Reasoning (ULTRA) — Galkin et al. (ICLR 2024)', href: 'https://arxiv.org/abs/2310.04562' },
           { label: 'Neural Bellman-Ford Networks (NBFNet) — Zhu et al. (NeurIPS 2021)', href: 'https://arxiv.org/abs/2106.06935', note: 'the conditional message passing ULTRA builds on' },
           { label: 'ULTRA explained by its author — Galkin (blog, 2023)', href: 'https://towardsdatascience.com/ultra-foundation-models-for-knowledge-graph-reasoning-9f8f4a0d7f09/' },
           { label: 'From Molecules to Materials (JMP) — Shoghi et al. (ICLR 2024)', href: 'https://arxiv.org/abs/2310.16802', note: '~120M structures, per-dataset heads' },
@@ -392,7 +392,7 @@ export const ZOO_SUBCHAPTERS: CourseModule[] = [
         items: [
           { label: 'GraphAny / Fully-inductive Node Classification on Arbitrary Graphs — Zhao et al. (ICLR 2025)', href: 'https://arxiv.org/abs/2405.20445' },
           { label: 'PRODIGY: Enabling In-context Learning Over Graphs — Huang et al. (NeurIPS 2023)', href: 'https://arxiv.org/abs/2305.12600' },
-          { label: 'Turning Tabular Foundation Models into Graph Foundation Models (G2T-FM) — Eremeev et al. (NeurIPS 2025)', href: 'https://arxiv.org/abs/2508.20906' },
+          { label: 'Turning Tabular Foundation Models into Graph Foundation Models (G2T-FM) — Eremeev et al. (NeurIPS 2025 workshop)', href: 'https://arxiv.org/abs/2508.20906' },
           { label: 'GraphPFN: A Prior-Data Fitted Graph Foundation Model — (2025)', href: 'https://arxiv.org/abs/2509.21489' },
           { label: 'TabPFN — Hollmann et al. (ICLR 2023)', href: 'https://arxiv.org/abs/2207.01848', note: 'the prior-fitted-network trick this family imports' },
         ],
@@ -449,7 +449,7 @@ export const ZOO_SUBCHAPTERS: CourseModule[] = [
               <strong>TAA — type-agnostic attention</strong> — is the cheap counterpart: one shared attention
               over a sampled neighborhood (two hops, up to ten per hop), so information still crosses type
               boundaries. A learned FFN <strong>Φ(h_tca, h_taa)</strong> fuses the two inside an otherwise
-              standard pre-norm transformer block — and Theorem 4.1 proves the pair is{' '}
+              standard post-norm transformer block — and Theorem 4.1 proves the pair is{' '}
               <em>strictly more expressive</em> than either alone: TCA&apos;s per-subset softmax masks relative
               neighbor-set sizes, TAA&apos;s shared parameters are blind to type distinctions; together they
               realize functions neither can.
@@ -545,7 +545,7 @@ export const ZOO_SUBCHAPTERS: CourseModule[] = [
               <strong>1 · Label-propagation in-context learning</strong> (Griffin, RT<sub>zero</sub>): treat the
               context examples&apos; labels as node features and let message passing spread them. Simple and
               schema-free — but Kumo&apos;s benchmark run reports these models underperforming on RelBenchV1,
-              with predictions that &quot;often reduce to the historical mean&quot; (vendor-reported; the
+              with predictions that often collapse toward the historical mean (vendor-reported; the
               comparison comes from a competitor&apos;s paper).
             </p>
             <p>
@@ -643,7 +643,7 @@ export const ZOO_SUBCHAPTERS: CourseModule[] = [
           { label: 'KumoRFM: A Foundation Model for In-Context Learning on Relational Data (2025)', href: 'https://kumo.ai/research/kumo_relational_foundation_model.pdf', note: 'the v1 whitepaper' },
           { label: 'RelBench: A Benchmark for Deep Learning on Relational Databases — Robinson et al. (NeurIPS 2024)', href: 'https://arxiv.org/abs/2407.20060' },
           { label: 'Relational Deep Learning — Fey et al. (2023)', href: 'https://arxiv.org/abs/2312.04615', note: 'databases as temporal heterogeneous graphs' },
-          { label: 'The Relational Transformer — (2025)', href: 'https://arxiv.org/abs/2510.06377', note: 'RT_zero is its zero-shot mode' },
+          { label: 'The Relational Transformer — (2025)', href: 'https://arxiv.org/abs/2510.06377', note: 'its zero-shot evaluation appears as RT_zero in KumoRFM-2\'s comparisons' },
         ],
       },
     ],
