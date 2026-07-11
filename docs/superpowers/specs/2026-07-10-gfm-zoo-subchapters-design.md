@@ -353,8 +353,10 @@ Widget `channel-ensemble` — **Channel Ensemble Lab** (GraphAny):
   class shown as node fill; per-channel accuracy chip. Each channel solved
   by real least squares (pseudo-inverse) on the toy graph's labeled nodes.
 - A bar row: the attention weights over channels (computed live from the
-  channel predictions' validation accuracy as an honest stand-in for the
-  learned attention, labeled as such).
+  channel predictions' held-out accuracy plus mean score margin — a
+  continuous, honest stand-in for the learned attention, labeled as such;
+  margin added 2026-07-11 because accuracy alone over a tiny held-out set
+  ties and the tie-break silently favored the first channel).
 - Drag homophily 1.0 → 0.0: the low-pass channels' accuracy collapses and
   the identity/high-pass channels take over; attention bars visibly cross —
   "it doesn't learn your features; it learns which filter to trust, per
