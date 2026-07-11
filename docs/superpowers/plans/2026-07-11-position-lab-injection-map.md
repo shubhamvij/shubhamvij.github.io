@@ -24,8 +24,7 @@
 
 - `src/components/courses/attention/PositionLab.tsx` — gains `Slot` type, `INJECTION` config, `SLOT_TITLES`, `MAP_NODES`, `InjectionMap` component (Tasks 1); RoPE/ALiBi note sentences (Task 2).
 - `src/components/courses/attention/subchapters.tsx` — second prose block of the `block-embeddings` module restructured (Task 3).
-- `src/components/courses/attention/subchapterLabs.test.tsx` — 3 injection-map tests + 1 note-anchor test appended to the `PositionLab` describe (Tasks 1–2).
-- `src/components/courses/attention/attentionCourse.test.tsx` — 1 new test asserting the two family labels render in 2.1 (Task 3).
+- `src/components/courses/attention/subchapterLabs.test.tsx` — 3 injection-map tests + 1 note-anchor test appended to the `PositionLab` describe (Tasks 1–2); 1 new describe asserting the two family labels in the 2.1 prose (Task 3, amended — see Task 3 note).
 
 ---
 
@@ -274,9 +273,11 @@ git commit -m "Anchor RoPE/ALiBi lab notes to the block anatomy's attention step
 
 ### Task 3: Regroup 2.1 prose bullets into the two injection families
 
+> **Amended 2026-07-11 (controller):** the test originally targeted `attentionCourse.test.tsx` via CourseShell navigation. A concurrent session holds uncommitted work in that file, so the test moves to `subchapterLabs.test.tsx` and renders the 2.1 prose blocks directly — same asserted labels, no shared-file contention. Shell-level rendering of 2.1 is already covered by the existing "module 2 exposes the four deep-dive subchapters" test.
+
 **Files:**
 - Modify: `src/components/courses/attention/subchapters.tsx` (second prose block of the `block-embeddings` module — the one currently starting "So position must be injected" with the flat 4-bullet `<ul>`)
-- Test: `src/components/courses/attention/attentionCourse.test.tsx`
+- Test: `src/components/courses/attention/subchapterLabs.test.tsx`
 
 **Interfaces:**
 - Consumes: nothing from Tasks 1–2 (content-only change; renders through the existing course engine `.prose` styles, which handle nested `<ul>`).
@@ -284,20 +285,29 @@ git commit -m "Anchor RoPE/ALiBi lab notes to the block anatomy's attention step
 
 - [ ] **Step 1: Write the failing test**
 
-Append inside `describe('Attention course through CourseShell', …)` in `src/components/courses/attention/attentionCourse.test.tsx`:
+In `src/components/courses/attention/subchapterLabs.test.tsx`, add to the imports at the top of the file:
 
 ```tsx
-  it('2.1 groups the four PE schemes into the two injection families', () => {
-    render(<CourseShell course={attentionCourse} />)
-    fireEvent.click(screen.getByRole('button', { name: /2\.1 Embeddings & positions/ }))
+import { BLOCK_SUBCHAPTERS } from './subchapters'
+```
+
+Then append this new describe block at the end of the file:
+
+```tsx
+describe('2.1 Embeddings & positions prose', () => {
+  it('groups the four PE schemes into the two injection families', () => {
+    const m21 = BLOCK_SUBCHAPTERS[0]
+    expect(m21.id).toBe('block-embeddings')
+    render(<>{m21.blocks.map((b, i) => (b.kind === 'prose' ? <div key={i}>{b.body}</div> : null))}</>)
     expect(screen.getByText(/At the input, once — a vector ⊕-added to the token embedding/)).toBeDefined()
     expect(screen.getByText(/Inside attention, at every layer — no position vectors at all/)).toBeDefined()
   })
+})
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
 
-Run: `npx vitest run src/components/courses/attention/attentionCourse.test.tsx -t 'injection families'`
+Run: `npx vitest run src/components/courses/attention/subchapterLabs.test.tsx -t 'injection families'`
 Expected: 1 failed — unable to find `/At the input, once — a vector ⊕-added to the token embedding/`.
 
 - [ ] **Step 3: Replace the prose block**
@@ -339,13 +349,13 @@ In `src/components/courses/attention/subchapters.tsx`, replace the entire second
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `npx vitest run src/components/courses/attention/attentionCourse.test.tsx`
-Expected: all PASS (the new test plus all pre-existing ones — nothing else in the file touches this prose).
+Run: `npx vitest run src/components/courses/attention/subchapterLabs.test.tsx`
+Expected: all 24 PASS (the new test plus the 23 existing — nothing else in the file touches this prose).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/components/courses/attention/subchapters.tsx src/components/courses/attention/attentionCourse.test.tsx
+git add src/components/courses/attention/subchapters.tsx src/components/courses/attention/subchapterLabs.test.tsx
 git commit -m "Regroup 2.1 positional-encoding bullets into the two injection families"
 ```
 
