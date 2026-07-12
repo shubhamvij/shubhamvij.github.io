@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { FLOW, FLOW_TOKENS, TOKEN_IDS, EMB, POS, posVec, D_MODEL, D_HEAD, N_HEADS, D_FF } from './blockFlow'
+import { FLOW, FLOW_TOKENS, TOKEN_IDS, EMB, POS, posVec, D_MODEL, D_HEAD, N_HEADS, D_FF, WALK } from './blockFlow'
 
 const argmax = (r: number[]) => r.indexOf(Math.max(...r))
 const maxAbs = (m: number[][]) => Math.max(...m.flat().map(Math.abs))
@@ -76,5 +76,29 @@ describe('blockFlow forward pass', () => {
 
   it('the FFN is alive (ReLU did not zero the edit out)', () => {
     expect(maxAbs(FLOW.f)).toBeGreaterThanOrEqual(0.1)
+  })
+})
+
+// Step 2's worked example must be the SAME numbers the grids show — every
+// intermediate is pinned to the forward pass, nothing is free-hand.
+describe('step-2 worked example (WALK)', () => {
+  it('q0 and kSlices are literally the head-1 columns of Q row "The" and of K', () => {
+    expect(WALK.q0).toEqual(FLOW.q[0].slice(0, D_HEAD))
+    WALK.kSlices.forEach((ks, j) => expect(ks).toEqual(FLOW.k[j].slice(0, D_HEAD)))
+  })
+
+  it('raw scores are the head-1 dot products and scaled = raw / √3', () => {
+    WALK.raw.forEach((r, j) => {
+      let dot = 0
+      for (let d = 0; d < D_HEAD; d++) dot += FLOW.q[0][d] * FLOW.k[j][d]
+      expect(r).toBeCloseTo(dot, 10)
+      expect(WALK.scaled[j]).toBeCloseTo(r / Math.sqrt(D_HEAD), 10)
+    })
+  })
+
+  it('e^scaled ÷ their sum reproduces head 1\'s "The" attention row exactly', () => {
+    expect(WALK.exps.reduce((a, b) => a + b, 0)).toBeCloseTo(WALK.sum, 10)
+    WALK.exps.forEach((e, j) => expect(e / WALK.sum).toBeCloseTo(FLOW.headWeights[0][0][j], 10))
+    expect(WALK.weights).toEqual(FLOW.headWeights[0][0])
   })
 })

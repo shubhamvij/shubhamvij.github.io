@@ -1,7 +1,7 @@
 'use client'
 import { Fragment, useState } from 'react'
 import s from '../engine/course.module.css'
-import { FLOW, FLOW_TOKENS, TOKEN_IDS, EMB, POS, D_HEAD } from './blockFlow'
+import { FLOW, FLOW_TOKENS, TOKEN_IDS, EMB, POS, D_HEAD, WALK } from './blockFlow'
 
 interface Part {
   id: string
@@ -39,6 +39,7 @@ interface GridSpec {
   weights?: boolean // 0..1 attention shading instead of signed shading
   headSplit?: boolean // label d₁–d₃ / d₄–d₆ column groups as head 1 / head 2
   headIndex?: number // whole grid belongs to one head (e.g. a 4×3 head output)
+  plain?: boolean // no shading — scratch arithmetic, not an activation tensor
 }
 type StageItem = GridSpec | { op: string } | { custom: 'emb-table' }
 
@@ -136,7 +137,7 @@ const MHA_STEPS: { chip: string; heading: string; items: StageItem[]; shape: str
       { label: 'head 2 pattern (rows sum to 1)', data: FLOW.headWeights[1], cols: FLOW_TOKENS, weights: true, headIndex: 1 },
     ],
     shape: 'softmax(Q_h·K_hᵀ / √3) → [4×4] per head — row = query token, column = who it attends to',
-    note: 'Same four tokens, two different learned lenses: head 1 leans toward "The"/"cat" while head 2 locks onto "sat"/"here". And note the shape — this token×token grid has 4 columns because there are 4 tokens to look at, not because d=6. It is a different kind of matrix from the [4×6] activations.',
+    note: 'Same four tokens, two different learned lenses: head 1 leans toward "The"/"cat" while head 2 locks onto "sat"/"here". And note the shape — this token×token grid has 4 columns because there are 4 tokens to look at, not because d=6. It is a different kind of matrix from the [4×6] activations. Lost on where a row comes from? The worked example below rebuilds row "The" of head 1 by hand.',
   },
   {
     chip: '3 · mix + combine',
@@ -151,6 +152,46 @@ const MHA_STEPS: { chip: string; heading: string; items: StageItem[]; shape: str
     note: 'Concatenation happens HERE — at fixed, planned width (3+3=6), once — and W_O immediately mixes the heads\' writes into shared directions of the residual stream. Without W_O each head\'s write would be locked to its own 3 columns of the stream (deep dive 2.2).',
   },
 ]
+
+// ---------- Step-2 worked example: one row of head 1, by hand ----------
+// Every number below comes from WALK (same forward pass as the grids). The
+// dot product is written out against K's row 0 ("The" attending to "The");
+// the interpretation line tracks whichever score is actually largest, so a
+// seed change cannot strand the prose.
+const wf2 = (v: number) => v.toFixed(2)
+const WALK_TOP = WALK.raw.indexOf(Math.max(...WALK.raw))
+const WALK_EQ = `score("The" → "The") = ${WALK.q0.map((qv, d) => `(${wf2(qv)})(${wf2(WALK.kSlices[0][d])})`).join(' + ')} = ${wf2(WALK.raw[0])}`
+
+function ScoreWalkthrough() {
+  return (
+    <div className={s.flowWalk}>
+      <p className={s.flowTitle}>worked example — head 1, query &quot;The&quot;, by hand</p>
+      <div className={s.flowGrids}>
+        <VecGrid g={{ label: 'q_The — head-1 slice of Q\'s "The" row (step 1)', data: [WALK.q0], rows: ['The'], cols: ['d₁', 'd₂', 'd₃'], headIndex: 0 }} />
+        <span className={s.flowArrow}>·</span>
+        <VecGrid g={{ label: 'K head-1 slice — Kᵀ means: dot against each row', data: WALK.kSlices, cols: ['d₁', 'd₂', 'd₃'], headIndex: 0 }} />
+      </div>
+      <p className={s.flowCalc}>{WALK_EQ}</p>
+      <p className={s.flowShape}>one multiply per dimension, then add — that is the whole comparison. The same recipe against K&apos;s other three rows fills out the score row:</p>
+      <div className={s.flowGrids}>
+        <VecGrid g={{ label: 'raw scores — q_The·Kᵀ', data: [WALK.raw], rows: ['The'], cols: FLOW_TOKENS }} />
+        <span className={s.flowArrow}>÷ √3 ≈ 1.73 →</span>
+        <VecGrid g={{ label: 'scaled scores', data: [WALK.scaled], rows: ['The'], cols: FLOW_TOKENS }} />
+        <span className={s.flowArrow}>e^x →</span>
+        <VecGrid g={{ label: `e^scaled — the four sum to ${wf2(WALK.sum)}`, data: [WALK.exps], rows: ['The'], cols: FLOW_TOKENS, plain: true }} />
+        <span className={s.flowArrow}>÷ {wf2(WALK.sum)} →</span>
+        <VecGrid g={{ label: 'weights — row "The" of head 1\'s pattern above', data: [WALK.weights], rows: ['The'], cols: FLOW_TOKENS, weights: true }} />
+      </div>
+      <p className={s.flowNote}>
+        softmax = e^each score ÷ their sum, so every weight lands in 0–1 and the row sums to 1. The exponential
+        exaggerates gaps — the top score ({wf2(WALK.raw[WALK_TOP])}) claims {wf2(WALK.weights[WALK_TOP])} of
+        &quot;The&quot;&apos;s attention budget — but never reorders scores. Rows &quot;cat&quot;/&quot;sat&quot;/&quot;here&quot;,
+        and all of head 2 on columns d₄–d₆, follow the exact same recipe. (√3 is √d_head, module 1&apos;s scale trick;
+        values are rounded to two decimals, so redoing the arithmetic by hand can land ±0.01 off.)
+      </p>
+    </div>
+  )
+}
 
 const flowColor = (v: number) => {
   const t = Math.max(-1.6, Math.min(1.6, v)) / 1.6
@@ -195,7 +236,7 @@ function VecGrid({ g }: { g: GridSpec }) {
             <span className={s.vecTok}>{tok}</span>
             {g.data[i].map((v, d) => (
               // weights are 0..1: negate so flowColor's blue (negative) branch renders a white→blue ramp
-              <span key={`${i}-${d}`} className={s.vecCell} style={{ background: g.weights ? flowColor(-v * 1.6) : flowColor(v) }}>
+              <span key={`${i}-${d}`} className={s.vecCell} style={{ background: g.plain ? undefined : g.weights ? flowColor(-v * 1.6) : flowColor(v) }}>
                 {v.toFixed(2)}
               </span>
             ))}
@@ -263,6 +304,7 @@ function MhaStepper() {
       <StageItems items={st.items} />
       <p className={s.flowShape}>{st.shape}</p>
       <p className={s.flowNote}>{st.note}</p>
+      {step === 1 && <ScoreWalkthrough />}
     </div>
   )
 }

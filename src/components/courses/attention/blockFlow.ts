@@ -90,3 +90,18 @@ function blockForward() {
 }
 
 export const FLOW = blockForward()
+
+// Step 2's worked example: head 1's slice of query row 0 ("The") dotted
+// against each row of K's head-1 slice, then scaled and softmaxed — every
+// intermediate the walkthrough displays, all derived from the pass above.
+// (No max-subtraction here: e^s ÷ Σe^s is the same weights, plainer to read.)
+const walkthrough = () => {
+  const q0 = FLOW.q[0].slice(0, D_HEAD)
+  const kSlices = FLOW.k.map(kj => kj.slice(0, D_HEAD))
+  const raw = kSlices.map(kj => kj.reduce((acc, kv, d) => acc + q0[d] * kv, 0))
+  const scaled = raw.map(v => v / Math.sqrt(D_HEAD))
+  const exps = scaled.map(v => Math.exp(v))
+  const sum = exps.reduce((a, b) => a + b, 0)
+  return { q0, kSlices, raw, scaled, exps, sum, weights: FLOW.headWeights[0][0] }
+}
+export const WALK = walkthrough()

@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import CourseShell from '../engine/CourseShell'
 import { attentionCourse } from './index'
 import { MODULES } from './content'
+import { WALK } from './blockFlow'
 import { invalidateCourseProgressCaches } from '../engine/progress'
 
 beforeEach(() => {
@@ -136,6 +137,24 @@ describe('Attention course through CourseShell', () => {
     fireEvent.click(screen.getAllByText('LayerNorm')[0])
     fireEvent.click(screen.getAllByText('multi-head attention')[0])
     expect(screen.getByText(/what am I looking for\?/)).toBeDefined()
+  })
+
+  it('step 2 walks one head-1 row by hand: dot product → ÷√3 → softmax', () => {
+    const f2 = (v: number) => v.toFixed(2)
+    render(<CourseShell course={attentionCourse} />)
+    fireEvent.click(screen.getByRole('button', { name: /2\. The transformer block/ }))
+    fireEvent.click(screen.getByRole('button', { name: /2 · score \+ softmax/ }))
+    // the written-out dot product is generated from the same live numbers the grids show
+    const terms = WALK.q0.map((qv, d) => `(${f2(qv)})(${f2(WALK.kSlices[0][d])})`).join(' + ')
+    expect(screen.getByText(`score("The" → "The") = ${terms} = ${f2(WALK.raw[0])}`)).toBeDefined()
+    expect(screen.getByText('raw scores — q_The·Kᵀ')).toBeDefined()
+    expect(screen.getByText('weights — row "The" of head 1\'s pattern above')).toBeDefined()
+    expect(screen.getByText('÷ √3 ≈ 1.73 →')).toBeDefined()
+    expect(screen.getByText(`e^scaled — the four sum to ${f2(WALK.sum)}`)).toBeDefined()
+    // the derived row IS the top row of head 1's pattern grid: each weight renders twice
+    for (const w of WALK.weights) {
+      expect(screen.getAllByText(f2(w)).length).toBeGreaterThanOrEqual(2)
+    }
   })
 
   it('2.3 explains why residuals add instead of concatenating', () => {

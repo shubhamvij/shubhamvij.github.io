@@ -792,6 +792,7 @@
   gap: 1px;
   font-size: 8.5px;
   font-family: Tahoma, sans-serif;
+  width: max-content; /* size to cells — a long caption must not stretch the grid */
 }
 .vecCell {
   min-width: 34px;
@@ -816,6 +817,16 @@
   color: #333;
   margin: 6px 0 0;
   line-height: 1.4;
+}
+.flowWalk {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dotted #aca899;
+}
+.flowCalc {
+  font-size: 11px;
+  color: #333;
+  margin: 8px 0 0;
 }
 .vecColHead {
   font-size: 7.5px;

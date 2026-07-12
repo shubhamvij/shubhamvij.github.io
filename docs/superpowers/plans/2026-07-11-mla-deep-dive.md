@@ -286,7 +286,7 @@ function DecouplePanel() {
         <rect x={8} y={20} width={230} height={58} rx={4} fill="#eaf1fb" stroke="#2b6fd0" />
         <text x={123} y={38} textAnchor="middle" fontSize={10} fontWeight="bold" fill="#1a4f9c">content lane — position-free</text>
         <text x={123} y={55} textAnchor="middle" fontSize={9.5}>kᶜ = W_UK · cₜ  (up-projected from latent)</text>
-        <text x={123} y={70} textAnchor="middle" fontSize={8.5} fill="#2f7a2f">absorbable — Act ②'s trick still works</text>
+        <text x={123} y={70} textAnchor="middle" fontSize={8.5} fill="#2f7a2f">absorbable — Act ②&apos;s trick still works</text>
         <rect x={250} y={20} width={222} height={58} rx={4} fill="#fbe4d4" stroke="#c86018" />
         <text x={361} y={38} textAnchor="middle" fontSize={10} fontWeight="bold" fill="#9a4a12">rotary lane — carries position</text>
         <text x={361} y={55} textAnchor="middle" fontSize={9.5}>kᴿ = RoPE(W_KR · h_t),  shared</text>
@@ -306,8 +306,8 @@ function DecouplePanel() {
         The fix: <strong>split the key into two lanes</strong>. The content lane stays position-free, so its
         matrix is still the fixed, absorbable one from Act ②. Position rides a separate <strong>decoupled rotary
         key kᴿ</strong> — RoPE-rotated, <strong>shared across all heads</strong>, and tiny (d_R = {D_R}). The
-        score is their sum. Total cache is d_c + d_R = {MLA_CACHE} values — at DeepSeek-V2's real scale {DS_MLA}{' '}
-        vs MHA's {DS_MHA} ({((DS_MLA / DS_MHA) * 100).toFixed(1)}%): GQA-class memory, MHA-class quality, RoPE
+        score is their sum. Total cache is d_c + d_R = {MLA_CACHE} values — at DeepSeek-V2&apos;s real scale {DS_MLA}{' '}
+        vs MHA&apos;s {DS_MHA} ({((DS_MLA / DS_MHA) * 100).toFixed(1)}%): GQA-class memory, MHA-class quality, RoPE
         intact.
       </p>
     </>
@@ -488,7 +488,7 @@ Replace the MLA bullet (line 26) with a forward-pointing teaser:
             id: 'am3-1-q1',
             prompt: 'MLA caches neither K nor V. What does it cache, and what\'s the cost of that choice?',
             options: [
-              { text: 'A low-rank latent vector per token, up-projected to per-head K/V at use time — trading a little extra compute for a much smaller cache', correct: true, explain: 'Decoding is memory-bound, so spending FLOPs (up-projections) to save bytes is a good trade. The wrinkle: RoPE doesn\'t commute with the down-projection, hence the small decoupled RoPE key cached alongside.' },
+              { text: 'A low-rank latent vector per token, up-projected to per-head K/V at use time — trading a little extra compute for a much smaller cache', correct: true, explain: 'Decoding is memory-bound, so spending FLOPs (up-projections) to save bytes is a good trade. The wrinkle: RoPE doesn\'t commute with the up-projection (W_UK), so the absorbed W_UQᵀW_UK matrix would depend on relative position — hence the small decoupled RoPE key cached alongside.' },
               { text: 'Nothing — it recomputes everything from scratch', explain: 'That would be the no-cache baseline whose O(t²) waste module 3\'s lab counts.' },
               { text: 'The attention weights from previous steps', explain: 'Attention weights are never cached by any scheme — they\'re cheap to recompute from Q and K.' },
             ],
