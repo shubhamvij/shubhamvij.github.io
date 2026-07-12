@@ -27,7 +27,7 @@ function fmtP(v: number): string {
 
 export default function ParamFlopLab() {
   const [logRows, setLogRows] = useState(7)   // rows per table, 10^x
-  const [nTables, setNTables] = useState(26)
+  const nTables = 26                          // fixed: ~Criteo's 26 categorical features (no control — rows/dim/MLP are the knobs)
   const [dim, setDim] = useState(64)
   const [mlpW, setMlpW] = useState(512)
 
