@@ -419,7 +419,7 @@ import s from '../engine/course.module.css'
 
 // Memory tiers (spec ledger): a ZionEX node ~ 320 GB HBM + 1.5 TB DDR, then SSD.
 const TIERS = [
-  { name: 'HBM (on-GPU)', maxGB: 320, color: '#2f8e2f', note: 'fast + tiny' },
+  { name: 'HBM (on-GPU)', maxGB: 80, color: '#2f8e2f', note: 'fast + tiny' }, // single A100/H100 HBM; 320 is the 8-GPU node aggregate
   { name: 'DRAM (host)', maxGB: 1536, color: '#c8a030', note: 'big + slower' },
   { name: 'SSD / distributed', maxGB: Infinity, color: '#c0392b', note: 'huge + slowest' },
 ]
@@ -1198,7 +1198,7 @@ export const MODULES: CourseModule[] = [
               production table runs ~1 million rows; a real model has 8 to 64 (later hundreds) of them, landing in
               tens to hundreds of GB — and the biggest models reach multiple terabytes. That is far past any single
               accelerator&apos;s on-chip memory, so tables spill down a hierarchy: <strong>HBM</strong> (on-GPU,
-              fast, ~hundreds of GB), <strong>DRAM</strong> (host, big, ~1.5 TB/node, slower), then{' '}
+              fast, ~80 GB on one A100/H100), <strong>DRAM</strong> (host, big, ~1.5 TB/node, slower), then{' '}
               <strong>SSD or distributed</strong> storage. Size the table below and watch which tier it falls into.
             </p>
           </>
