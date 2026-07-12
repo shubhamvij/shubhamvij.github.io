@@ -5,6 +5,7 @@ import ParamFlopLab from './ParamFlopLab'
 import TableSizerLab from './TableSizerLab'
 import ShardShuffleLab from './ShardShuffleLab'
 import CollisionLab from './CollisionLab'
+import InteractionOrdersLab from './InteractionOrdersLab'
 
 describe('LookupLab', () => {
   it('selects the embedding row for the picked category', () => {
@@ -116,5 +117,20 @@ describe('CollisionLab', () => {
     const bits = screen.getByLabelText(/bits/i)
     fireEvent.change(bits, { target: { value: '4' } })
     expect(screen.getByText(/int4/i)).toBeDefined()
+  })
+})
+
+describe('InteractionOrdersLab', () => {
+  it('Wukong reaches interaction order 2^layers', () => {
+    render(<InteractionOrdersLab />)
+    const layers = screen.getByLabelText(/layers/i)
+    fireEvent.change(layers, { target: { value: '5' } })
+    expect(screen.getByText(/order 32/)).toBeDefined() // 2^5
+  })
+
+  it('contrasts DLRM fixed pairwise (order 2)', () => {
+    render(<InteractionOrdersLab />)
+    const stat = screen.getByText(/DLRM reaches/i)
+    expect(within(stat).getByText(/order 2/)).toBeDefined()
   })
 })
