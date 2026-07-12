@@ -119,8 +119,12 @@ export default function CollisionLab() {
               <text x={96 + Math.max(6, bytesPerRow * 3)} y={38} fontSize={9} fill="#555">{bytesPerRow} B</text>
             </svg>
             <div className={s.labControls}>
-              <span className={s.sliderLabel}>precision bits <strong>{bits}</strong></span>
-              <input type="range" min={2} max={5} step={1} value={Math.log2(bits)} aria-label="bits" className={s.slider} onChange={e => setBits(Math.pow(2, Number(e.target.value)))} />
+              <span className={s.sliderLabel}>precision</span>
+              {[32, 16, 8, 4].map(b => (
+                <button key={b} type="button" className={`${s.chip} ${bits === b ? s.chipOn : ''}`} onClick={() => setBits(b)}>
+                  {b === 32 ? 'fp32' : b === 16 ? 'fp16' : `int${b}`}
+                </button>
+              ))}
             </div>
             <div className={s.labControls}>
               <span className={s.labStat}>mode <span className={s.labStatValue}>{bits === 32 ? 'fp32' : bits === 16 ? 'fp16' : `int${bits}`}</span></span>

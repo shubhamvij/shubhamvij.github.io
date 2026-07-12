@@ -111,12 +111,12 @@ describe('CollisionLab', () => {
     expect(screen.getByText(/14 rows/)).toBeDefined()
   })
 
-  it('quantization tab moves bytes/row with bit-width', () => {
+  it('quantization tab moves bytes/row with bit-width (int4 = (4/8)*16 + 6 = 14 B)', () => {
     render(<CollisionLab />)
     fireEvent.click(screen.getByRole('button', { name: /shrink each row/i }))
-    const bits = screen.getByLabelText(/bits/i)
-    fireEvent.change(bits, { target: { value: '4' } })
-    expect(screen.getByText(/int4/i)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /^int4$/ }))
+    // assert the STATE-DRIVEN computed byte count, not the static prose that always contains "int4"
+    expect(screen.getByText('14 B')).toBeDefined()
   })
 })
 
