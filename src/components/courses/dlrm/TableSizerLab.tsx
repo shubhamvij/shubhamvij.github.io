@@ -103,7 +103,7 @@ export default function TableSizerLab() {
         {view === 'size' && (
           <p className={s.labNote}>
             rows × dim × bytes × tables → total memory. A single production table is ~1M rows; a real model has
-            hundreds of tables and lands in the hundreds of GB to multi-TB range — past any single GPU&apos;s
+            dozens to thousands of tables and lands in the hundreds of GB to multi-TB range — past any single GPU&apos;s
             HBM. The problem isn&apos;t FLOPs, it&apos;s <strong>capacity and bandwidth</strong>: the gather-reduce
             (SLS) ops are 37–74% of serving latency, running within ~35% of the memory-bandwidth roofline.
           </p>

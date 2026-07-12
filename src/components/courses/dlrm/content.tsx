@@ -126,8 +126,8 @@ export const MODULES: CourseModule[] = [
               paper</A> reports three deployed DLRMs spanning <strong>332 billion to 12 trillion parameters — at
               only 5 to 638 MFLOPs per sample</strong>. The 12-trillion-parameter model runs at <em>5</em> MFLOPs
               per sample; nearly all of it is table. Embeddings &quot;contribute the majority of the
-              parameters&quot;; the MLPs are &quot;smaller in memory but translate into sizeable amounts of
-              compute&quot;.
+              parameters&quot;; the MLPs are smaller in memory but their parameters &quot;translate into
+              sizeable amounts of compute&quot;.
             </p>
           </>
         ),
@@ -139,9 +139,9 @@ export const MODULES: CourseModule[] = [
           <>
             <p>
               This wasn&apos;t a niche workload. As of 2019, recommendation models consumed <strong>more than 72%
-              of all AI inference cycles</strong> in Facebook&apos;s datacenters, and DLRMs were the company&apos;s
-              single largest AI application by infrastructure demand. Every instinct from compute-bound deep
-              learning — buy more FLOPs, the model is compute-bound — inverts here.
+              of all AI inference cycles</strong> in Facebook&apos;s datacenters; by 2022, DLRMs were the
+              company&apos;s single largest AI application by infrastructure demand. Every instinct from
+              compute-bound deep learning — buy more FLOPs, the model is compute-bound — inverts here.
             </p>
           </>
         ),
@@ -184,7 +184,7 @@ export const MODULES: CourseModule[] = [
       {
         kind: 'refs',
         items: [
-          { label: 'Understanding Training Efficiency of DL Recommendation Models at Scale — Meta (ISCA 2022)', href: 'https://arxiv.org/abs/2104.05158', note: 'the 332B–12T params @ 5–638 MFLOPS figures' },
+          { label: 'Software-Hardware Co-design for Fast and Scalable Training of DLRMs (Neo/ZionEX) — Mudigere et al. (2021)', href: 'https://arxiv.org/abs/2104.05158', note: 'Table 3: the 332B–12T params @ 5–638 MFLOPS figures' },
           { label: 'The Architectural Implications of Facebook\'s DNN-based Personalized Recommendation — Gupta et al. (2019)', href: 'https://arxiv.org/abs/1906.03109', note: 'fleet share; serving is memory-bound' },
         ],
       },
@@ -204,8 +204,8 @@ export const MODULES: CourseModule[] = [
           <>
             <p>
               Table memory is just geometry: <strong>rows × dim × bytes × number of tables</strong>. A single
-              production table runs ~1 million rows; a real model has 8 to 64 (later hundreds) of them, landing in
-              tens to hundreds of GB — and the biggest models reach multiple terabytes. That is far past any single
+              production table runs ~1 million rows; a real model has 8 to 64 of them in 2019, and the largest modern models reach thousands, landing in
+              tens to hundreds of GB for a typical model — and the biggest models reach multiple terabytes. That is far past any single
               accelerator&apos;s on-chip memory, so tables spill down a hierarchy: <strong>HBM</strong> (on-GPU,
               fast, ~80 GB on one A100/H100), <strong>DRAM</strong> (host, big, ~1.5 TB/node, slower), then{' '}
               <strong>SSD or distributed</strong> storage. Size the table below and watch which tier it falls into.

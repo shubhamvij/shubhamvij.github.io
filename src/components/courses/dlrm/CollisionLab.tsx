@@ -9,8 +9,8 @@ const D = 16          // embedding dim (for memory math)
 const QR_NOTE = 'Criteo Kaggle: ~4× smaller within 0.3% (DCN) / 0.7% (DLRM) of baseline BCE'
 const QUANT_NOTE: Record<number, string> = {
   32: 'baseline (FP32)',
-  16: 'FP16 · ~2× · quality-neutral',
-  8: 'int8 · ~4× · negligible loss',
+  16: 'FP16 · ~2× (half precision)',
+  8: 'int8 · ~4× (1 byte/value)',
   4: 'int4 · ~7–8× (with per-row scale+bias) · log-loss-neutral on Terabyte Criteo',
 }
 
