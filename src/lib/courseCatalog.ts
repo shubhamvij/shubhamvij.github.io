@@ -34,8 +34,8 @@ export const COURSE_CATALOG: CourseCatalogEntry[] = [
     description:
       'An interactive course on attention: scaled dot-product and multi-head attention, the transformer block, vision transformers, efficient attention (GQA, FlashAttention, MLA), and typed graph attention (HGT, GraphBFF) — with interactive labs and quizzes.',
     modules: 7,
-    minutes: 106,
-    highlights: '14 interactive labs · 7 deep dives',
+    minutes: 113,
+    highlights: '15 interactive labs · 8 deep dives',
   },
   {
     slug: 'dlrm-embedding-tables',
