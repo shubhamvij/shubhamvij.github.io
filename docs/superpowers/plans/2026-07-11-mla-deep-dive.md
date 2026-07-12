@@ -217,7 +217,7 @@ function AbsorbPanel() {
 }
 
 // ---------- Act ③ — RoPE breaks absorption (one slider; centerpiece) ----------
-const THETA0 = 0.32 // radians per unit of relative position — visible rotation
+const THETA0 = 0.19 // radians/unit; ≤ π/16 keeps |sin| monotonic across the ±8 range so the gap widens with |Δ| everywhere
 // A fixed shear stands in for the projection W_UQᵀ(…)W_UK: rotation plainly does not commute with it.
 const shear = ([x, y]: [number, number]): [number, number] => [x + 0.55 * y, y]
 const rot = (a: number, [x, y]: [number, number]): [number, number] => [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)]
@@ -268,7 +268,7 @@ function RopeBreakPanel() {
         RoPE rotates each key/query by an angle proportional to its position, dropping a{' '}
         <strong>position-dependent rotation R_Δ between W_UQᵀ and W_UK</strong>. Rotation does not commute with
         the projection, so <strong>rotate-then-map ≠ map-then-rotate</strong> for any Δ ≠ 0 — drag the slider and
-        the two arrows split, the gap growing with Δ. The absorbed matrix that made Act ② cheap is now a{' '}
+        the two arrows split, the gap widening as Δ moves away from 0. The absorbed matrix that made Act ② cheap is now a{' '}
         <em>different</em> matrix for every query–key distance, so there is nothing to precompute. At Δ = 0 they
         coincide — the escape hatch the next act uses.
       </p>
