@@ -55,9 +55,15 @@ describe('Attention course through CourseShell', () => {
     expect(screen.getByText('Parameter Budget Lab')).toBeDefined()
   })
 
+  it('subchapter 3.2 exposes the MLA Lab', () => {
+    render(<CourseShell course={attentionCourse} />)
+    fireEvent.click(screen.getByRole('button', { name: /3\.2 Cache the latent/ }))
+    expect(screen.getByText('MLA Lab')).toBeDefined()
+  })
+
   it('mask lab switches modes and reports pair counts', () => {
     render(<CourseShell course={attentionCourse} />)
-    fireEvent.click(screen.getByRole('button', { name: /3\.3 Score fewer pairs/ }))
+    fireEvent.click(screen.getByRole('button', { name: /3\.4 Score fewer pairs/ }))
     expect(screen.getByText('Attention Mask Lab')).toBeDefined()
     // full mode: 100/100 pairs
     expect(screen.getByText('100 / 100')).toBeDefined()

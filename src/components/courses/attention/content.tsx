@@ -259,11 +259,12 @@ export const MODULES: CourseModule[] = [
         kind: 'prose',
         body: (
           <>
-            <p>With the vocabulary in place, the modern fixes sort into three attack directions — each with its own deep dive below this module in the sidebar:</p>
+            <p>With the vocabulary in place, the modern fixes sort into three attack directions — spread across four deep dives below this module in the sidebar:</p>
             <ul>
-              <li><strong>3.1 — Shrink the cache.</strong> Queries are used once, but K/V are re-read forever: share K/V heads across query heads (MQA, GQA) or cache a compressed latent instead (DeepSeek&apos;s MLA).</li>
-              <li><strong>3.2 — Compute the same thing, smarter.</strong> FlashAttention changes zero math: it reorganizes the computation so the n×n matrix never touches GPU main memory. The bottleneck was memory movement, not FLOPs.</li>
-              <li><strong>3.3 — Score fewer pairs.</strong> Windows + global tokens (Longformer, BigBird), production sliding windows (Mistral), or linear attention&apos;s reordering that dodges n² entirely — with trade-offs.</li>
+              <li><strong>3.1 — Shrink the cache (share).</strong> Queries are used once, but K/V are re-read forever: share K/V heads across query heads — MQA and GQA.</li>
+              <li><strong>3.2 — Cache the latent (compress).</strong> DeepSeek&apos;s MLA stops sharing and starts compressing: cache one low-rank latent, up-project K/V on the fly, and decouple RoPE onto a small key so it all stays cheap.</li>
+              <li><strong>3.3 — Compute the same thing, smarter.</strong> FlashAttention changes zero math: it reorganizes the computation so the n×n matrix never touches GPU main memory. The bottleneck was memory movement, not FLOPs.</li>
+              <li><strong>3.4 — Score fewer pairs.</strong> Windows + global tokens (Longformer, BigBird), production sliding windows (Mistral), or linear attention&apos;s reordering that dodges n² entirely — with trade-offs.</li>
             </ul>
           </>
         ),

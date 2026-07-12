@@ -2,7 +2,7 @@
 //
 // The score-matrix VISUAL is a toy 16×16 (4×4 tiles) so it reads at widget
 // size, but every byte and time figure is computed at REAL scale so the meters
-// mean something. Hardware anchors are A100-80GB, matching subchapter 3.2's
+// mean something. Hardware anchors are A100-80GB, matching subchapter 3.3's
 // prose and FlashAttention (Dao et al. 2022, §1–2): HBM 1.5–2.0 TB/s (we use
 // 2.0); 108 SMs × 192 KB SRAM ≈ 20 MB at ~19 TB/s; bf16 tensor-core peak
 // 312 TFLOP/s (A100 dense). Verified 2026-07-11 against the paper + datasheet.

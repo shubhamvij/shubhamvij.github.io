@@ -106,8 +106,8 @@ export default function KvCacheLab() {
           The cache is pure trade: memory for compute. It turns each decode step from &quot;reproject the whole
           history&quot; into &quot;project one token, read the rest&quot; — but the reading is the new tax. Every generated
           token must stream the <em>entire</em> cache through the GPU&apos;s compute units, so long-context decoding
-          is <strong>memory-bound</strong>: the bar above, re-read per token. That number is what modules 3.1
-          (shrink it), 3.2 (move bytes smarter), and 3.3 (score fewer pairs) are all attacking.
+          is <strong>memory-bound</strong>: the bar above, re-read per token. That number is what modules 3.1–3.2
+          (shrink it), 3.3 (move bytes smarter), and 3.4 (score fewer pairs) are all attacking.
         </p>
       </div>
     </div>
