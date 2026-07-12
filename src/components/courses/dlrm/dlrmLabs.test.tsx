@@ -68,7 +68,7 @@ describe('TableSizerLab', () => {
   it('switches to the cache-locality view', () => {
     render(<TableSizerLab />)
     fireEvent.click(screen.getByRole('button', { name: /cache locality/i }))
-    expect(screen.getByText(/hit rate/i)).toBeDefined()
+    expect(screen.getByText(/hit rate/i, { selector: 'p' })).toBeDefined()
   })
 })
 

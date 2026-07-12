@@ -90,7 +90,7 @@ export default function TableSizerLab() {
               ))}
               <line x1={34} y1={124 - (5 / 65) * 108} x2={348} y2={124 - (5 / 65) * 108} stroke="#c0392b" strokeDasharray="3 2" />
               <text x={200} y={124 - (5 / 65) * 108 - 3} fontSize={7.5} fill="#c0392b" aria-hidden="true">random access: &lt;5% hit</text>
-              <text x={8} y={70} fontSize={8} fill="#555" transform="rotate(-90 8 70)">CHR →</text>
+              <text x={8} y={70} fontSize={8} fill="#555" transform="rotate(-90 8 70)">hit rate →</text>
             </svg>
             <p className={s.labNote}>
               Embeddings have <strong>temporal</strong> locality (popular items recur) but almost no{' '}
