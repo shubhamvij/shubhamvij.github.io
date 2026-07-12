@@ -4,6 +4,7 @@ import LookupLab from './LookupLab'
 import ParamFlopLab from './ParamFlopLab'
 import TableSizerLab from './TableSizerLab'
 import ShardShuffleLab from './ShardShuffleLab'
+import CollisionLab from './CollisionLab'
 
 describe('LookupLab', () => {
   it('selects the embedding row for the picked category', () => {
@@ -85,5 +86,35 @@ describe('ShardShuffleLab', () => {
     fireEvent.change(g, { target: { value: '7' } }) // index 7 = 1000 GPUs in GPU_STEPS
     // at 1000 GPUs the ledger says all-to-all > 3x embedding compute
     expect(screen.getByText(/communication-bound/i)).toBeDefined()
+  })
+})
+
+describe('CollisionLab', () => {
+  it('modulo collides two ids that share a residue; Q-R resolves them', () => {
+    render(<CollisionLab />)
+    // N=48, m=8: ids 3 and 11 both %8==3
+    fireEvent.click(screen.getByRole('button', { name: /^id 3$/ }))
+    fireEvent.click(screen.getByRole('button', { name: /^id 11$/ }))
+    // modulo mode (default): both map to row 3 -> collision reported
+    expect(screen.getByText(/collide/i)).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: /quotient-remainder/i }))
+    expect(screen.getByText(/unique/i)).toBeDefined()
+  })
+
+  it('memory readout follows the real formulas as m changes', () => {
+    render(<CollisionLab />)
+    const m = screen.getByLabelText(/buckets/i)
+    fireEvent.change(m, { target: { value: '8' } })
+    // Q-R rows = m + ceil(48/8) = 8 + 6 = 14 (of 48 full)
+    fireEvent.click(screen.getByRole('button', { name: /quotient-remainder/i }))
+    expect(screen.getByText(/14 rows/)).toBeDefined()
+  })
+
+  it('quantization tab moves bytes/row with bit-width', () => {
+    render(<CollisionLab />)
+    fireEvent.click(screen.getByRole('button', { name: /shrink each row/i }))
+    const bits = screen.getByLabelText(/bits/i)
+    fireEvent.change(bits, { target: { value: '4' } })
+    expect(screen.getByText(/int4/i)).toBeDefined()
   })
 })
