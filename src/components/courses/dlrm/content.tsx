@@ -274,4 +274,278 @@ export const MODULES: CourseModule[] = [
       },
     ],
   },
+  // ------------------------------------------------------------------
+  {
+    id: 'distribute',
+    navLabel: '4. Distributing the table',
+    title: 'Distributing the table',
+    subtitle: 'Hybrid parallelism, and why communication becomes the wall',
+    minutes: 9,
+    blocks: [
+      {
+        kind: 'prose',
+        body: (
+          <>
+            <p>
+              No single device holds a multi-terabyte table, so DLRMs use <strong>hybrid parallelism</strong>,
+              introduced by the DLRM paper and generalized by Meta&apos;s Neo/ZionEX: the huge tables are{' '}
+              <strong>model-parallel sharded</strong> across GPUs (each holds a slice), while the small MLP is{' '}
+              <strong>data-parallel replicated</strong> on every GPU. But a sample&apos;s categorical rows may live
+              on a different GPU than the one running its MLP — so every step needs a personalized{' '}
+              <strong>all-to-all</strong> exchange to route rows to where they&apos;re consumed, plus an allreduce
+              to sync MLP gradients.
+            </p>
+          </>
+        ),
+      },
+      { kind: 'widget', widget: 'shard-shuffle' },
+      {
+        kind: 'prose',
+        body: (
+          <>
+            <p>
+              Neo/ZionEX trained production DLRMs up to <strong>12 trillion parameters at ~1.7 million QPS on 128
+              A100 GPUs</strong>, a 40× speedup over the prior CPU parameter-server platform. But at scale the
+              all-to-all becomes the bottleneck: a 2025 Meta preprint reports that on a ~2 TB, 4000-plus-table
+              model at <strong>1 000 GPUs the all-to-all exceeds 600 ms — over 3× the embedding compute</strong>.
+              The newest fix layers data parallelism back on top of the sharded tables (4D / 2D-sparse sharding) to
+              cut the communication.
+            </p>
+          </>
+        ),
+      },
+      {
+        kind: 'callout',
+        icon: '🔀',
+        title: 'The wall is communication, not compute',
+        body: (
+          <>
+            The Attention course&apos;s efficiency story is about moving less <em>memory</em> (KV caches,
+            FlashAttention). The DLRM story is about moving less <em>across the network</em> — the all-to-all
+            shuffle. Different layer of the stack, same lesson: at scale, data movement dominates arithmetic.
+          </>
+        ),
+      },
+      {
+        kind: 'quiz',
+        questions: [
+          {
+            id: 'd4-q1',
+            prompt: 'In DLRM hybrid parallelism, what is sharded vs replicated?',
+            options: [
+              { text: 'MLP sharded, tables replicated', explain: 'Backwards — the tables are far too big to replicate; the MLP is the small, replicable part.' },
+              { text: 'Embedding tables model-parallel sharded across GPUs; the MLP data-parallel replicated on each', correct: true, explain: 'Tables are too large to copy, so they\'re split; the small MLP is copied everywhere and its gradients allreduced.' },
+              { text: 'Both fully replicated', explain: 'A terabyte table can\'t be replicated per GPU — that\'s the whole reason for sharding.' },
+            ],
+          },
+          {
+            id: 'd4-q2',
+            prompt: 'Why does the all-to-all exchange exist at all?',
+            options: [
+              { text: 'To synchronize MLP gradients', explain: 'That\'s the allreduce; the all-to-all does something else — it moves embedding rows.' },
+              { text: 'A sample\'s rows may live on a different GPU than the one running its MLP, so rows must be routed to where they\'re consumed', correct: true, explain: 'Sharding scatters rows by table; the personalized all-to-all gathers each sample\'s rows onto its compute GPU.' },
+              { text: 'To load-balance the SSD tier', explain: 'Storage tiering is separate; the all-to-all is a per-step GPU-to-GPU row exchange.' },
+            ],
+          },
+        ],
+      },
+      {
+        kind: 'refs',
+        items: [
+          { label: 'Software-Hardware Co-design for Fast and Scalable Training of DLRMs (Neo/ZionEX) — Mudigere et al. (2021)', href: 'https://arxiv.org/abs/2104.05158', note: '12T params, 1.7M QPS, 128 A100s, hybrid parallelism' },
+          { label: 'Deep Learning Recommendation Model (DLRM) — Naumov et al. (2019)', href: 'https://arxiv.org/abs/1906.00091', note: 'introduced the sharded-embeddings + replicated-MLP scheme' },
+        ],
+      },
+    ],
+  },
+  // ------------------------------------------------------------------
+  {
+    id: 'shrink',
+    navLabel: '5. Shrinking the table',
+    title: 'Shrinking the table',
+    subtitle: 'Five families of compression — and no free lunch',
+    minutes: 11,
+    blocks: [
+      {
+        kind: 'prose',
+        body: (
+          <>
+            <p>
+              If the table is the problem, the obvious move is to make it smaller. There are five families, and
+              every one trades something. <strong>(A) Share rows.</strong> The <A href="https://arxiv.org/abs/0902.2206">hashing
+              trick</A> maps ids into a fixed <em>m</em>-row space (storage O(d)→O(m)) — but ids that hash together{' '}
+              <em>collide</em> onto one vector. <A href="https://arxiv.org/abs/1909.02107">Quotient-remainder</A>{' '}
+              (Shi et al., 2020) keeps two small tables — one indexed by <strong>id mod m</strong>, one by{' '}
+              <strong>id ÷ m</strong> — and combines their rows element-wise, giving every id a unique vector at
+              roughly √-memory. <A href="https://arxiv.org/abs/2108.02191">ROBE</A> (MLSys 2022) generalizes this to
+              a single shared circular array of blocks, reporting <strong>~1000× less embedding memory (100 MB vs
+              100 GB) at the MLPerf CriteoTB AUC target</strong>.
+            </p>
+            <p>
+              <strong>(B) Factorize.</strong> <A href="https://arxiv.org/abs/2101.11714">TT-Rec</A> (MLSys 2021)
+              tensor-train-decomposes each table into a few small cores; a lookup becomes a product of core slices.
+              It reports <strong>112× compression on Criteo Terabyte with no accuracy loss</strong> (12.57 GB →
+              0.11 GB), at ~14% more training time. <strong>(C) Shrink each row.</strong> Row-wise{' '}
+              <strong>int8/int4 quantization</strong> stores low-precision rows with one (scale, bias) pair each —
+              ~7–8× smaller, log-loss-neutral on Terabyte Criteo (a deployed Meta model hit 13.9% of FP32 size).{' '}
+              <strong>(D) Manage lifecycle.</strong> Frequency/importance pruning drops rarely-useful embeddings
+              during training. And the outlier, <strong>(E) eliminate the table</strong>:{' '}
+              <A href="https://arxiv.org/abs/2010.10784">DHE</A> (KDD 2021) replaces it with hash functions plus a
+              trainable MLP that <em>computes</em> the embedding on demand — parameter count independent of
+              vocabulary — but only ~4× smaller at parity. Try the two cleanest knobs below.
+            </p>
+          </>
+        ),
+      },
+      { kind: 'widget', widget: 'qr-collide' },
+      {
+        kind: 'callout',
+        icon: '🍎',
+        title: 'These numbers are not directly comparable',
+        body: (
+          <>
+            Every headline ratio is self-reported on a <em>different</em> benchmark and metric — DHE&apos;s ~4× on
+            MovieLens/Amazon AUC, ROBE&apos;s 1000× on CriteoTB AUC, TT-Rec&apos;s 112× on Criteo Terabyte
+            accuracy, quotient-remainder&apos;s 4–15× on Criteo Kaggle BCE, quantization&apos;s ~7–8× on Terabyte
+            log-loss. Read each as &quot;its paper reports X on its benchmark,&quot; never as a head-to-head
+            ranking. The real lesson is the shape of the trade: memory vs collisions vs accuracy vs compute — you
+            choose which axis to spend, and there is no free lunch.
+          </>
+        ),
+      },
+      {
+        kind: 'quiz',
+        questions: [
+          {
+            id: 'd5-q1',
+            prompt: 'How does quotient-remainder keep every id unique while using far fewer rows than a full table?',
+            options: [
+              { text: 'It stores each id\'s vector once in a compressed column format', explain: 'No compression codec — it\'s a factorization of the index space.' },
+              { text: 'Two small tables indexed by id mod m and id ÷ m, combined element-wise — the (remainder, quotient) pair is unique per id, so the combined vector is too', correct: true, explain: 'Every id maps to a distinct (r, q) pair, so element-wise combining two shared rows yields a unique vector at (m + ⌈N/m⌉) rows instead of N.' },
+              { text: 'It hashes ids and accepts the collisions', explain: 'That\'s plain modulo hashing; Q-R\'s point is to AVOID collisions while still shrinking.' },
+            ],
+          },
+          {
+            id: 'd5-q2',
+            prompt: 'A colleague says "ROBE gets 1000× and TT-Rec gets 112×, so ROBE is 9× better." What\'s wrong?',
+            options: [
+              { text: 'Nothing — the ratios are directly comparable', explain: 'They aren\'t: each is measured on a different dataset and metric.' },
+              { text: 'The ratios come from different papers on different benchmarks and metrics (CriteoTB AUC vs Criteo Terabyte accuracy), so they can\'t be ranked head-to-head', correct: true, explain: 'The apples-to-oranges trap: compression numbers are only meaningful against their own reported benchmark and quality target.' },
+              { text: 'ROBE\'s number is fabricated', explain: 'It\'s a real reported result — the error is comparing it directly to a number from a different protocol.' },
+            ],
+          },
+          {
+            id: 'd5-q3',
+            prompt: 'DHE is described as "eliminating the table." What replaces it, and what\'s the catch?',
+            options: [
+              { text: 'A bigger table with fewer rows', explain: 'DHE has no embedding table at all — that\'s the point.' },
+              { text: 'Hash functions produce a dense id vector fed to a trainable MLP that computes the embedding on the fly; params are independent of vocabulary size, but the compression is modest (~4×)', correct: true, explain: 'Storage moves from an O(n·d) table into a fixed-size decoder — elegant, vocabulary-independent, but only ~4× at parity, far below TT-Rec/ROBE.' },
+              { text: 'A cache of the most frequent embeddings', explain: 'That\'s a tiering/lifecycle idea; DHE instead synthesizes each embedding from hashes via an MLP.' },
+            ],
+          },
+        ],
+      },
+      {
+        kind: 'refs',
+        items: [
+          { label: 'Compositional Embeddings Using Complementary Partitions (Quotient-Remainder) — Shi et al. (KDD 2020)', href: 'https://arxiv.org/abs/1909.02107' },
+          { label: 'Random Offset Block Embedding (ROBE) — Desai et al. (MLSys 2022)', href: 'https://arxiv.org/abs/2108.02191', note: '~1000× on CriteoTB' },
+          { label: 'TT-Rec: Tensor Train Compression for DLRM Embedding Tables — Yin et al. (MLSys 2021)', href: 'https://arxiv.org/abs/2101.11714', note: '112× on Criteo Terabyte, no loss' },
+          { label: 'Learning to Embed Categorical Features without Embedding Tables (DHE) — Kang et al. (KDD 2021)', href: 'https://arxiv.org/abs/2010.10784' },
+          { label: 'The Hashing Trick (Feature Hashing) — Weinberger et al. (ICML 2009)', href: 'https://arxiv.org/abs/0902.2206', note: 'the shared-row baseline' },
+          { label: 'Post-Training 4-bit Quantization of Embedding Tables — Guan et al. (2019)', href: 'https://arxiv.org/abs/1911.02079', note: 'row-wise scale+bias' },
+        ],
+      },
+    ],
+  },
+  // ------------------------------------------------------------------
+  {
+    id: 'pivot',
+    navLabel: '6. Does the table survive?',
+    title: 'The pivot — does the table survive?',
+    subtitle: 'Dense scaling, generative recommenders, and what persists',
+    minutes: 9,
+    blocks: [
+      {
+        kind: 'prose',
+        body: (
+          <>
+            <p>
+              For years recommenders scaled by <strong>sparse scaling</strong> — growing embedding tables to
+              trillions of parameters. Meta&apos;s <A href="https://arxiv.org/abs/2403.02545">Wukong</A> (ICML 2024)
+              argues this diverges from hardware trends (next-gen accelerators add <em>compute</em>, not capacity)
+              and pivots to <strong>dense scaling</strong>: a stack of identical interaction blocks where layer{' '}
+              <em>i</em> captures feature-interaction orders up to <strong>2^i</strong> — versus DLRM&apos;s single
+              fixed pairwise round. Wukong reports an <strong>LLM-style scaling law past 100 GFLOP/example</strong>.
+            </p>
+          </>
+        ),
+      },
+      { kind: 'widget', widget: 'interaction-orders' },
+      {
+        kind: 'prose',
+        body: (
+          <>
+            <p>
+              The generative turn goes further: sequential/generative recommenders (HSTU-style) reframe
+              recommendation as next-item prediction, and MLPerf&apos;s 2026 benchmark refresh replaced the classic
+              DLRM interaction core with a 5-layer generative model. But notice what <em>doesn&apos;t</em> change:
+              Wukong is still <strong>627 billion of its 637 billion parameters in embeddings</strong>, and even
+              the new generative benchmark <strong>keeps a 1-billion-row embedding table</strong>. The interaction
+              architecture is being reinvented; the categorical-feature vocabulary — the table — persists. The
+              problem this course is about doesn&apos;t disappear. It moves.
+            </p>
+          </>
+        ),
+      },
+      {
+        kind: 'callout',
+        icon: '🎓',
+        title: 'The through-line',
+        body: (
+          <>
+            Categorical features need learned rows (1); those rows dominate parameters but not compute (2); that
+            makes recommenders memory- and communication-bound (3–4); so the field&apos;s engineering is table
+            compression and distribution (5); and even as architectures go generative, the table stays (6). If you
+            took the {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a href="/learn/attention-mechanisms">Attention</a> and{' '}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a href="/learn/graph-foundation-models">Graph Foundation Models</a> courses, this is the third corner:
+            the world where the model is mostly memory.
+          </>
+        ),
+      },
+      {
+        kind: 'quiz',
+        questions: [
+          {
+            id: 'd6-q1',
+            prompt: 'What distinguishes Wukong\'s "dense scaling" from classic DLRM scaling?',
+            options: [
+              { text: 'It grows the embedding tables faster', explain: 'That\'s sparse scaling — the thing Wukong argues away from.' },
+              { text: 'It scales by adding interaction compute (stacked blocks reaching order 2^i) rather than only enlarging tables, tracking compute-oriented hardware trends', correct: true, explain: 'Dense scaling spends FLOPs on higher-order interactions instead of only spending memory on bigger tables.' },
+              { text: 'It removes embeddings entirely', explain: 'No — 627B of Wukong\'s 637B params are still embeddings.' },
+            ],
+          },
+          {
+            id: 'd6-q2',
+            prompt: 'Generative recommenders (HSTU / the 2026 MLPerf refresh) are displacing DLRM interaction cores. What happens to the embedding table?',
+            options: [
+              { text: 'It disappears — generative models don\'t need it', explain: 'The evidence is the opposite: the new benchmark keeps a 1B-row table.' },
+              { text: 'It persists — the interaction architecture changes, but categorical ids still need learned rows; even DLRMv3 retains a 1B-row table', correct: true, explain: 'The vocabulary problem is orthogonal to the interaction architecture, so the table survives the generative turn.' },
+              { text: 'It becomes the MLP', explain: 'Tables and MLPs stay distinct; generative cores replace the interaction step, not the embedding storage.' },
+            ],
+          },
+        ],
+      },
+      {
+        kind: 'refs',
+        items: [
+          { label: 'Wukong: Towards a Scaling Law for Large-Scale Recommendation — Zhang et al. (ICML 2024)', href: 'https://arxiv.org/abs/2403.02545', note: 'dense scaling; 627B/637B params in embeddings' },
+          { label: 'Actions Speak Louder than Words (HSTU generative recommenders) — Zhai et al. (ICML 2024)', href: 'https://arxiv.org/abs/2402.17152' },
+          { label: 'MLPerf Inference — MLCommons', href: 'https://mlcommons.org/benchmarks/inference-datacenter/', note: 'the DLRMv3 generative benchmark refresh (2026)' },
+        ],
+      },
+    ],
+  },
 ]
