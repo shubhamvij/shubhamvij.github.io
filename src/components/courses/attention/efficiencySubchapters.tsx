@@ -159,7 +159,7 @@ export const EFFICIENCY_SUBCHAPTERS: CourseModule[] = [
             options: [
               { text: 'FLOPs — every one of the n² pairs is still scored; only the memory traffic (and wall-clock time) drops', correct: true, explain: 'It\'s still exact, still quadratic compute. If n² arithmetic itself is your problem, you need subchapter 3.3\'s "score fewer pairs" family instead.' },
               { text: 'Reads and writes to HBM', explain: 'That\'s precisely what it reduces — S never round-trips through HBM.' },
-              { text: 'Peak memory for the score matrix', explain: 'Reduced from n² to one tile — the lab\'s second counter.' },
+              { text: 'Peak memory for the score matrix', explain: 'Reduced from n² to one tile — the lab\'s peak-memory counter.' },
             ],
           },
         ],
