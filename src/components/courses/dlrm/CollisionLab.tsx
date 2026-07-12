@@ -43,7 +43,7 @@ export default function CollisionLab() {
 
   const toggle = (id: number) => setSel(cur => cur.includes(id) ? cur.filter(x => x !== id) : [...cur.slice(-1), id])
 
-  const bytesPerRow = (bits / 8) * D + (bits < 32 ? 6 : 0) // +scale+bias for low precision
+  const bytesPerRow = (bits / 8) * D + (bits < 16 ? 6 : 0) // +scale+bias only for integer quantization (int8/int4); fp16/fp32 are native floats
 
   return (
     <div className={s.widgetBox}>
