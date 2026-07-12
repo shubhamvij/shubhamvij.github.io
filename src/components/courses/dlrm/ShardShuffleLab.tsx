@@ -3,11 +3,12 @@ import { useMemo, useState } from 'react'
 import s from '../engine/course.module.css'
 
 // Illustrative latency shapes anchored to the spec ledger: embedding compute is
-// roughly flat per-GPU (~100-200ms at scale); all-to-all grows with GPU count
-// and exceeds 3x compute by ~1000 GPUs (>600ms). Shapes, not a benchmark.
+// roughly flat per-GPU (~100-200ms at scale); all-to-all grows with GPU count,
+// starts BELOW compute at small scale (compute-bound), and crosses to exceed 3x
+// compute by ~1000 GPUs (>600ms). The crossover sits near ~64 GPUs. Shapes, not a benchmark.
 function latencies(gpus: number) {
-  const compute = 100 + 100 * Math.min(1, gpus / 1000) // 100..200 ms
-  const a2a = 40 * Math.pow(gpus, 0.55)                 // ~40ms@8 -> ~600ms@1000
+  const compute = 100 + 100 * Math.min(1, gpus / 1000) // ~100..200 ms, roughly flat per GPU
+  const a2a = 7.8 * Math.pow(gpus, 0.64)               // ~30ms@8 (compute-bound) -> ~650ms@1000 (>3x compute)
   return { compute, a2a }
 }
 
@@ -43,7 +44,7 @@ export default function ShardShuffleLab() {
             )
           })}
           {/* all-to-all arrows between shards */}
-          {shards > 1 && <text x={235} y={124} textAnchor="middle" fontSize={8} fill="#c0392b">↔ all-to-all: route each sample's rows to its MLP GPU ↔</text>}
+          {shards > 1 && <text x={235} y={124} textAnchor="middle" fontSize={8} fill="#c0392b">↔ all-to-all: route each sample&apos;s rows to its MLP GPU ↔</text>}
         </svg>
         <div className={s.labControls}>
           <span className={s.sliderLabel}>GPUs <strong>{gpus}</strong></span>
@@ -63,12 +64,12 @@ export default function ShardShuffleLab() {
           <span className={s.labStat}>regime <span className={s.labStatValue}>{bound}</span></span>
         </div>
         <p className={s.labNote}>
-          The table is too big to replicate, so it's <strong>model-parallel sharded</strong> across GPUs
+          The table is too big to replicate, so it&apos;s <strong>model-parallel sharded</strong> across GPUs
           while the small MLP is <strong>data-parallel replicated</strong>. Each step, a personalized{' '}
-          <strong>all-to-all</strong> routes every sample's rows to the GPU running its MLP; MLP gradients
+          <strong>all-to-all</strong> routes every sample&apos;s rows to the GPU running its MLP; MLP gradients
           sync via allreduce. Slide the GPU count: the all-to-all grows until it dwarfs compute — on a ~2 TB,
           4000+-table model at 1000 GPUs it exceeds <strong>3×</strong> the embedding compute (&gt;600 ms). The
-          DLRM wall is communication, not FLOPs — the mirror image of the attention course's memory-movement
+          DLRM wall is communication, not FLOPs — the mirror image of the attention course&apos;s memory-movement
           lesson.
         </p>
       </div>
