@@ -3,6 +3,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import LookupLab from './LookupLab'
 import ParamFlopLab from './ParamFlopLab'
 import TableSizerLab from './TableSizerLab'
+import ShardShuffleLab from './ShardShuffleLab'
 
 describe('LookupLab', () => {
   it('selects the embedding row for the picked category', () => {
@@ -68,5 +69,21 @@ describe('TableSizerLab', () => {
     render(<TableSizerLab />)
     fireEvent.click(screen.getByRole('button', { name: /cache locality/i }))
     expect(screen.getByText(/hit rate/i)).toBeDefined()
+  })
+})
+
+describe('ShardShuffleLab', () => {
+  it('shows model-parallel tables and data-parallel MLP', () => {
+    render(<ShardShuffleLab />)
+    expect(screen.getByText(/model-parallel/i)).toBeDefined()
+    expect(screen.getByText(/data-parallel/i)).toBeDefined()
+  })
+
+  it('all-to-all overtakes compute as GPU count grows', () => {
+    render(<ShardShuffleLab />)
+    const g = screen.getByRole('slider', { name: /gpus/i })
+    fireEvent.change(g, { target: { value: '7' } }) // index 7 = 1000 GPUs in GPU_STEPS
+    // at 1000 GPUs the ledger says all-to-all > 3x embedding compute
+    expect(screen.getByText(/communication-bound/i)).toBeDefined()
   })
 })
