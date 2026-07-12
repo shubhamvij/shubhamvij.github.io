@@ -37,4 +37,14 @@ export const COURSE_CATALOG: CourseCatalogEntry[] = [
     minutes: 106,
     highlights: '14 interactive labs · 7 deep dives',
   },
+  {
+    slug: 'dlrm-embedding-tables',
+    title: 'Recommenders at Scale',
+    subtitle: 'Why a recommendation model is mostly a giant lookup table',
+    description:
+      'An interactive course on Deep Learning Recommendation Models and the embedding-table problem: why categorical features need learned rows, the parameter-vs-FLOP asymmetry, terabyte-scale tables and the memory roofline, distributing the table across GPUs, compression (hashing, quotient-remainder, TT-Rec, quantization, DHE), and whether the table survives the generative turn.',
+    modules: 6,
+    minutes: 55,
+    highlights: '6 interactive labs · 17 referenced sources',
+  },
 ]
