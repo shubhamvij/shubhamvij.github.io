@@ -12,7 +12,6 @@ export const D_HEAD = 64
 export const BYTES = 2 // bf16
 export const SRAM_MB = 20
 export const HBM_TBS = 2 // TB/s
-export const SRAM_TBS = 19 // TB/s
 export const MATMUL_TFLOPS = 312 // bf16 dense tensor cores
 
 const MB = 1e6

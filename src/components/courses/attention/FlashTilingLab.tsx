@@ -78,7 +78,7 @@ export default function FlashTilingLab() {
           <text x={8} y={M + 22} fontSize={8.5} fill="#666">n×n scores S = QKᵀ {act === 1 ? '(shown 16×16; real n = 4096)' : '— only a tile exists at a time'}</text>
 
           {/* HBM box */}
-          <text x={240} y={22} fontSize={10.5} fontFamily="Tahoma, sans-serif" fontWeight="bold">HBM · ~20 GB · 2 TB/s</text>
+          <text x={240} y={22} fontSize={10.5} fontFamily="Tahoma, sans-serif" fontWeight="bold">HBM · ~80 GB · 2 TB/s</text>
           <rect x={240} y={28} width={232} height={40} fill="#fbe7d4" stroke="#b88a5a" />
           <Block x={248} y={44} w={30} label="Q" fill="#fff" stroke="#b88a5a" />
           <Block x={282} y={44} w={30} label="K" fill="#fff" stroke="#b88a5a" />
