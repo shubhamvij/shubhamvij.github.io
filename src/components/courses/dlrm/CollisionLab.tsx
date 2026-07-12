@@ -23,16 +23,14 @@ export default function CollisionLab() {
 
   const qRows = Math.ceil(N / m)
   // Real index math.
-  const modRow = (id: number) => id % m
-  const qr = (id: number) => ({ r: id % m, q: Math.floor(id / m) })
-
   const collision = useMemo(() => {
     if (sel.length < 2) return null
     if (mode === 'mod') {
-      const rows = sel.map(modRow)
+      const rows = sel.map(id => id % m)
       return rows[0] === rows[1] ? { kind: 'collide', detail: `both map to row ${rows[0]}` } : { kind: 'distinct', detail: `rows ${rows[0]} and ${rows[1]}` }
     }
-    const a = qr(sel[0]), b = qr(sel[1])
+    const a = { r: sel[0] % m, q: Math.floor(sel[0] / m) }
+    const b = { r: sel[1] % m, q: Math.floor(sel[1] / m) }
     const same = a.r === b.r && a.q === b.q
     return same
       ? { kind: 'collide', detail: `(r${a.r},q${a.q}) = (r${b.r},q${b.q})` }
