@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import LookupLab from './LookupLab'
 import ParamFlopLab from './ParamFlopLab'
+import TableSizerLab from './TableSizerLab'
 
 describe('LookupLab', () => {
   it('selects the embedding row for the picked category', () => {
@@ -45,5 +46,27 @@ describe('ParamFlopLab', () => {
     const flops = screen.getByTestId('your-flops').textContent
     fireEvent.change(rowsSlider, { target: { value: '6' } })
     expect(screen.getByTestId('your-flops').textContent).toBe(flops)
+  })
+})
+
+describe('TableSizerLab', () => {
+  it('computes total size and picks the memory tier', () => {
+    render(<TableSizerLab />)
+    // defaults: 100 tables × 1e7 rows × 64 dim × 4 bytes = 256 GB -> DRAM tier
+    expect(screen.getByText(/256 GB/)).toBeDefined()
+    expect(screen.getByText(/DRAM/)).toBeDefined()
+  })
+
+  it('crosses to SSD tier when the table grows past DRAM', () => {
+    render(<TableSizerLab />)
+    const rows = screen.getByLabelText(/rows per table/i)
+    fireEvent.change(rows, { target: { value: '9' } }) // 1e9 rows -> 100×1e9×64×4 = 25.6 TB
+    expect(screen.getByText(/SSD/)).toBeDefined()
+  })
+
+  it('switches to the cache-locality view', () => {
+    render(<TableSizerLab />)
+    fireEvent.click(screen.getByRole('button', { name: /cache locality/i }))
+    expect(screen.getByText(/hit rate/i)).toBeDefined()
   })
 })
