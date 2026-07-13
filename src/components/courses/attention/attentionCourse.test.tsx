@@ -51,6 +51,9 @@ describe('Attention course through CourseShell', () => {
     fireEvent.click(screen.getByRole('button', { name: /2\.1 Embeddings & positions/ }))
     expect(screen.getByText('Position Lab')).toBeDefined()
     expect(screen.getByText(/Module 2 · Deep dive 1 of 4/)).toBeDefined()
+    // 2.1 prose renders through the engine's .prose path (family labels also
+    // unit-tested against BLOCK_SUBCHAPTERS in subchapterLabs.test.tsx)
+    expect(screen.getByText(/At the input, once — a vector ⊕-added to the token embedding/)).toBeDefined()
     fireEvent.click(screen.getByRole('button', { name: /2\.4 The FFN/ }))
     expect(screen.getByText('Parameter Budget Lab')).toBeDefined()
   })

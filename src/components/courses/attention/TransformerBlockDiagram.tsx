@@ -115,6 +115,8 @@ const FLOW_STAGES: Record<string, FlowStage> = {
 }
 
 // ---------- MHA stepper: the one stage that gets a step-through ----------
+// PositionLab's RoPE/ALiBi lab notes quote these step names — "step 1 (make
+// Q, K, V)", "step 2 (score + softmax)" — so renaming a chip must update them.
 const MHA_STEPS: { chip: string; heading: string; items: StageItem[]; shape: string; note: string }[] = [
   {
     chip: '1 · make Q, K, V',
